@@ -1,0 +1,5 @@
+# use glob syntax
+syntax: glob
+
+# ignore patterns
+.DS_STORE
