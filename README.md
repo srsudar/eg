@@ -16,6 +16,9 @@ No more!
 `eg` will give you useful examples right at the command line. Think of it as a
 companion tool for `man`.
 
+> `eg` comes from _exempli gratia_, and is pronounced like the letters: "ee
+gee".
+
 ## Usage
 
 `eg <tool> <subsection>`

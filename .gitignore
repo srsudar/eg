@@ -1,5 +1,8 @@
 # use glob syntax
 syntax: glob
 
-# ignore patterns
+# mac
 .DS_STORE
+
+# python
+*.pyc

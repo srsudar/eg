@@ -1,4 +1,3 @@
-import sys
 import os
 
 # Name of the environment variable where we look for the default pager
@@ -40,5 +39,18 @@ def get_line_number_of_subsection(program, subsection):
 
     This returns flags to try and be more efficient than having to read the
     file multiple times.
+    """
+    pass
+
+
+def open_pager_to_line_number(pager, line_number):
+    """
+    Open pager scrolled to line_number.
+
+    pager should be the user's preferred executable pager.
+    line_number should be a valid line number >0.
+
+    If pager does not support opening to an offset, it will just open the
+    pager.
     """
     pass
