@@ -3,8 +3,13 @@ import os
 # Name of the environment variable where we look for the default pager
 PAGER_ENV = 'PAGER'
 
-FLAG_NO_EXAMPLES = -1
-FLAG_NO_SUBSECTION = -2
+FLAG_NO_SUBSECTION = -1
+
+# The directory containing example files.
+EXAMPLES_DIR = 'examples'
+
+# The file name suffix expected for example files.
+EXAMPLE_FILE_SUFFIX = '.txt'
 
 
 def show_usage():
@@ -20,18 +25,29 @@ def pager_env_is_set():
         return True
 
 
+def get_file_path_for_program(program):
+    """
+    Return the file name and path for the program. It returns the file relative
+    to the eg/ directory.
+
+    For example, passing find would return "examples/find.txt". This does not
+    ensure that the file exists, merely that if it does exist, this is where it
+    should be.
+    """
+    return EXAMPLES_DIR + '/' + program + EXAMPLE_FILE_SUFFIX
+
+
 def has_entry_for_program(program):
     """Return True if has examples for program, else False."""
-    pass
+    file_path = get_file_path_for_program(program)
+    return os.path.isfile(file_path)
 
 
 def get_line_number_of_subsection(program, subsection):
     """
     Return the line number of the given subsection in program.
 
-    Returns FLAG_NO_EXAMPLES if program does not point to a program that
-    contains examples. I.e. returns FLAG_NO_EXAMPLES if
-    has_entry_for_program(program) returns false.
+    Program must exist.
 
     If a subsection or an alias for a subsection exists, returns the line
     number for the start of the subsection. If a subsection or alias for the
