@@ -9,7 +9,7 @@ FLAG_NO_SUBSECTION = -1
 EXAMPLES_DIR = 'examples'
 
 # The file name suffix expected for example files.
-EXAMPLE_FILE_SUFFIX = '.txt'
+EXAMPLE_FILE_SUFFIX = '.md'
 
 
 def show_usage():
