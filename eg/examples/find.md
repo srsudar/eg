@@ -16,6 +16,12 @@ show more info (`-ls`)
     118871021  0 -rw-r--r--  1 staff  staff 0 Feb  2 11:14  /searchdir/file.txt
 
 
+# Basic Usage
+
+Find files and directories matching a given name.
+
+    find <searchdir> -name <name>
+
 # By Name
 
 Search `/searchdir` for files and directories named `file.txt`:
