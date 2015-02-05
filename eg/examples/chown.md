@@ -2,23 +2,26 @@
 
 change user
 
-    chown a_user file.txt
+    sudo chown username file.txt
 
 change user recursively for all files
 
-    chown -R a_user directory
+    sudo chown -R username directory
 
 change user and group
 
-    chown a_user:a_group file.txt
+    sudo chown username:groupname file.txt
 
 change group
 
-    chown :a_group file.txt
+    sudo chown :groupname file.txt
 
 
 # Basic Usage
 
+The caller needs to be a super-user to perform `chown`. Examples are shown
+using `sudo`, which is not required if the user is a super-user.
+
 Change the ownership of a file:
 
-    chown <user> <file>
+    sudo chown <user> <file>

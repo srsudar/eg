@@ -96,7 +96,6 @@ The following commands still need entries:
 * whereis
 * which
 * chmod
-* mkdir
 * rm
 * mv
 * cp
