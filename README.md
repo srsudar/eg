@@ -85,3 +85,19 @@ $ alias woman=eg
 $ man find
 $ woman find
 ```
+
+## TODO
+
+The following commands still need entries:
+
+* grep
+* locate
+* whatis
+* whereis
+* which
+* chmod
+* chown
+* mkdir
+* rm
+* mv
+* cp
