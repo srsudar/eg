@@ -41,16 +41,52 @@ how the pager is resolved).
 ## Format and Content of Examples
 
 Example documents are written in [markdown](http://daringfireball.net/projects/markdown/syntax).
-This is due to the fact that markdown is easily readable by both humans and
-machines. Documents in markdown are easily read at the command line as well as
-online.
+Documents in markdown are easily read at the command line as well as online.
 
-The first section should be simply the name of the tool. It should be followed
-by the most rudimentary examples. Users that are familiar with the command but
-just forget the precise syntax should be able to see what they need without
-scrolling.
+### Name of the Command
 
-A Basic Usage section explains the most basic usage in slightly more detail.
+The first section heading should be simply the name of the tool. It should be
+followed by the most rudimentary examples. Users that are familiar with the
+command but just forget the precise syntax should be able to see what they need
+without scrolling. Example commands should be as real-world as possible, with
+file names and arguments as illustrative as possible. Examples for the `cp`
+command, for instance, might be:
+
+    cp original.txt copy.txt
+
+Here the `.txt` extensions indicate that these are file names, while the names
+themselves make clear which is the already existing file and which will be the
+newly created copy.
+
+### Basic Usage
+
+Next a Basic Usage section explains the most basic usage without using real
+file names. This section gives users that might not know the usual syntax a
+more abstract example than the first section. It is intended to provide a more
+useful explanation than the first entry in the man page, which typically shows
+all possible flags and arguments in a way that is not immediately obvious to
+new users of the command. The SYNOPSIS section of the man page for `cp`, for
+example, shows:
+
+    cp [-R [-H | -L | -P]] [-fi | -n] [-apvX] source_file ... target_directory
+
+The Basic Usage is intended to provide a less verbose, more immediately
+practical version of the man page's SYNOPSIS section.
+
+Commands and flags that will affect the behavior are shown as would be entered
+in the command line, while user-entered filenames and arguments that alter the
+what rather than the how are shown in `< >`. Examples in the Basic Usage
+section for the `cp` command, for instance, might be:
+
+    cp -R <original_directory> <copied_directory>
+
+In this command the `cp -R` indicate the command and behavior and thus are not
+given in `< >`. User-entered components of the command, in this case the
+directory to be copied and the name of the copy, are surrounded with `< >`.
+Each is wrapped in separate `< >` to make clear that this is in fact two
+distinct arguments.
+
+### Additional Sections
 
 Subsequent subsections can be added for common uses of the tools, as
 appropriate and as necessary.
@@ -61,11 +97,14 @@ appropriate and as necessary.
 variable. If `$PAGER` is not set, it defaults to `less`. If your pager does not
 support jumping to a line number `eg` will try not to fail.
 
-## Contributing and Guidelines
+## Contributor Guidelines
 
 Additions of new tools and new or more useful examples are welcome. `eg` should
 be something that people want to have on their machines. If it has a man page,
 it should be included in `eg`.
+
+Please read the Format of Examples section and review existing example files to
+get a feel for how `eg` pages should be structured.
 
 If you find yourself turning to the internet for the same command again and
 again, consider adding it to the examples.
