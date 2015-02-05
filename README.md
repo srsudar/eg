@@ -131,5 +131,3 @@ The following commands still need entries:
 
 * grep
 * locate
-* whatis
-* whereis
