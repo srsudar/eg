@@ -1,0 +1,16 @@
+# mv
+
+rename a file
+
+    mv old_name.txt new_name.txt
+
+move a file to a different directory
+
+    mv foo.txt new_location/foo.txt
+
+
+# Basic Usage
+
+`mv` lets you rename and move files.
+
+    mv <old_location> <new_location>

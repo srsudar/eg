@@ -94,8 +94,3 @@ The following commands still need entries:
 * locate
 * whatis
 * whereis
-* which
-* chmod
-* rm
-* mv
-* cp
