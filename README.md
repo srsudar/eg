@@ -75,7 +75,7 @@ right. `eg` should provide quick examples in practice. Do not list all the
 flags for the sake of listing them. Assume that users will have `man`
 available.
 
-## For the Ladies
+## Grace Hopper Approves
 
 Alias `eg` to `woman` for something that is like `man` but is a little more
 practical:
