@@ -131,3 +131,9 @@ The following commands still need entries:
 
 * grep
 * locate
+* ps
+* top
+* kill
+* scp
+* gcc
+* ar
