@@ -116,7 +116,7 @@ available.
 
 ## Grace Hopper Approves
 
-Alias `eg` to `woman` for something that is like `man` but is a little more
+Alias `eg` to `woman` for something that is like `man` but a little more
 practical:
 
 ```shell
