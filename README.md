@@ -130,7 +130,6 @@ $ woman find
 The following commands still need entries:
 
 * locate
-* top
 * scp
 * gcc
 * ar
