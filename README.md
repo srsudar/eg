@@ -138,9 +138,7 @@ The following commands still need entries:
 * wc
 * sort
 * cut
-* less
 * more
-* cat
 * hexdump
 * od
 * top
