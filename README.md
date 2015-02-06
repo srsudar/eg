@@ -135,10 +135,8 @@ The following commands still need entries:
 * scp
 * gcc
 * ar
-* wc
 * sort
 * cut
 * more
 * hexdump
 * od
-* top
