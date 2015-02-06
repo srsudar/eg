@@ -131,6 +131,4 @@ The following commands still need entries:
 
 * gcc
 * ar
-* su
-* sudo
 * xargs
