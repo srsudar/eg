@@ -43,8 +43,8 @@ background job 1 (`%1`):
 
 # Sending Other Signals
 
-`kill` sends a software termination `TERM` signal. Other signals can be
-specified with the `-s` flag. This will send (`-s`) and interrupt (`INT`)
+`kill` sends a software termination `TERM` signal by default. Other signals can
+be specified with the `-s` flag. This will send (`-s`) and interrupt (`INT`)
 signal to process 26089:
 
     kill -s INT 26089

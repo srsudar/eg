@@ -129,6 +129,8 @@ $ woman find
 
 The following commands still need entries:
 
-* locate
 * gcc
 * ar
+* su
+* sudo
+* xargs
