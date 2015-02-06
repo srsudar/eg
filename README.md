@@ -138,5 +138,3 @@ The following commands still need entries:
 * sort
 * cut
 * more
-* hexdump
-* od

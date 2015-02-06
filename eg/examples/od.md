@@ -1,12 +1,12 @@
 # od
 
-show all characters with helpful names
-
-    od -a chars.txt
-
-show with offset in decimal
+show character with helpful names and offset in decimal
 
     od -a -Ad chars.txt
+
+show human readable 16 per line
+
+    od -Ad -w16 -tc human_readable.txt
 
 show escaped characters (\n new line, \t tab, etc)
 
