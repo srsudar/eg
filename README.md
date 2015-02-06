@@ -131,7 +131,6 @@ The following commands still need entries:
 
 * locate
 * top
-* kill
 * scp
 * gcc
 * ar
