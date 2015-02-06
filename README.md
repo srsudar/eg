@@ -132,5 +132,4 @@ The following commands still need entries:
 * locate
 * gcc
 * ar
-* cut
 * more
