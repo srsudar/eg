@@ -129,11 +129,18 @@ $ woman find
 
 The following commands still need entries:
 
-* grep
 * locate
-* ps
 * top
 * kill
 * scp
 * gcc
 * ar
+* wc
+* sort
+* cut
+* less
+* more
+* cat
+* hexdump
+* od
+* top
