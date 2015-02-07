@@ -133,3 +133,4 @@ The following commands still need entries:
 * ar
 * xargs
 * touch
+* ifconfig
