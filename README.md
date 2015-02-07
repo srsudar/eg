@@ -132,3 +132,4 @@ The following commands still need entries:
 * gcc
 * ar
 * xargs
+* touch
