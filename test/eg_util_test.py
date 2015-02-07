@@ -18,7 +18,7 @@ def test_pager_not_set_returns_false():
 
 def test_get_file_path_for_program_valid():
     actual = eg_util.get_file_path_for_program('find')
-    target = 'examples/find.txt'
+    target = 'examples/find.md'
     assert actual == target
 
 
@@ -50,17 +50,9 @@ def _assert_has_entry_helper(should_find):
             mock_method.assert_called_once_with(path)
 
 
-def test_get_line_number_of_subsection_returns_no_examples():
-    assert True is False
-
-
-def test_get_line_number_of_subsection_returns_no_subsection():
-    assert True is False
-
-
-def test_get_line_number_of_subsection_finds_correct_line():
-    assert True is False
-
-
-def open_pager_to_line_number_invokes_correctly_for_less():
-    assert True is False
+def test_open_pager_to_line_number_invokes_correctly_for_less():
+    pager = 'less'
+    file_path = 'examples/touch.md'
+    with patch('subprocess.call') as mock_method:
+        eg_util.open_pager_for_file(pager, file_path)
+        mock_method.assert_called_once_with([pager, file_path])

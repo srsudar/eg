@@ -1,9 +1,8 @@
 import os
+import subprocess
 
 # Name of the environment variable where we look for the default pager
 PAGER_ENV = 'PAGER'
-
-FLAG_NO_SUBSECTION = -1
 
 # The directory containing example files.
 EXAMPLES_DIR = 'examples'
@@ -13,7 +12,7 @@ EXAMPLE_FILE_SUFFIX = '.md'
 
 
 def show_usage():
-    print 'usage: eg <program> <subsection>'
+    print 'usage: eg <program>'
 
 
 def pager_env_is_set():
@@ -43,23 +42,7 @@ def has_entry_for_program(program):
     return os.path.isfile(file_path)
 
 
-def get_line_number_of_subsection(program, subsection):
-    """
-    Return the line number of the given subsection in program.
-
-    Program must exist.
-
-    If a subsection or an alias for a subsection exists, returns the line
-    number for the start of the subsection. If a subsection or alias for the
-    subsection is not found, returns FLAG_NO_SUBSECTION.
-
-    This returns flags to try and be more efficient than having to read the
-    file multiple times.
-    """
-    pass
-
-
-def open_pager_to_line_number(pager, line_number):
+def open_pager_for_file(pager, file_path):
     """
     Open pager scrolled to line_number.
 
@@ -69,4 +52,4 @@ def open_pager_to_line_number(pager, line_number):
     If pager does not support opening to an offset, it will just open the
     pager.
     """
-    pass
+    subprocess.call([pager, file_path])
