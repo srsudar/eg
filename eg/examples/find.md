@@ -130,7 +130,7 @@ smallFile.txt`):
 
 ## NOT
 
-List files bigger than 50 megabytes that are not named `unwanted.txt` (`! -name
-unwanted.txt`):
+List files bigger than 50 megabytes (`-size +50M`) that are not named
+`unwanted.txt` (`-not -name unwanted.txt`):
 
     find /searchdir -size +50M ! -name unwanted.txt
