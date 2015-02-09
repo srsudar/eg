@@ -8,6 +8,10 @@ copy a directory
 
     cp -R directory directory_copy
 
+prompt if will overwrite existing file
+
+    cp -i foo.txt directoryWithFoo/
+
 
 # Basic Usage
 
