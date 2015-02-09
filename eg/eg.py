@@ -1,4 +1,4 @@
-#! python
+#!/usr/bin/python
 import sys
 import eg_util
 
@@ -8,4 +8,4 @@ if __name__ == '__main__':
     if len(args) < 1:
         eg_util.show_usage()
     else:
-        print args[1]
+        eg_util.handle_program(args[1])

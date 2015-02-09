@@ -18,7 +18,7 @@ def test_pager_not_set_returns_false():
 
 def test_get_file_path_for_program_valid():
     actual = eg_util.get_file_path_for_program('find')
-    target = 'examples/find.md'
+    target = './examples/find.md'
     assert actual == target
 
 
@@ -39,7 +39,7 @@ def _assert_has_entry_helper(should_find):
     not
     """
     program = 'foo'
-    path = 'examples/' + program + '.txt'
+    path = './examples/' + program + '.txt'
     with patch('eg.eg_util.get_file_path_for_program', return_value=path):
         with patch('os.path.isfile', return_value=should_find) as mock_method:
             actual = eg_util.has_entry_for_program(program)
@@ -56,3 +56,24 @@ def test_open_pager_to_line_number_invokes_correctly_for_less():
     with patch('subprocess.call') as mock_method:
         eg_util.open_pager_for_file(pager, file_path)
         mock_method.assert_called_once_with([pager, file_path])
+
+
+def test_get_pager_with_custom_correct():
+    custom_pager = 'more'
+    with patch('eg.eg_util.pager_env_is_set', return_value=True):
+        with patch('os.getenv', return_value=custom_pager):
+            assert eg_util.get_pager() == custom_pager
+
+
+def test_get_pager_without_custom_correct():
+    with patch('eg.eg_util.pager_env_is_set', return_value=False):
+        assert eg_util.get_pager() == eg_util.DEFAULT_PAGER
+
+
+def test_get_path_to_rc_file():
+    passed_in_value = '~/.egrc'
+    target_return = '/Users/tyrion'
+    with patch('os.path.expanduser', return_value=target_return) as mocked:
+        result = eg_util.get_path_to_rc_file()
+        assert result == target_return
+        mocked.assert_called_once_with(passed_in_value)
