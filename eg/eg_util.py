@@ -16,6 +16,11 @@ VERSION = '0.0.0'
 
 EGRC_FILE_NAME = '.egrc'
 
+# Properties in the rc file.
+CONFIG_SECTION = 'eg-config'
+EG_HOME_DIR = 'eg-home'
+CUSTOM_EXAMPLES = 'custom-dir'
+
 
 def show_usage():
     print 'usage: eg <program>'
