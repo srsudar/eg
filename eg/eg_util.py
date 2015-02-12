@@ -203,13 +203,19 @@ def open_pager_for_file(pager, default_file_path=None, custom_file_path=None):
     Open pager to file_path. If a custom_file_path is also included, it will be
     shown before file_path in the same pager.
     """
-    args = None
     if default_file_path and custom_file_path:
-        args = ['cat', default_file_path, custom_file_path, '|', pager]
+        cat = subprocess.Popen(
+            ('cat', custom_file_path, default_file_path),
+            stdout=subprocess.PIPE
+        )
+        subprocess.call(
+            (pager),
+            stdin=cat.stdout
+        )
+        cat.wait()
     elif default_file_path:
-        args = [pager, default_file_path]
+        subprocess.call([pager, default_file_path])
     elif custom_file_path:
-        args = [pager, custom_file_path]
+        subprocess.call([pager, custom_file_path])
     else:
         print 'At least one file must be defined.'
-    subprocess.call(args)
