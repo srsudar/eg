@@ -7,7 +7,9 @@ if __name__ == '__main__':
 
     print __file__
 
-    parser = argparse.ArgumentParser(description='Provide examples of command usage')
+    parser = argparse.ArgumentParser(
+        description='Provide examples of command usage'
+    )
 
     parser.add_argument(
         '--list',

@@ -9,19 +9,21 @@ from collections import namedtuple
 PAGER_ENV = 'PAGER'
 DEFAULT_PAGER = 'less'
 
-# The directory containing example files.
-EXAMPLES_DIR = './examples'
+# The directory containing example files, relative to the eg executable. The
+# directory structure is assumed to be:
+# eg.py*
+# eg_util.py
+# examples/
+#    |- cp.md, etc
+
+DEFAULT_EXAMPLES_DIR = os.path.join(os.path.dirname(__file__), 'examples')
+DEFAULT_EGRC_PATH = os.path.join('~', '.egrc')
 
 # The file name suffix expected for example files.
 EXAMPLE_FILE_SUFFIX = '.md'
 
 # Version of eg, revved with each update.
 VERSION = '0.0.0'
-
-DEFAULT_EGRC_PATH = os.path.join('~', '.egrc')
-
-# The default location of the example files.
-DEFAULT_EG_EXAMPLES_IN_HOME = os.path.join('eg', 'examples')
 
 # We need this just because the ConfigParser library requires it.
 DEFAULT_SECTION = 'eg-config'
@@ -52,10 +54,19 @@ def get_resolved_config_items(
     """
     Create a Config namedtuple. Passed in values will override defaults.
     """
-    # Set our default.
+    # Set our defaults, which we'll overwrite as necessary.
     if egrc_path is None:
         egrc_path = DEFAULT_EGRC_PATH
-    # First get try to get any defaults from the .egrc
+    else:
+        # they have specified an egrc file. Fail verbosely to try and be
+        # helpful.
+        if not os.path.isfile(get_expanded_path(egrc_path)):
+            print 'Could not find custom egrc at: ' + egrc_path
+
+    if examples_dir is None:
+        examples_dir = DEFAULT_EXAMPLES_DIR
+
+    # First try to get any defaults from the .egrc
     egrc_path = get_expanded_path(egrc_path)
 
     config = Config(examples_dir=None, custom_dir=None)
@@ -84,15 +95,22 @@ def get_config_tuple_from_egrc(egrc_path):
     Create a Config named tuple from the values specified in the .egrc.
 
     egrc_path must exist and point a file.
+
+    If not present in the .egrc, properties of the Config are returned as None.
     """
     with open(egrc_path, 'r') as egrc:
         config = ConfigParser.RawConfigParser()
-        valsread = config.readfp(egrc)
+        config.readfp(egrc)
 
-        print 'valsread: ' + str(valsread)
+        # default to None
+        examples_dir = None
+        custom_dir = None
 
-        examples_dir = config.get(DEFAULT_SECTION, EG_EXAMPLES_DIR)
-        custom_dir = config.get(DEFAULT_SECTION, CUSTOM_EXAMPLES_DIR)
+        if config.has_option(DEFAULT_SECTION, EG_EXAMPLES_DIR):
+            examples_dir = config.get(DEFAULT_SECTION, EG_EXAMPLES_DIR)
+
+        if config.has_option(DEFAULT_SECTION, CUSTOM_EXAMPLES_DIR):
+            custom_dir = config.get(DEFAULT_SECTION, CUSTOM_EXAMPLES_DIR)
 
         return Config(examples_dir=examples_dir, custom_dir=custom_dir)
 
@@ -193,9 +211,15 @@ def has_default_entry_for_program(program, config):
 
 def has_custom_entry_for_program(program, config):
     """Return True if has custom examples for a program, else false."""
-    custom_path = get_custom_file_path_for_program(program, config.custom_dir)
-    print custom_path
-    return os.path.isfile(custom_path)
+    if config.custom_dir:
+        custom_path = get_custom_file_path_for_program(
+            program,
+            config.custom_dir
+        )
+        print custom_path
+        return os.path.isfile(custom_path)
+    else:
+        return False
 
 
 def open_pager_for_file(pager, default_file_path=None, custom_file_path=None):
