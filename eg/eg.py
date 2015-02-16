@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import argparse
 import eg_util
+import sys
 
 
 if __name__ == '__main__':
@@ -8,13 +9,20 @@ if __name__ == '__main__':
     print __file__
 
     parser = argparse.ArgumentParser(
-        description='Provide examples of command usage'
+        description='eg provides examples of common command usage.'
     )
 
     parser.add_argument(
         '--list',
         action='store_true',
         help='show all the programs with eg entries'
+    )
+
+    parser.add_argument(
+        '-v',
+        '--version',
+        nargs='?',
+        help='Display version information about eg'
     )
 
     parser.add_argument(
@@ -42,13 +50,17 @@ if __name__ == '__main__':
     )
 
     args = parser.parse_args()
-    print args
-    print args.custom_dir
 
-    config = eg_util.get_resolved_config_items(
-        egrc_path=args.config_file,
-        examples_dir=args.examples_dir,
-        custom_dir=args.custom_dir
-    )
+    if len(sys.argv) < 2:
+        parser.print_help()
+    else:
+        print args
+        print args.custom_dir
 
-    eg_util.handle_program(args.program, config)
+        config = eg_util.get_resolved_config_items(
+            egrc_path=args.config_file,
+            examples_dir=args.examples_dir,
+            custom_dir=args.custom_dir
+        )
+
+        eg_util.handle_program(args.program, config)
