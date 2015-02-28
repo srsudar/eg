@@ -39,11 +39,40 @@ Config = namedtuple('Config', ['examples_dir', 'custom_dir'])
 
 
 def get_expanded_path(path):
-    """Expand ~ and variables in a path."""
-    result = path
-    result = os.path.expanduser(result)
-    result = os.path.expandvars(result)
-    return result
+    """Expand ~ and variables in a path. If path is not truthy, return None."""
+    if path:
+        result = path
+        result = os.path.expanduser(result)
+        result = os.path.expandvars(result)
+        return result
+    else:
+        return None
+
+
+def _get_priority(first, second, third):
+    """
+    Return the items based on priority and their truthiness. If first is
+    present, it will be returned. If only second and third, second will be
+    returned. If all three are absent, will return None.
+    """
+    if first:
+        return first
+    elif second:
+        return second
+    elif third:
+        return third
+    else:
+        return None
+
+
+def _inform_if_path_does_not_exist(path):
+    """
+    If the path does not exist, print a message saying so. This is intended to
+    be helpful to users if they specify a custom path that eg cannot find.
+    """
+    expanded_path = get_expanded_path(path)
+    if not os.path.isfile(expanded_path):
+        print 'Could not find custom path at: ' + expanded_path
 
 
 def get_resolved_config_items(
@@ -54,47 +83,52 @@ def get_resolved_config_items(
     """
     Create a Config namedtuple. Passed in values will override defaults.
     """
-    # Set our defaults, which we'll overwrite as necessary.
-    #import ipdb; ipdb.set_trace()
-    if egrc_path is None:
-        egrc_path = DEFAULT_EGRC_PATH
-    else:
-        # they have specified an egrc file. Fail verbosely to try and be
-        # helpful.
-        expanded_path = get_expanded_path(egrc_path)
-        if not os.path.isfile(expanded_path):
-            print 'Could not find custom egrc at: ' + expanded_path
-
-    if examples_dir is None:
-        examples_dir = DEFAULT_EXAMPLES_DIR
-
-    # First try to get any defaults from the .egrc
+    # Expand the paths so we can use them with impunity later.
     egrc_path = get_expanded_path(egrc_path)
+    examples_dir = get_expanded_path(examples_dir)
+    custom_dir = get_expanded_path(custom_dir)
 
-    config = Config(examples_dir=None, custom_dir=None)
-
-    if os.path.isfile(egrc_path):
-        config = get_config_tuple_from_egrc(egrc_path)
-
-    # Now overwrite them as necessary.
-    resolved_examples_dir = config.examples_dir
-    resolved_custom_dir = config.custom_dir
-
+    # Print helpful failures.
+    if egrc_path:
+        _inform_if_path_does_not_exist(egrc_path)
     if examples_dir:
-        resolved_examples_dir = examples_dir
-
+        _inform_if_path_does_not_exist(examples_dir)
     if custom_dir:
-        resolved_custom_dir = custom_dir
+        _inform_if_path_does_not_exist(custom_dir)
 
-    return Config(
+    # The general rule is: caller-defined, egrc-defined, defaults. We'll try and
+    # get all three then use _get_priority to choose the right one.
+
+    resolved_egrc_path = _get_priority(egrc_path, DEFAULT_EGRC_PATH, None)
+    resolved_egrc_path = get_expanded_path(resolved_egrc_path)
+
+    egrc_config = Config(examples_dir=None, custom_dir=None)
+    if os.path.isfile(resolved_egrc_path):
+        egrc_config = get_config_tuple_from_egrc(resolved_egrc_path)
+
+    resolved_examples_dir = _get_priority(
+        examples_dir,
+        egrc_config.examples_dir,
+        DEFAULT_EXAMPLES_DIR
+    )
+    resolved_custom_dir = _get_priority(
+        custom_dir,
+        egrc_config.custom_dir,
+        None
+    )
+
+    result = Config(
         examples_dir=resolved_examples_dir,
         custom_dir=resolved_custom_dir
     )
 
+    return result
+
 
 def get_config_tuple_from_egrc(egrc_path):
     """
-    Create a Config named tuple from the values specified in the .egrc.
+    Create a Config named tuple from the values specified in the .egrc. Expands
+    any paths as necessary.
 
     egrc_path must exist and point a file.
 
@@ -110,9 +144,11 @@ def get_config_tuple_from_egrc(egrc_path):
 
         if config.has_option(DEFAULT_SECTION, EG_EXAMPLES_DIR):
             examples_dir = config.get(DEFAULT_SECTION, EG_EXAMPLES_DIR)
+            examples_dir = get_expanded_path(examples_dir)
 
         if config.has_option(DEFAULT_SECTION, CUSTOM_EXAMPLES_DIR):
             custom_dir = config.get(DEFAULT_SECTION, CUSTOM_EXAMPLES_DIR)
+            custom_dir = get_expanded_path(custom_dir)
 
         return Config(examples_dir=examples_dir, custom_dir=custom_dir)
 
