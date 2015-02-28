@@ -83,6 +83,7 @@ def test_config_returns_passed_in_values_for_dirs():
 
 
 def test_get_config_tuple_from_egrc_all_none_when_not_present():
+    # TODO: figure out how to mock open
     #with patch('open', return_value='file_handle'):
         with patch(
             'ConfigParser.RawConfigParser.readfp',
@@ -91,7 +92,7 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
             with patch(
                 'ConfigParser.RawConfigParser.has_option',
                 return_value=False
-            ) as mock_has_section:
+            ):
                 # We need to mock open, but cannot seem to do so...so for
                 # now instead we're going to use a file that exists.
                 actual = eg_util.get_config_tuple_from_egrc(
@@ -105,6 +106,7 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
 
 
 def test_get_config_tuple_from_egrc_when_present():
+    # TODO: Figure out how to mock open
     #with patch('open', return_value='file_handle'):
         with patch(
             'ConfigParser.RawConfigParser.readfp',
@@ -113,7 +115,7 @@ def test_get_config_tuple_from_egrc_when_present():
             with patch(
                 'ConfigParser.RawConfigParser.has_option',
                 return_value=True
-            ) as mock_has_section:
+            ):
                 target_examples_dir = 'test/example/dir'
                 # We should use different return_values for custom and eg dirs,
                 # but currently on a plane without wifi and can't look up how
@@ -122,7 +124,7 @@ def test_get_config_tuple_from_egrc_when_present():
                 with patch(
                     'ConfigParser.RawConfigParser.get',
                     return_value=target_examples_dir
-                ) as mock_get:
+                ):
                     # We need to mock open, but cannot seem to do so...so for
                     # now instead we're going to use a file that exists.
                     actual = eg_util.get_config_tuple_from_egrc(
@@ -133,40 +135,6 @@ def test_get_config_tuple_from_egrc_when_present():
                         custom_dir=target_examples_dir
                     )
                     assert_equal(actual, target)
-
-
-def test_get_file_path_for_program_valid():
-    actual = eg_util.get_file_path_for_program('find')
-    target = './examples/find.md'
-    assert actual == target
-
-
-def test_has_entry_for_program_finds_file():
-    _assert_has_entry_helper(True)
-
-
-def test_does_not_have_entry_for_file():
-    _assert_has_entry_helper(False)
-
-
-def _assert_has_entry_helper(should_find):
-    """
-    Helps assert whether or not there is an entry for a program. Handles
-    mocking out calls.
-
-    should_find_program true if the program should exist, false if it should
-    not
-    """
-    program = 'foo'
-    path = './examples/' + program + '.txt'
-    with patch('eg.eg_util.get_file_path_for_program', return_value=path):
-        with patch('os.path.isfile', return_value=should_find) as mock_method:
-            actual = eg_util.has_entry_for_program(program)
-            if should_find:
-                assert actual
-            else:
-                assert not actual
-            mock_method.assert_called_once_with(path)
 
 
 def test_open_pager_to_line_number_invokes_correctly_for_less():
@@ -189,15 +157,6 @@ def test_get_pager_without_custom_correct():
         assert_equal(eg_util.get_pager(), eg_util.DEFAULT_PAGER)
 
 
-def test_get_path_to_rc_file():
-    passed_in_value = '~/.egrc'
-    target_return = '/Users/tyrion'
-    with patch('os.path.expanduser', return_value=target_return) as mocked:
-        result = eg_util.get_path_to_rc_file()
-        assert result == target_return
-        mocked.assert_called_once_with(passed_in_value)
-
-
 def test_get_file_path_for_program_correct():
     program = 'cp'
     examples_dir = '/Users/tyrion/test/eg_dir'
@@ -209,9 +168,126 @@ def test_get_file_path_for_program_correct():
     assert_equal(actual, target)
 
 
+def test_has_default_entry_for_program_no_examples_dir():
+    config = eg_util.Config(examples_dir=None, custom_dir='customdir')
+    program = 'cp'
+
+    has_entry = eg_util.has_default_entry_for_program(program, config)
+
+    assert_equal(False, has_entry)
+
+
+def test_has_custom_entry_for_program_no_custom_dir():
+    config = eg_util.Config(examples_dir='examplesdir', custom_dir=None)
+    program = 'find'
+
+    has_entry = eg_util.has_custom_entry_for_program(program, config)
+
+    assert_equal(False, has_entry)
+
+
+def test_has_default_entry_when_present():
+    config = eg_util.Config(examples_dir='examplesdir', custom_dir=None)
+    program = 'mv'
+
+    path = '/Users/tyrion/examplesdir/mv.md'
+
+    _helper_assert_path_isfile_not_present(
+        config,
+        program,
+        path,
+        'default',
+        True,
+        True
+    )
+
+
+def test_has_default_entry_when_not_present():
+    config = eg_util.Config(examples_dir='examplesdir', custom_dir=None)
+    program = 'cp'
+
+    path = '/Users/tyrion/examplesdir/cp.md'
+
+    _helper_assert_path_isfile_not_present(
+        config,
+        program,
+        path,
+        'default',
+        False,
+        False,
+    )
+
+
+def test_has_custom_entry_when_present():
+    config = eg_util.Config(examples_dir=None, custom_dir='customdir')
+    program = 'find'
+
+    path = '/Users/tyrion/customdir/find.md'
+
+    _helper_assert_path_isfile_not_present(
+        config,
+        program,
+        path,
+        'custom',
+        True,
+        True
+    )
+
+
+def test_has_custom_entry_when_not_present():
+    config = eg_util.Config(examples_dir=None, custom_dir='customdir')
+    program = 'locate'
+
+    path = '/Users/tyrion/customdir/locate.md'
+
+    _helper_assert_path_isfile_not_present(
+        config,
+        program,
+        path,
+        'custom',
+        False,
+        False,
+    )
+
+
+def _helper_assert_path_isfile_not_present(
+        config,
+        program,
+        file_path_for_program,
+        defaultOrCustom,
+        isfile,
+        has_entry):
+    """
+    Helper for asserting whether or not a default file is present. Pass in the
+    parameters defining the program and directories and say whether or not that
+    file should be found.
+    """
+    if defaultOrCustom != 'default' and defaultOrCustom != 'custom':
+        raise TypeError(
+            'defaultOrCustom must be default or custom, not ' + defaultOrCustom
+        )
+    with patch(
+        'eg.eg_util.get_file_path_for_program',
+        return_value=file_path_for_program
+    ) as mock_get_path:
+        with patch('os.path.isfile', return_value=isfile) as mock_isfile:
+
+            actual = None
+            correct_dir = None
+
+            if (defaultOrCustom == 'default'):
+                correct_dir = config.examples_dir
+                actual = eg_util.has_default_entry_for_program(program, config)
+            else:
+                correct_dir = config.custom_dir
+                actual = eg_util.has_custom_entry_for_program(program, config)
+
+            mock_get_path.assert_called_once_with(program, correct_dir)
+            mock_isfile.assert_called_once_with(file_path_for_program)
+
+            assert_equal(actual, has_entry)
+
 
 # TODO:
 # handle_program
-# has_default_entry_for_program
-# has_custom_entry_for_program
 # open_pager_for_file
