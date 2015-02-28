@@ -288,6 +288,74 @@ def _helper_assert_path_isfile_not_present(
             assert_equal(actual, has_entry)
 
 
+def test_handle_program_no_entries():
+    program = 'cp'
+    config = eg_util.Config(examples_dir=None, custom_dir=None)
+
+    with patch(
+        'eg.eg_util.has_default_entry_for_program',
+        return_value=False
+    ) as mock_has_default:
+        with patch(
+            'eg.eg_util.has_custom_entry_for_program',
+            return_value=False
+        ) as mock_has_custom:
+            with patch(
+                'eg.eg_util.open_pager_for_file'
+            ) as mock_open_pager:
+                eg_util.handle_program(program, config)
+
+                mock_has_default.assert_called_once_with(program, config)
+                mock_has_custom.assert_called_once_with(program, config)
+
+                assert_equal(mock_open_pager.call_count, 0)
+
+
+def test_handle_program_finds_paths_and_calls_open_pager():
+    program = 'mv'
+    pager = 'more'
+    config = eg_util.Config(
+        examples_dir='test-eg-dir',
+        custom_dir='test-custom-dir'
+    )
+
+    # TODO: make return different behavior for different calls
+    default_path = 'test-eg-dir/mv.md'
+    #custom_path = 'test-custom-dir/mv.md'
+
+    with patch(
+        'eg.eg_util.has_default_entry_for_program',
+        return_value=True
+    ) as mock_has_default:
+        with patch(
+            'eg.eg_util.has_custom_entry_for_program',
+            return_value=True
+        ) as mock_has_custom:
+            with patch(
+                'eg.eg_util.open_pager_for_file'
+            ) as mock_open_pager:
+                with patch(
+                    'eg.eg_util.get_file_path_for_program',
+                    return_value=default_path
+                ) as mock_get_file:
+                    with patch('eg.eg_util.get_pager', return_value=pager):
+                        eg_util.handle_program(program, config)
+
+                        mock_has_default.assert_called_once_with(
+                            program,
+                            config
+                        )
+                        mock_has_custom.assert_called_once_with(
+                            program,
+                            config
+                        )
+
+                        mock_open_pager.assert_called_once_with(
+                            pager,
+                            default_file_path=default_path,
+                            custom_file_path=default_path
+                        )
+
+
 # TODO:
-# handle_program
 # open_pager_for_file
