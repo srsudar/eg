@@ -55,13 +55,15 @@ def get_resolved_config_items(
     Create a Config namedtuple. Passed in values will override defaults.
     """
     # Set our defaults, which we'll overwrite as necessary.
+    #import ipdb; ipdb.set_trace()
     if egrc_path is None:
         egrc_path = DEFAULT_EGRC_PATH
     else:
         # they have specified an egrc file. Fail verbosely to try and be
         # helpful.
-        if not os.path.isfile(get_expanded_path(egrc_path)):
-            print 'Could not find custom egrc at: ' + egrc_path
+        expanded_path = get_expanded_path(egrc_path)
+        if not os.path.isfile(expanded_path):
+            print 'Could not find custom egrc at: ' + expanded_path
 
     if examples_dir is None:
         examples_dir = DEFAULT_EXAMPLES_DIR

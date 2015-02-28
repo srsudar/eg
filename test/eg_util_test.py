@@ -1,5 +1,6 @@
 from eg import eg_util
 from mock import patch
+from nose.tools import assert_equal
 
 
 def test_pager_set_returns_true():
@@ -14,6 +15,69 @@ def test_pager_not_set_returns_false():
         actual = eg_util.pager_env_is_set()
         print actual
         assert actual is False
+
+
+def test_config_returns_defaults_if_all_none_and_no_egrc():
+    with patch('os.path.isfile', return_value=False):
+        config = eg_util.get_resolved_config_items(None, None, None)
+        assert config.examples_dir == eg_util.DEFAULT_EXAMPLES_DIR
+        assert config.custom_dir is None
+
+
+def test_config_returns_egrc_values_if_present():
+    with patch('os.path.isfile', return_value=True):
+        examples_dir = 'test_eg_dir_from_egrc'
+        custom_dir = 'test_custom_dir_from_egrc'
+        def_config = eg_util.Config(
+            examples_dir=examples_dir,
+            custom_dir=custom_dir
+        )
+        with patch(
+            'eg.eg_util.get_config_tuple_from_egrc',
+            return_value=def_config
+        ):
+            config = eg_util.get_resolved_config_items(None, None, None)
+            assert_equal(config.examples_dir, examples_dir)
+            assert_equal(config.custom_dir, custom_dir)
+
+
+def test_config_uses_custom_egrc_path():
+    """Make sure we use the passed in egrc path rather than the default."""
+    with patch('os.path.isfile', return_value=True):
+        def_config = eg_util.Config(
+            examples_dir='eg_dir',
+            custom_dir='custom_dir'
+        )
+        egrc_path = 'test/path/to/egrc'
+        with patch(
+            'eg.eg_util.get_config_tuple_from_egrc',
+            return_value=def_config
+        ) as mocked_method:
+            eg_util.get_resolved_config_items(egrc_path, None, None)
+            mocked_method.assert_called_once_with(egrc_path)
+
+
+def test_config_returns_passed_in_values_for_dirs():
+    with patch('os.path.isfile', return_value=True):
+        examples_dir = 'test_eg_dir_user_defined'
+        custom_dir = 'test_custom_dir_user_defined'
+        egrc_examples_dir = 'egrc_examples_dir'
+        egrc_custom_dir = 'egrc_custom_dir'
+        egrc_config = eg_util.Config(
+            examples_dir=egrc_examples_dir,
+            custom_dir=egrc_custom_dir
+        )
+        with patch(
+            'eg.eg_util.get_config_tuple_frmo_egrc',
+            return_value=egrc_config
+        ):
+            actual = eg_util.get_resolved_config_items(
+                None,
+                examples_dir,
+                custom_dir
+            )
+            assert_equal(actual.examples_dir, examples_dir)
+            assert_equal(actual.custom_dir, custom_dir)
 
 
 def test_get_file_path_for_program_valid():

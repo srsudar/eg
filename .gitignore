@@ -6,3 +6,4 @@ syntax: glob
 
 # python
 *.pyc
+.ropeproject/**
