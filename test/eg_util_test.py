@@ -1,3 +1,5 @@
+import os
+
 from eg import eg_util
 from mock import patch
 from nose.tools import assert_equal
@@ -68,7 +70,7 @@ def test_config_returns_passed_in_values_for_dirs():
             custom_dir=egrc_custom_dir
         )
         with patch(
-            'eg.eg_util.get_config_tuple_frmo_egrc',
+            'eg.eg_util.get_config_tuple_from_egrc',
             return_value=egrc_config
         ):
             actual = eg_util.get_resolved_config_items(
@@ -78,6 +80,59 @@ def test_config_returns_passed_in_values_for_dirs():
             )
             assert_equal(actual.examples_dir, examples_dir)
             assert_equal(actual.custom_dir, custom_dir)
+
+
+def test_get_config_tuple_from_egrc_all_none_when_not_present():
+    #with patch('open', return_value='file_handle'):
+        with patch(
+            'ConfigParser.RawConfigParser.readfp',
+            return_value='read_file'
+        ):
+            with patch(
+                'ConfigParser.RawConfigParser.has_option',
+                return_value=False
+            ) as mock_has_section:
+                # We need to mock open, but cannot seem to do so...so for
+                # now instead we're going to use a file that exists.
+                actual = eg_util.get_config_tuple_from_egrc(
+                    '/Users/sudars/.zshrc'
+                )
+                target = eg_util.Config(
+                    examples_dir=None,
+                    custom_dir=None
+                )
+                assert_equal(actual, target)
+
+
+def test_get_config_tuple_from_egrc_when_present():
+    #with patch('open', return_value='file_handle'):
+        with patch(
+            'ConfigParser.RawConfigParser.readfp',
+            return_value='read_file'
+        ):
+            with patch(
+                'ConfigParser.RawConfigParser.has_option',
+                return_value=True
+            ) as mock_has_section:
+                target_examples_dir = 'test/example/dir'
+                # We should use different return_values for custom and eg dirs,
+                # but currently on a plane without wifi and can't look up how
+                # to do this, so:
+                # TODO
+                with patch(
+                    'ConfigParser.RawConfigParser.get',
+                    return_value=target_examples_dir
+                ) as mock_get:
+                    # We need to mock open, but cannot seem to do so...so for
+                    # now instead we're going to use a file that exists.
+                    actual = eg_util.get_config_tuple_from_egrc(
+                        '/Users/sudars/.zshrc'
+                    )
+                    target = eg_util.Config(
+                        examples_dir=target_examples_dir,
+                        custom_dir=target_examples_dir
+                    )
+                    assert_equal(actual, target)
 
 
 def test_get_file_path_for_program_valid():
@@ -131,7 +186,7 @@ def test_get_pager_with_custom_correct():
 
 def test_get_pager_without_custom_correct():
     with patch('eg.eg_util.pager_env_is_set', return_value=False):
-        assert eg_util.get_pager() == eg_util.DEFAULT_PAGER
+        assert_equal(eg_util.get_pager(), eg_util.DEFAULT_PAGER)
 
 
 def test_get_path_to_rc_file():
@@ -141,3 +196,22 @@ def test_get_path_to_rc_file():
         result = eg_util.get_path_to_rc_file()
         assert result == target_return
         mocked.assert_called_once_with(passed_in_value)
+
+
+def test_get_file_path_for_program_correct():
+    program = 'cp'
+    examples_dir = '/Users/tyrion/test/eg_dir'
+    program_file = program + eg_util.EXAMPLE_FILE_SUFFIX
+    target = os.path.join(examples_dir, program_file)
+
+    actual = eg_util.get_file_path_for_program(program, examples_dir)
+
+    assert_equal(actual, target)
+
+
+
+# TODO:
+# handle_program
+# has_default_entry_for_program
+# has_custom_entry_for_program
+# open_pager_for_file

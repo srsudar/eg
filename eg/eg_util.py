@@ -175,13 +175,13 @@ def handle_program(program, config):
     custom_file_path = None
 
     if has_default_entry_for_program(program, config):
-        default_file_path = get_default_file_path_for_program(
+        default_file_path = get_file_path_for_program(
             program,
             config.examples_dir
         )
 
     if has_custom_entry_for_program(program, config):
-        custom_file_path = get_custom_file_path_for_program(
+        custom_file_path = get_file_path_for_program(
             program,
             config.custom_dir
         )
@@ -201,7 +201,7 @@ def handle_program(program, config):
     )
 
 
-def get_default_file_path_for_program(program, examples_dir):
+def get_file_path_for_program(program, dir_to_search):
     """
     Return the file name and path for the program.
 
@@ -210,27 +210,10 @@ def get_default_file_path_for_program(program, examples_dir):
     Path is not guaranteed to exist. Just says where it should be if it
     existed. Returned paths are absolute.
     """
-    if examples_dir is None:
+    if dir_to_search is None:
         raise TypeError('examples_dir cannot be None')
     else:
-        result = os.path.join(examples_dir, program + EXAMPLE_FILE_SUFFIX)
-        result = get_expanded_path(result)
-        return result
-
-
-def get_custom_file_path_for_program(program, custom_dir):
-    """
-    Return a custom file path for the program. Returns the absolute path.
-
-    custom_dir cannot be None.
-
-    Path is not guaranteed to exist. Just says where it should be if it
-    existed. Returned paths are absolute.
-    """
-    if custom_dir is None:
-        raise TypeError('custom_dir cannot be None')
-    else:
-        result = os.path.join(custom_dir, program + EXAMPLE_FILE_SUFFIX)
+        result = os.path.join(dir_to_search, program + EXAMPLE_FILE_SUFFIX)
         result = get_expanded_path(result)
         return result
 
@@ -238,7 +221,7 @@ def get_custom_file_path_for_program(program, custom_dir):
 def has_default_entry_for_program(program, config):
     """Return True if has standard examples for program, else False."""
     if config.examples_dir:
-        file_path = get_default_file_path_for_program(
+        file_path = get_file_path_for_program(
             program,
             config.examples_dir)
         print file_path
@@ -250,7 +233,7 @@ def has_default_entry_for_program(program, config):
 def has_custom_entry_for_program(program, config):
     """Return True if has custom examples for a program, else false."""
     if config.custom_dir:
-        custom_path = get_custom_file_path_for_program(
+        custom_path = get_file_path_for_program(
             program,
             config.custom_dir
         )
