@@ -83,58 +83,45 @@ def test_config_returns_passed_in_values_for_dirs():
 
 
 def test_get_config_tuple_from_egrc_all_none_when_not_present():
-    # TODO: figure out how to mock open
-    #with patch('open', return_value='file_handle'):
-        with patch(
-            'ConfigParser.RawConfigParser.readfp',
-            return_value='read_file'
-        ):
-            with patch(
-                'ConfigParser.RawConfigParser.has_option',
-                return_value=False
-            ):
-                # We need to mock open, but cannot seem to do so...so for
-                # now instead we're going to use a file that exists.
-                actual = eg_util.get_config_tuple_from_egrc(
-                    '/Users/sudars/.zshrc'
-                )
-                target = eg_util.Config(
-                    examples_dir=None,
-                    custom_dir=None
-                )
-                assert_equal(actual, target)
+    actual = eg_util.get_config_tuple_from_egrc('test/assets/egrc_nodata')
+    target = eg_util.Config(examples_dir=None, custom_dir=None)
+    assert_equal(actual, target)
 
 
 def test_get_config_tuple_from_egrc_when_present():
-    # TODO: Figure out how to mock open
-    #with patch('open', return_value='file_handle'):
-        with patch(
-            'ConfigParser.RawConfigParser.readfp',
-            return_value='read_file'
-        ):
-            with patch(
-                'ConfigParser.RawConfigParser.has_option',
-                return_value=True
-            ):
-                target_examples_dir = 'test/example/dir'
-                # We should use different return_values for custom and eg dirs,
-                # but currently on a plane without wifi and can't look up how
-                # to do this, so:
-                # TODO
-                with patch(
-                    'ConfigParser.RawConfigParser.get',
-                    return_value=target_examples_dir
-                ):
-                    # We need to mock open, but cannot seem to do so...so for
-                    # now instead we're going to use a file that exists.
-                    actual = eg_util.get_config_tuple_from_egrc(
-                        '/Users/sudars/.zshrc'
-                    )
-                    target = eg_util.Config(
-                        examples_dir=target_examples_dir,
-                        custom_dir=target_examples_dir
-                    )
-                    assert_equal(actual, target)
+    # These are the values hardcoded into the files.
+    examples_dir = 'test/example/dir/in/egrc_withdata'
+    custom_dir = 'test/custom/dir/in/egrc_withdata'
+
+    def return_expanded_path(*args, **kwargs):
+        if args[0] == examples_dir:
+            return examples_dir
+        elif args[0] == custom_dir:
+            return custom_dir
+        else:
+            raise TypeError(
+                args[0] +
+                ' was an unexpected path--should be ' +
+                examples_dir +
+                ' or ' +
+                custom_dir
+            )
+
+    with patch(
+        'eg.eg_util.get_expanded_path',
+        side_effect=return_expanded_path
+    ) as mock_expand:
+
+        actual = eg_util.get_config_tuple_from_egrc('test/assets/egrc_withdata')
+
+        target = eg_util.Config(
+            examples_dir=examples_dir,
+            custom_dir=custom_dir
+        )
+        assert_equal(actual, target)
+
+        mock_expand.assert_any_call(examples_dir)
+        mock_expand.assert_any_call(custom_dir)
 
 
 def test_open_pager_to_line_number_invokes_correctly_for_less():
@@ -314,14 +301,35 @@ def test_handle_program_no_entries():
 def test_handle_program_finds_paths_and_calls_open_pager():
     program = 'mv'
     pager = 'more'
+
+    examples_dir = 'test-eg-dir'
+    custom_dir = 'test-custom-dir'
+
     config = eg_util.Config(
-        examples_dir='test-eg-dir',
-        custom_dir='test-custom-dir'
+        examples_dir=examples_dir,
+        custom_dir=custom_dir
     )
 
-    # TODO: make return different behavior for different calls
     default_path = 'test-eg-dir/mv.md'
-    #custom_path = 'test-custom-dir/mv.md'
+    custom_path = 'test-custom-dir/mv.md'
+
+    def return_correct_path(*args, **kwargs):
+        program_param = args[0]
+        dir_param = args[1]
+        if program_param != program:
+            raise NameError('expected ' + program + ', got ' + program_param)
+        if dir_param == examples_dir:
+            return default_path
+        elif dir_param == custom_dir:
+            return custom_path
+        else:
+            raise NameError(
+                'got ' +
+                dir_param +
+                ', expected ' +
+                examples_dir +
+                ' or ' +
+                custom_dir)
 
     with patch(
         'eg.eg_util.has_default_entry_for_program',
@@ -336,7 +344,7 @@ def test_handle_program_finds_paths_and_calls_open_pager():
             ) as mock_open_pager:
                 with patch(
                     'eg.eg_util.get_file_path_for_program',
-                    return_value=default_path
+                    side_effect=return_correct_path
                 ) as mock_get_file:
                     with patch('eg.eg_util.get_pager', return_value=pager):
                         eg_util.handle_program(program, config)
@@ -350,10 +358,19 @@ def test_handle_program_finds_paths_and_calls_open_pager():
                             config
                         )
 
+                        mock_get_file.assert_any_call(
+                            program,
+                            examples_dir
+                        )
+                        mock_get_file.assert_any_call(
+                            program,
+                            custom_dir
+                        )
+
                         mock_open_pager.assert_called_once_with(
                             pager,
                             default_file_path=default_path,
-                            custom_file_path=default_path
+                            custom_file_path=custom_path
                         )
 
 

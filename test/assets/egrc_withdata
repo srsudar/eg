@@ -1,0 +1,3 @@
+[eg-config]
+examples-dir = test/example/dir/in/egrc_withdata
+custom-dir = test/custom/dir/in/egrc_withdata
