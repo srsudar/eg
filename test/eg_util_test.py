@@ -17,7 +17,6 @@ def test_pager_not_set_returns_false():
     # os.getenv returns None if a variable is not set
     with patch('os.getenv', return_value=None):
         actual = eg_util.pager_env_is_set()
-        print actual
         assert actual is False
 
 

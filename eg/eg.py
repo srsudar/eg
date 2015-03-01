@@ -6,8 +6,6 @@ import sys
 
 if __name__ == '__main__':
 
-    print __file__
-
     parser = argparse.ArgumentParser(
         description='eg provides examples of common command usage.'
     )
@@ -54,9 +52,6 @@ if __name__ == '__main__':
     if len(sys.argv) < 2:
         parser.print_help()
     else:
-        print args
-        print args.custom_dir
-
         config = eg_util.get_resolved_config_items(
             egrc_path=args.config_file,
             examples_dir=args.examples_dir,

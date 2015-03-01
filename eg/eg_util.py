@@ -224,7 +224,6 @@ def has_default_entry_for_program(program, config):
         file_path = get_file_path_for_program(
             program,
             config.examples_dir)
-        print file_path
         return os.path.isfile(file_path)
     else:
         return False
@@ -237,7 +236,6 @@ def has_custom_entry_for_program(program, config):
             program,
             config.custom_dir
         )
-        print custom_path
         return os.path.isfile(custom_path)
     else:
         return False
