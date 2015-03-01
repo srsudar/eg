@@ -32,6 +32,10 @@ DEFAULT_SECTION = 'eg-config'
 EG_EXAMPLES_DIR = 'examples-dir'
 CUSTOM_EXAMPLES_DIR = 'custom-dir'
 
+# Flags for showing where the examples for commands are coming from.
+FLAG_ONLY_CUSTOM = '+'
+FLAG_CUSTOM_AND_DEFAULT = '*'
+
 # A basic struct containing configuration values.
 #    examples_dir: path to the directory of examples that ship with eg
 #    custom_dir: path to the directory where custom examples are found
@@ -262,3 +266,76 @@ def open_pager_for_file(pager, default_file_path=None, custom_file_path=None):
         subprocess.call([pager, custom_file_path])
     else:
         print 'At least one file must be defined.'
+
+
+def get_list_of_all_supported_commands(config):
+    """
+    Generate a list of all the commands that have examples known to eg. The
+    format of the list is the command names. The fact that there are examples
+    for 'cp', for example, would mean that 'cp' was in the list.
+
+    The format of the list contains additional information to say if there are
+    only default examples, only custom examples, or both:
+
+        cp    (only default)
+        cp *  (only custom)
+        cp +  (default and custom)
+    """
+    default_files = []
+    custom_files = []
+
+    if config.examples_dir and os.path.isdir(config.examples_dir):
+        default_files = os.listdir(config.examples_dir)
+    if config.custom_dir and os.path.isdir(config.custom_dir):
+        custom_files = os.listdir(config.custom_dir)
+
+    # Now we get tricky. We're going to output the correct information by
+    # iterating through each list only once. Keep pointers to our position in
+    # the list. If they point to the same value, output that value with the
+    # 'both' flag and increment both. Just one, output with the appropriate flag
+    # and increment.
+
+    ptr_default = 0
+    ptr_custom = 0
+
+    result = []
+
+    def get_without_suffix(file_name):
+        """
+        Return the file name without the suffix, or the file name itself
+        if it does not have the suffix.
+        """
+        return file_name.split(EXAMPLE_FILE_SUFFIX)[0]
+
+    while ptr_default < len(default_files) and ptr_custom < len(custom_files):
+        def_cmd = default_files[ptr_default]
+        cus_cmd = custom_files[ptr_custom]
+
+        if def_cmd == cus_cmd:
+            # They have both
+            result.append(
+                get_without_suffix(def_cmd) +
+                ' ' +
+                FLAG_CUSTOM_AND_DEFAULT
+            )
+            ptr_default += 1
+            ptr_custom += 1
+        elif def_cmd < cus_cmd:
+            # Only default, as default comes first.
+            result.append(get_without_suffix(def_cmd))
+            ptr_default += 1
+        else:
+            # Only custom
+            result.append(get_without_suffix(cus_cmd) + ' ' + FLAG_ONLY_CUSTOM)
+            ptr_custom += 1
+
+    # Now just append.
+    for i in range(ptr_default, len(default_files)):
+        def_cmd = default_files[i]
+        result.append(get_without_suffix(def_cmd))
+
+    for i in range(ptr_custom, len(custom_files)):
+        cus_cmd = custom_files[i]
+        result.append(get_without_suffix(cus_cmd) + ' ' + FLAG_ONLY_CUSTOM)
+
+    return result

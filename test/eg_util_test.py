@@ -411,3 +411,81 @@ def test_open_pager_for_both_file_types():
             )
 
             mock_call.assert_called_once_with((pager), stdin=cat.stdout)
+
+
+def test_list_supported_programs_only_default():
+    example_dir = 'example/dir'
+    custom_dir = 'custom/dir'
+
+    config = eg_util.Config(examples_dir=example_dir, custom_dir=custom_dir)
+
+    def give_list(*args, **kwargs):
+        if args[0] == example_dir:
+            return ['cp.md', 'find.md', 'xargs.md']
+        else:
+            return []
+
+    with patch('os.path.isdir', return_value=True):
+        with patch('os.listdir', side_effect=give_list):
+            actual = eg_util.get_list_of_all_supported_commands(config)
+            target = ['cp', 'find', 'xargs']
+
+            assert_equal(actual, target)
+
+
+def test_list_supported_programs_only_custom():
+    example_dir = 'example/dir'
+    custom_dir = 'custom/dir'
+
+    config = eg_util.Config(examples_dir=example_dir, custom_dir=custom_dir)
+
+    def give_list(*args, **kwargs):
+        if args[0] == custom_dir:
+            return ['awk.md', 'bar.md', 'xor.md']
+        else:
+            return []
+
+    with patch('os.path.isdir', return_value=True):
+        with patch('os.listdir', side_effect=give_list):
+            actual = eg_util.get_list_of_all_supported_commands(config)
+            target = ['awk +', 'bar +', 'xor +']
+
+            assert_equal(actual, target)
+
+
+def test_list_supported_programs_both():
+    examples_dir = 'example/dir'
+    custom_dir = 'custom/dir'
+
+    config = eg_util.Config(examples_dir=examples_dir, custom_dir=custom_dir)
+
+    def give_list(*args, **kwargs):
+        if args[0] == examples_dir:
+            return ['alpha', 'bar.md', 'both.md', 'examples']
+        else:
+            # custom_dir
+            return ['azy.md', 'both.md', 'examples', 'zeta']
+
+    with patch('os.path.isdir', return_value=True):
+        with patch('os.listdir', side_effect=give_list):
+            actual = eg_util.get_list_of_all_supported_commands(config)
+
+            target = [
+                'alpha',
+                'azy +',
+                'bar',
+                'both *',
+                'examples *',
+                'zeta +'
+            ]
+
+            assert_equal(actual, target)
+
+
+def test_list_supported_programs_fails_gracefully_if_no_dirs():
+    config = eg_util.Config(None, None)
+
+    actual = eg_util.get_list_of_all_supported_commands(config)
+    target = []
+
+    assert_equal(actual, target)

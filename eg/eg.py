@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '--list',
         action='store_true',
-        help='show all the programs with eg entries'
+        help='show all the programs with eg entries.'
     )
 
     parser.add_argument(
@@ -58,4 +58,38 @@ if __name__ == '__main__':
             custom_dir=args.custom_dir
         )
 
-        eg_util.handle_program(args.program, config)
+        if args.list:
+            # Show what's available.
+            supported_programs = eg_util.get_list_of_all_supported_commands(
+                config
+            )
+            msg_line_1 = 'Legend: '
+            msg_line_2 = ('    ' +
+                          eg_util.FLAG_ONLY_CUSTOM +
+                          ' only custom files'
+                          )
+            msg_line_3 = ('    ' +
+                          eg_util.FLAG_CUSTOM_AND_DEFAULT +
+                          ' custom and default files'
+                          )
+            msg_line_4 = '    ' + '  only default files (no symbol)'
+            msg_line_5 = ''
+            msg_line_6 = 'Programs supported by eg: '
+
+            preamble = [
+                msg_line_1,
+                msg_line_2,
+                msg_line_3,
+                msg_line_4,
+                msg_line_5,
+                msg_line_6
+            ]
+
+            for line in preamble:
+                print line
+
+            for program in supported_programs:
+                print program
+        else:
+
+            eg_util.handle_program(args.program, config)
