@@ -1,6 +1,8 @@
 import os
+import subprocess
 
 from eg import eg_util
+from mock import Mock
 from mock import patch
 from nose.tools import assert_equal
 
@@ -374,5 +376,39 @@ def test_handle_program_finds_paths_and_calls_open_pager():
                         )
 
 
-# TODO:
-# open_pager_for_file
+def test_open_pager_for_file_only_default():
+    pager = 'more'
+    default_path = 'test/default/path'
+    with patch('subprocess.call') as mock_call:
+        eg_util.open_pager_for_file(pager, default_path, None)
+
+        mock_call.assert_called_once_with([pager, default_path])
+
+
+def test_open_pager_for_file_only_custom():
+    pager = 'more'
+    custom_path = 'test/custom/path'
+    with patch('subprocess.call') as mock_call:
+        eg_util.open_pager_for_file(pager, None, custom_path)
+
+        mock_call.assert_called_once_with([pager, custom_path])
+
+
+def test_open_pager_for_both_file_types():
+    # This is kind of a messy function, as we do a lot of messing around with
+    # subprocess.Popen. We're not going to test that absolutely everything is
+    # plugged in correctly, just that things are more or less right
+    pager = 'less'
+    default_path = 'test/default/path'
+    custom_path = 'test/custom/path'
+    cat = Mock(autospec=True)
+    with patch('subprocess.Popen', return_value=cat) as mock_popen:
+        with patch('subprocess.call') as mock_call:
+            eg_util.open_pager_for_file(pager, default_path, custom_path)
+
+            mock_popen.assert_called_once_with(
+                ('cat', custom_path, default_path),
+                stdout=subprocess.PIPE
+            )
+
+            mock_call.assert_called_once_with((pager), stdin=cat.stdout)
