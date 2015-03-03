@@ -4,13 +4,16 @@ print commands as they are executed
 
     xargs -t
 
+
 parallelize ls with at most 5 processes
 
     xargs -P 5 ls
 
+
 combine with find to remove all .txt files in directory
 
     find directory -name "*.txt" -print0 | xargs -0 -t rm
+
 
 
 # Basic Usage
@@ -18,6 +21,7 @@ combine with find to remove all .txt files in directory
 `xargs` is used to pass arguments to commands:
 
     <command_to_generate_arguments> | xargs <command_to_consume_arguments>
+
 
 
 # Splitting Arguments
@@ -37,3 +41,5 @@ It will `echo` them back to `stdout`, printing the commands it is executing
     3 4
     echo 5 6
     5 6
+
+

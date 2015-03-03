@@ -7,6 +7,7 @@ print lines matching `foo`
     second line foo
     FOURTH LINE foo
 
+
 match foo, split on whitespace, and print the first element in the split array
 
     $ awk '/foo/ { print $1 }' input.txt
@@ -15,11 +16,13 @@ match foo, split on whitespace, and print the first element in the split array
     FOURTH
 
 
+
 # Basic Usage
 
 Print a subset of lines from a file. 
 
     awk '/<pattern>/' <inputfile>
+
     
 The forward slashes around `<pattern>` are required for POSIX-style regular
 expressions.
@@ -31,6 +34,7 @@ More complicated processing of matching lines can go in curly braces. This will
 print each line that matches foo:
 
     awk '/foo/ { print }' input.txt
+
     
 
 # Print Matching Lines
@@ -43,6 +47,7 @@ are all equivalent. Each will print every line from a file matching `foo`
     $ awk '/foo/' input.txt
     $ awk '/foo/ { print }' input.txt
     $ awk '/foo/ { print $0 }' input.txt
+
 
 
 # Columns and Fields
@@ -62,12 +67,14 @@ Fields are 1-indexed--i.e. `$2` would refer to the second colum in a file.
     Jon      Snow         555.206.4444
     Arya     Stark        555.206.1111
 
+
 Match lines containing `Lannister`, print the first field (split on
 whitespace):
 
     $ awk '/Lannister/ { print $1 }' thrones.txt
     Tyrion
     Jamie
+
 
 
 # Print All Fields

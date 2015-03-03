@@ -4,28 +4,34 @@ show contents of current directory
 
     ls
 
+
 show contents of directory
 
     ls directory
+
 
 show contents, hidden files, and stats
 
     $ ls -al
 
+
 show extended time information
 
     ls -lT
+
 
 show with color and indicators of file type
 
     ls -FG
     
 
+
 # Basic Usage
 
 Display the contents of a directory
 
     ls <directory>
+
 
 
 # Showing Hidden Files
@@ -36,6 +42,7 @@ directory:
 
     $ ls -a
     .               ..              .hidden.txt     bar.txt
+
 
 
 # Showing More Information
@@ -50,6 +57,7 @@ of hard links to the file, owner, group, size in bytes, and date modified.
     -rw-r--r--  1 tyrion  group   15 Feb  3 14:01 foo.txt
     lrwxr-xr-x  1 tyrion  group    7 Feb  3 14:06 link-to-foo.txt -> foo.txt
 
+
 Human-readable size formats with units can be shown with the `-h` flag:
 
     $ ls -lh
@@ -59,10 +67,12 @@ Human-readable size formats with units can be shown with the `-h` flag:
     -rw-r--r--  1 tyrion  group    15B Feb  3 14:01 foo.txt
     lrwxr-xr-x  1 tyrion  group     7B Feb  3 14:06 link-to-foo.txt -> foo.txt
 
+
 Indicators of file type can be included with the `-F` flag:
 
     $ ls -F
     directory/    executable*    foo.txt    link-to-foo.txt@
+
 
 Extended time format can be shown with the `-T` flag:
 
@@ -72,3 +82,5 @@ Extended time format can be shown with the `-T` flag:
     -rwxr-xr-x  1 tyrion  group    0 Feb  3 14:06:15 2015 executable
     -rw-r--r--  1 tyrion  group   15 Feb  3 14:01:12 2015 foo.txt
     lrwxr-xr-x  1 tyrion  group    7 Feb  3 14:06:40 2015 link-to-foo.txt -> foo.txt
+
+

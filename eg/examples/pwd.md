@@ -4,10 +4,14 @@ print the current working directory
 
     pwd
 
+
+
 # Basic Usage
 
     $ pwd
     /Users/tyrion
+
+
 
 # Resolve Symbolic Links
 
@@ -18,9 +22,10 @@ flag:
     total 8
     drwxr-xr-x  2 tyrion  group  68 Feb  3 16:05 directory/
     lrwxr-xr-x  1 tyrion  group   9 Feb  3 16:05 link-to-directory@ -> directory
-
     $ cd /Users/tyrion/link-to-directory
     $ pwd
     /Users/tyrion/link-to-directory
     $ pwd -P
     /Users/tyrion/directory
+
+

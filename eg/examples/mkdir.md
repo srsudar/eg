@@ -4,9 +4,11 @@ create a directory
 
     mkdir directory
 
+
 create a directory with all permissions enabled
 
     mkdir -m 777 unprotected_directory
+
 
 
 # Basic Usage
@@ -14,3 +16,5 @@ create a directory with all permissions enabled
 Create a directory:
 
     mkdir <directory>
+
+

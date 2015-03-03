@@ -9,9 +9,11 @@ make a symlink to `foo.txt`
     lrwxr-xr-x  1 tyrion  group  7 Feb  3 14:14 link-to-foo.txt@ -> foo.txt
 
 
+
 # Basic Usage
 
 `ln -s <target> <anchor>`
+
 
 
 # Symbolic Links (symlinks)
@@ -25,6 +27,7 @@ Make it symbolic with the `-s` flag:
     lrwxr-xr-x  1 tyrion  group  7 Feb  3 14:14 link-to-foo.txt@ -> foo.txt
 
 
+
 # Hard Links
 
 Omit the `-s` flag.
@@ -34,3 +37,5 @@ Omit the `-s` flag.
     total 0
     -rw-r--r--  2 tyrion  group     0B Feb  3 14:13 foo.txt
     -rw-r--r--  2 tyrion  group     0B Feb  3 14:13 hard-link-to-foo.txt
+
+

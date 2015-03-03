@@ -4,13 +4,16 @@ page file to stdout
 
     less file.txt
 
+
 page file starting at line 25
 
     less +25 file.txt
 
+
 page file starting at first line containing "pattern"
 
     less +/"pattern" file.txt
+
 
 
 # Basic Usage
@@ -18,6 +21,7 @@ page file starting at first line containing "pattern"
 Show the file on `stdout`, paging the input:
 
     less <file>
+
     
 Once in `less` use `j` to scroll down, `k` to scroll up, and `q` to quit.
 
