@@ -19,7 +19,7 @@ if __name__ == '__main__':
     parser.add_argument(
         '-v',
         '--version',
-        nargs='?',
+        action='store_true',
         help='Display version information about eg'
     )
 
@@ -90,6 +90,8 @@ if __name__ == '__main__':
 
             for program in supported_programs:
                 print program
+        elif args.version:
+            print eg_util.VERSION
         else:
 
             eg_util.handle_program(args.program, config)
