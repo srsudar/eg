@@ -44,6 +44,8 @@ Permissions can be read (`r`), write (`w`), and execute (`x`).
 
 Permissions are added with `+` and removed with `-`.
 
+
+
 ## Bit Representation
 
 Permissions can also be specified with numbers acting as bit masks. `7` is

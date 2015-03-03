@@ -2,18 +2,17 @@
 
 print lines matching `foo`
 
-    $ awk '/foo/' input.txt
-    first line foo
-    second line foo
-    FOURTH LINE foo
+    awk '/foo/' input.txt
 
 
 match foo, split on whitespace, and print the first element in the split array
 
-    $ awk '/foo/ { print $1 }' input.txt
-    first
-    second
-    FOURTH
+    awk '/foo/ { print $1 }' input.txt
+
+
+use `:` as the field delimiter
+
+    awk -F:
 
 
 
@@ -30,8 +29,8 @@ expressions.
 Wrap everything going to `awk` in single quotes and give it the name of an
 input file.
 
-More complicated processing of matching lines can go in curly braces. This will
-print each line that matches foo:
+More complicated processing of matching lines can go in curly braces. For
+example, this command will print each line that matches foo:
 
     awk '/foo/ { print }' input.txt
 
@@ -42,7 +41,7 @@ print each line that matches foo:
 `awk` prints lines by default, so no command prints the whole matching line.
 `$0` is special and means the whole matching line. The following three commands
 are all equivalent. Each will print every line from a file matching `foo`
-(`/foo/`):
+(`/foo/`) (output is not shown):
 
     $ awk '/foo/' input.txt
     $ awk '/foo/ { print }' input.txt
@@ -77,15 +76,13 @@ whitespace):
 
 
 
-# Print All Fields
+# For Loops
 
-`awk -F: ' { for (i = 1; i < NF; i++) print $i }'`
+For loops can be used to do things like print all the fields in a line. Here 
+`NF` is the number of fields on every line in the file `input.txt`. We match
+all lines (by not giving a pattern) and print all fields, splitting on
+whitespace by default.
 
-Split lines into field on `:` (`-F:`).
+    awk '{ for (i = 1; i < NF; i++) print $i }' input.txt
 
-Print all fields using a for loop. `NF` is the number of fields in the line,
-`print $2` will print the second field.
 
-This command will print your path, assuming it is colon-delimited:
-
-`echo $PATH | awk -F: ' { for (i = 1; i < NF; i++) print $i }'`

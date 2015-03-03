@@ -1,21 +1,18 @@
 # find
     
-files
+files in searchdir named file.txt
 
-    $ find /searchdir -name file.txt
-    /searchdir/file.txt
-
-
-only directories (`-type d`)
-
-    $ find /searchdir -type d -name 'directory'
-    /searchdir/directory
+    find ./searchdir -name file.txt
 
 
-show more info (`-ls`)
+only directories in searchdir
 
-    $ find /searchdir -name 'file.txt' -ls
-    118871021  0 -rw-r--r--  1 staff  staff 0 Feb  2 11:14  /searchdir/file.txt
+    find ./searchdir -type d
+
+
+show more info
+
+    find ./searchdir -name 'file.txt' -ls
 
 
 
@@ -31,7 +28,7 @@ Find files and directories matching a given name.
 
 Search `/searchdir` for files and directories named `file.txt`:
 
-    find /searchdir -name file.txt
+    find ./searchdir -name file.txt
 
 
 
@@ -39,9 +36,9 @@ Search `/searchdir` for files and directories named `file.txt`:
 
 Use `-iname` for case insensitive name searching.
 
-    $ find /searchdir -iname file.txt
-    /searchdir/file.txt
-    /searchdir/bar/FiLe.TxT
+    $ find ./searchdir -iname file.txt
+    ./searchdir/file.txt
+    ./searchdir/bar/FiLe.TxT
 
 
 
@@ -51,9 +48,9 @@ Wildcards are supported with quotes.
 
 Find files starting with `prefix`:
 
-    $ find /searchdir -name "prefix*"
-    /searchdir/prefix.txt
-    /searchdir/prefixAndMore.txt
+    $ find ./searchdir -name "prefix*"
+    ./searchdir/prefix.txt
+    ./searchdir/prefixAndMore.txt
 
 
 
@@ -63,7 +60,7 @@ Find files starting with `prefix`:
 
 Will find files (`-type f`) but not directories named `foo`:
 
-    find /searchdir -type f foo
+    find ./searchdir -type f foo
 
 
 
@@ -71,8 +68,8 @@ Will find files (`-type f`) but not directories named `foo`:
 
 List only directories by specifying `-type d`.
 
-    $ find /searchdir -type d -name 'directory'
-    /searchdir/directory
+    $ find ./searchdir -type d -name 'directory'
+    ./searchdir/directory
 
 
 
@@ -83,17 +80,17 @@ blocks.
 
 Find entries exactly two bytes (`-size 2c`). `c` stands for character:
 
-    find /searchdir -size 2c
+    find ./searchdir -size 2c
 
 
 Find files exactly 2 kilobytes (`-size 2k`):
 
-    find /searchdir -size 2k
+    find ./searchdir -size 2k
 
 
 Find files exactly 2 megabytes (`-size 2M`):
 
-    find /searchdir -size 2M
+    find ./searchdir -size 2M
 
 
 
@@ -141,8 +138,8 @@ Flags are ANDed by default, but can also achieve OR and NOT functionality.
 List files greater bigger than 500k (`+500k`) and named `bigFile.txt`
 (`-name bifile.txt`). These two commands are equivalent:
     
-    find /searchdir -size +500k -name bigFile.txt
-    find /searchdir -size +500k -and -name bigFile.txt
+    $ find ./searchdir -size +500k -name bigFile.txt
+    $ find ./searchdir -size +500k -and -name bigFile.txt
 
 
 ## OR
@@ -150,7 +147,7 @@ List files greater bigger than 500k (`+500k`) and named `bigFile.txt`
 List files bigger than 500k (`+500k`) or named `smallFile.txt` (`-or -name
 smallFile.txt`):
 
-    find /searchdir -size +500k -or -name smallFile.txt
+    find ./searchdir -size +500k -or -name smallFile.txt
 
 
 ## NOT
@@ -158,6 +155,6 @@ smallFile.txt`):
 List files bigger than 50 megabytes (`-size +50M`) that are not named
 `unwanted.txt` (`-not -name unwanted.txt`):
 
-    find /searchdir -size +50M ! -name unwanted.txt
+    find ./searchdir -size +50M ! -name unwanted.txt
 
 

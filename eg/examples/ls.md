@@ -10,9 +10,9 @@ show contents of directory
     ls directory
 
 
-show contents, hidden files, and stats
+show contents, hidden files, and stats in human readable form
 
-    $ ls -al
+    $ ls -alh
 
 
 show extended time information
@@ -82,5 +82,16 @@ Extended time format can be shown with the `-T` flag:
     -rwxr-xr-x  1 tyrion  group    0 Feb  3 14:06:15 2015 executable
     -rw-r--r--  1 tyrion  group   15 Feb  3 14:01:12 2015 foo.txt
     lrwxr-xr-x  1 tyrion  group    7 Feb  3 14:06:40 2015 link-to-foo.txt -> foo.txt
+
+
+
+# Useful Aliases
+
+`ls` is often aliased to make the defaults a bit more useful. Here are three
+basic aliases. The second two can be remembered by "list long" and "list all".
+
+    $ alias ls='ls -FG'
+    $ alias ll='ls -lhF'
+    $ alias la='ll -A' 
 
 
