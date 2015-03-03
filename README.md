@@ -21,6 +21,20 @@ companion tool for `man`.
 gee".
 
 
+## Installation
+
+Clone the repo and create a symlink to `eg.py`:
+
+```shell
+git clone https://github.com/srsudar/eg ./
+link -s ./eg/eg.py /usr/local/bin/eg
+```
+
+`eg` is in beta and doesn't ship with a binary. You'll have to have python
+2.x installed on your machine. Dependencies are very, very modest. If you find
+otherwise, open an issue.
+
+
 ## Usage
 
 `eg <program>`
@@ -29,6 +43,8 @@ gee".
 examples.
 
 `eg find` will provide examples for the `find` command.
+
+`eg --list` will show all the commands for which `eg` has examples.
 
 
 ## How it Works
@@ -39,6 +55,45 @@ such that the file is the name of the tool with `.md`. E.g. the examples for
 
 `eg find` will pipe the contents of `find.md` through the pager (usually
 `less`, but see below for how the pager is resolved).
+
+
+## Configuration and Extension
+
+`eg` works out of the box, no configuration required.
+
+If you want to get fancy, however, `eg` can be fancy.
+
+For example, perhaps you have some common examples that you want to have easy 
+access to. You can define a custom file, put the example there, and tell `eg`
+to use it.
+
+The way to think about what `eg` does is just that it takes a program name, for
+example `find`, and looks for two files named `find.md` in a the default
+directory and a custom directory. If it finds them, it pipes them through
+`less`, with the custom file at the top. Easy.
+
+The default and custom directories can be specified at the command line like
+so: 
+
+```shell
+eg --examples-dir='the/default/dir' --custom-dir='my/fancy/dir' find
+```
+
+Instead of doing this every time, you can define a configuration file. By
+default it is expected to live in `~/.egrc`. It must begin with a section
+called `eg-config` and can contain two keys: `custom-dir` and `examples-dir`.
+Here is an example of a valid config file:
+
+    [eg-config]
+    examples-dir = ~/examples-dir
+    custom-dir = ~/my/fancy/dir
+
+Although by default the file is looked for at `~/.egrc`, you can also specify a
+different location at the command line like so: 
+
+```shell
+eg --config-file=myfile find
+```
 
 
 ## Format and Content of Examples
@@ -56,10 +111,10 @@ keep the tool consistent.
 
 ## Overview
 
-Anything indented four spaces or surrounded by backticks `like this` are meant
-to be input or output at the command line. A single line indented four spaces
-is a user-entered command. If a block is indented four spaces, only the lines
-beginning with `$` are user-entered--anything else is output.
+Anything indented four spaces or surrounded by backticks \`like this\` are
+meant to be input or output at the command line. A single line indented four
+spaces is a user-entered command. If a block is indented four spaces, only the
+lines beginning with `$` are user-entered--anything else is output.
 
 
 ### Name of the Command
@@ -77,10 +132,12 @@ Here the `.txt` extensions indicate that these are file names, while the names
 themselves make clear which is the already existing file and which will be the
 newly created copy.
 
-**This section shouldn't show output and should not include the `$` to indicate
-that we are at the command line. This section should be a quick glance for
+This section shouldn't show output and should not include the `$` to indicate
+that we are at the command line.
+
+**This section should be a quick glance for
 users that know what the tool does, know a basic usage is what they are trying
-to do, and they are just looking for a reminder.**
+to do, and are just looking for a reminder.**
 
 ### Basic Usage
 
@@ -165,7 +222,8 @@ $ woman find
 
 ## TODO
 
-The following commands still need entries:
+The following commands still need entries. The list is incomplete. Feel free to
+suggest more that are missing, and feel even freer to submit examples for them.
 
 * gcc
 * ar
