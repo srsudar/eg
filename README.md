@@ -1,6 +1,6 @@
 # eg
 
-> Example usages for command line tools.
+> Example usage for commands at the command line.
 
 ## Overview
 
@@ -12,7 +12,10 @@ bigger than 500kb and no more than two levels deep? Pore through the man pages
 looking for the right flags, be frustrated, eventually turn to the internet for
 an example.
 
-No more!
+And what about using `tar`? Even with the man pages `tar` is [famously
+inscrutable without the internet](http://xkcd.com/1168/).
+
+No more! `eg tar` and save the world.
 
 `eg` will give you useful examples right at the command line. Think of it as a
 companion tool for `man`.
@@ -23,7 +26,8 @@ gee".
 
 ## Installation
 
-Clone the repo and create a symlink to `eg.py`:
+Clone the repo and create a symlink to `eg.py`. Make sure the location you
+choose for the symlink is on your path:
 
 ```shell
 git clone https://github.com/srsudar/eg ./
@@ -31,8 +35,9 @@ link -s ./eg/eg.py /usr/local/bin/eg
 ```
 
 `eg` is in beta and doesn't ship with a binary. You'll have to have python
-2.x installed on your machine. Dependencies are very, very modest. If you find
-otherwise, open an issue.
+2.x installed on your machine. Dependencies are very modest and should not
+require you to install anything (other than Nose if you want to run the tests).
+If you find otherwise, open an issue.
 
 
 ## Usage
@@ -53,8 +58,8 @@ Files full of examples live in `examples/`. A naming convention is followed
 such that the file is the name of the tool with `.md`. E.g. the examples for
 `find` are in `find.md`.
 
-`eg find` will pipe the contents of `find.md` through the pager (usually
-`less`, but see below for how the pager is resolved).
+`eg find` will pipe the contents of `find.md` through the `less` (although it
+tries to respect the `PAGER` environment variable.
 
 
 ## Configuration and Extension
@@ -63,12 +68,14 @@ such that the file is the name of the tool with `.md`. E.g. the examples for
 
 If you want to get fancy, however, `eg` can be fancy.
 
-For example, perhaps you have some common examples that you want to have easy 
-access to. You can define a custom file, put the example there, and tell `eg`
-to use it.
+For example, maybe a team member always sends you bzipped tarballs and you can
+never remember the flag for bzipping--why can't that guy just use gzip
+like everybody else? You can create an example for untarring and unzipping
+bzipped tarballs, stick it in a file called `tar.md`, and tell `eg` where to
+find it.
 
 The way to think about what `eg` does is just that it takes a program name, for
-example `find`, and looks for two files named `find.md` in a the default
+example `find`, and looks for two files named `find.md` in the default
 directory and a custom directory. If it finds them, it pipes them through
 `less`, with the custom file at the top. Easy.
 
@@ -86,7 +93,7 @@ Here is an example of a valid config file:
 
     [eg-config]
     examples-dir = ~/examples-dir
-    custom-dir = ~/my/fancy/dir
+    custom-dir = ~/my/fancy/custom/dir
 
 Although by default the file is looked for at `~/.egrc`, you can also specify a
 different location at the command line like so: 
@@ -102,11 +109,11 @@ Example documents are written in [markdown](http://daringfireball.net/projects/m
 Documents in markdown are easily read at the command line as well as online.
 They all follow the same basic format.
 
-This section explains the format so that you better understand how to use the
-examples.
+This section explains the format so that you better understand how to quickly
+grok the examples.
 
-Contributors should also pay close attention to these guidelines so that we
-keep the tool consistent.
+Contributors should also pay close attention to these guidelines to keep
+examples consistent.
 
 
 ## Overview
@@ -135,9 +142,10 @@ newly created copy.
 This section shouldn't show output and should not include the `$` to indicate
 that we are at the command line.
 
-**This section should be a quick glance for
-users that know what the tool does, know a basic usage is what they are trying
-to do, and are just looking for a reminder.**
+**This section should be a quick glance for users that know what the tool does,
+know a basic usage is what they are trying to do, and are just looking for a
+reminder.**
+
 
 ### Basic Usage
 
@@ -151,12 +159,12 @@ example, shows:
 
     cp [-R [-H | -L | -P]] [-fi | -n] [-apvX] source_file ... target_directory
 
-**The Basic Usage is intended to provide a less verbose, more immediately
-practical version of the man page's SYNOPSIS section.**
+**The Basic Usage is intended to provide less verbose, more immediately
+practical versions of the man page's SYNOPSIS section.**
 
 Commands and flags that will affect the behavior are shown as would be entered
-in the command line, while user-entered filenames and arguments that alter the
-what rather than the how are shown in `< >`. Examples in the Basic Usage
+in the command line, while user-entered filenames and arguments that do not
+alter the command's behaviors are shown in `< >`. Examples in the Basic Usage
 section for the `cp` command, for instance, might be:
 
     cp -R <original_directory> <copied_directory>
@@ -170,9 +178,9 @@ distinct arguments.
 ### Additional Sections
 
 Subsequent subsections can be added for common uses of the tools, as
-appropriate and as necessary.
+appropriate.
 
-### Spacing
+### Formatting
 
 Although markdown is readable, it can still be tricky without syntax
 highlighting. We use spacing to help the eye.
@@ -184,14 +192,11 @@ should be preceded by exactly three lines.
 
 3. Files should end with two blank lines.
 
-
-## Pagers
-
-`eg` tries to use your preferred pager by looking at the `$PAGER` environment
-variable. If `$PAGER` is not set, it defaults to `less`.
+4. Lines should not exceed 80 characters, unless to accommodate a necessarily
+   long command or long output.
 
 
-## Contributor Guidelines
+## Contributing
 
 Additions of new tools and new or more useful examples are welcome. `eg` should
 be something that people want to have on their machines. If it has a man page,
@@ -207,6 +212,18 @@ again, consider adding it to the examples.
 right. `eg` should provide quick examples in practice. Do not list all the
 flags for the sake of listing them. Assume that users will have `man`
 available.
+
+
+### Building and Running Tests
+
+`eg` depends only on standard libraries and Python 2.x, so building should be a
+simple matter of cloning the repo and running the executable `eg/eg.py`.
+
+`eg` uses Nose for testing, so you'll have to have Nose installed to run tests.
+Once you have Nose, run `nosetests` from **the root directory of the repo**.
+
+Tests should always be expected to pass. If they fail, please open an issue,
+even if only so that we can better elucidate `eg`'s dependencies.
 
 
 ## Grace Hopper Approves
