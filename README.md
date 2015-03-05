@@ -31,7 +31,7 @@ choose for the symlink is on your path:
 
 ```shell
 git clone https://github.com/srsudar/eg ./
-link -s ./eg/eg.py /usr/local/bin/eg
+ln -s ./eg/eg.py /usr/local/bin/eg
 ```
 
 `eg` is in beta and doesn't ship with a binary. You'll have to have python
