@@ -1,6 +1,6 @@
 # eg
 
-> Example usage for commands at the command line.
+> Useful examples at the command line.
 
 ## Overview
 
