@@ -75,7 +75,7 @@ def _inform_if_path_does_not_exist(path):
     be helpful to users if they specify a custom path that eg cannot find.
     """
     expanded_path = get_expanded_path(path)
-    if not os.path.isfile(expanded_path):
+    if not os.path.exists(expanded_path):
         print 'Could not find custom path at: ' + expanded_path
 
 
