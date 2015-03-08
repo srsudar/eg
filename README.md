@@ -8,19 +8,17 @@
 
 `eg` provides examples of common uses of command line tools.
 
-Man pages are great. How does `find` work, again? `man find` will tell you, if
-you have 30 minutes. How do you use `find` to find only directories? How about
-bigger than 500kb and no more than two levels deep? Pore through the man pages
-looking for the right flags, be frustrated, eventually turn to the internet for
-an example.
+Man pages are great. How does `find` work, again? `man find` will tell you, but
+you'll have to pore through all the flags and options just to figure out a
+basic usage. And what about using `tar`? Even with the man pages `tar` is
+[famously inscrutable without the googline for examples](http://xkcd.com/1168/).
 
-And what about using `tar`? Even with the man pages `tar` is [famously
-inscrutable without the internet](http://xkcd.com/1168/).
-
-No more! `eg tar` and save the world.
+No more!
 
 `eg` will give you useful examples right at the command line. Think of it as a
 companion tool for `man`.
+
+![eg Demo](./eg-demo.gif)
 
 > `eg` comes from _exempli gratia_, and is pronounced like the letters: "ee
 gee".
@@ -238,11 +236,3 @@ $ alias woman=eg
 $ man find
 $ woman find
 ```
-
-## TODO
-
-The following commands still need entries. The list is incomplete. Feel free to
-suggest more that are missing, and feel even freer to submit examples for them.
-
-* gcc
-* ar
