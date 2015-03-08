@@ -11,7 +11,7 @@
 Man pages are great. How does `find` work, again? `man find` will tell you, but
 you'll have to pore through all the flags and options just to figure out a
 basic usage. And what about using `tar`? Even with the man pages `tar` is
-[famously inscrutable without the googline for examples](http://xkcd.com/1168/).
+[famously inscrutable without the googling for examples](http://xkcd.com/1168/).
 
 No more!
 
