@@ -236,3 +236,8 @@ $ alias woman=eg
 $ man find
 $ woman find
 ```
+
+# TODO
+
+* curl
+* file
