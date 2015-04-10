@@ -3,6 +3,9 @@ import argparse
 import eg_util
 import sys
 
+from colorama import Fore
+from colorama import Style
+
 
 if __name__ == '__main__':
 
