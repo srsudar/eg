@@ -1,61 +1,82 @@
 import re
 
+from collections import namedtuple
 from colorama import Fore
 from colorama import Style
 from colorama import init
 
 import pydoc
 
+# Default colors
+DEFAULT_COLOR_HASH = Fore.GREEN
+DEFAULT_COLOR_HEADING = Fore.RED + Style.BRIGHT
+DEFAULT_COLOR_CODE = Fore.RED
+DEFAULT_COLOR_BACKTICK = Fore.RED
 
-init()
-
-COLOR_HASH = Fore.GREEN
-COLOR_HEADING = Fore.RED + Style.BRIGHT
-COLOR_CODE = Fore.RED
-COLOR_BACKTICK = Fore.RED
-
-
-def color_heading(text):
-    return color_helper(
-        text,
-        '(^#)(.*)$',
-        COLOR_HASH + r'\1' + COLOR_HEADING + r'\2'
-    )
-
-
-def color_block_indent(text):
-    return color_helper(
-        text,
-        '^    (.*)$',
-        COLOR_CODE + r'\1'
-    )
+# A struct with color values
+ColorConfig = namedtuple(
+    'ColorConfig',
+    [
+        'pound',
+        'heading',
+        'code',
+        'backtick',
+        'prompt'
+    ]
+)
 
 
-def color_backticks(text):
-    """untested"""
-    return color_helper(
-        text,
-        '[^`]+',
-        COLOR_BACKTICK + r'\1'
-    )
+class EgColorizer():
+
+    def __init__(self, color_config):
+        init()
+        self.color_config = color_config
+
+    def colorize_heading(self, text):
+        return self.color_helper(
+            text,
+            '(^#)(.*)$',
+            (
+                self.color_config.pound +
+                r'\1' +
+                Style.RESET_ALL +
+                self.color_config.heading +
+                r'\2' +
+                Style.RESET_ALL
+            )
+        )
+
+    def colorize_block_indent(self, text):
+        return self.color_helper(
+            text,
+            '^    (.*)$',
+            self.color_config.code + r'\1'
+        )
+
+    def colorize_backticks(self, text):
+        """untested"""
+        return self.color_helper(
+            text,
+            '[^`]+',
+            self.color_config.backtick + r'\1'
+        )
+
+    def color_helper(self, text, pattern, repl):
+        return re.sub(
+            pattern,
+            repl,
+            text,
+            flags=re.MULTILINE
+        )
 
 
-def color_helper(text, pattern, repl):
-    return re.sub(
-        pattern,
-        repl + Style.RESET_ALL,
-        text,
-        flags=re.MULTILINE
-    )
+#test = Fore.RED + 'this is a test' + Style.RESET_ALL
 
-
-test = Fore.RED + 'this is a test' + Style.RESET_ALL
-
-title = """this is nothing
+#title = """this is nothing
 # find
 
-next level"""
+#next level"""
 
-title = color_heading(title)
+#title = color_heading(title)
 
-pydoc.pager(title)
+#pydoc.pager(title)
