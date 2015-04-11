@@ -136,3 +136,67 @@ def test_colorize_heading():
     actual = colorizer.colorize_heading(clean)
 
     assert_equal(actual, target)
+
+
+def test_colorize_block_indents():
+    """Makes sure we colorize block indents correctly."""
+    color_config = eg_colorizer.ColorConfig(
+        Fore.BLACK,
+        Fore.MAGENTA,
+        'C',
+        Fore.YELLOW,
+        'P',
+        '',
+        '',
+        'res',
+        '',
+        'res'
+    )
+
+    clean = get_clean_find_file()
+
+    raw_file = get_raw_find_test_file()
+    target = get_data_with_subs(
+        raw_file,
+        code=color_config.code,
+        code_reset=color_config.code_reset,
+        prompt=color_config.prompt,
+        prompt_reset=color_config.prompt_reset
+    )
+
+    colorizer = eg_colorizer.EgColorizer(color_config)
+
+    actual = colorizer.colorize_block_indent(clean)
+
+    assert_equal(actual, target)
+
+
+def test_colorize_backticks():
+    """Makes sure we colorize backticks correctly."""
+    color_config = eg_colorizer.ColorConfig(
+        Fore.BLACK,
+        Fore.MAGENTA,
+        Fore.YELLOW,
+        'B',
+        Fore.GREEN,
+        '',
+        '',
+        '',
+        'res',
+        ''
+    )
+
+    clean = get_clean_find_file()
+
+    raw_file = get_raw_find_test_file()
+    target = get_data_with_subs(
+        raw_file,
+        backticks=color_config.backticks,
+        backticks_reset=color_config.backticks_reset,
+    )
+
+    colorizer = eg_colorizer.EgColorizer(color_config)
+
+    actual = colorizer.colorize_backticks(clean)
+
+    assert_equal(actual, target)

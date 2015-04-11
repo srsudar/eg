@@ -2,7 +2,7 @@
 
 this is a test
 
-    {CODE}and some block indented code{CODE_RESET}
+    {PROMPT}{PROMPT_RESET}{CODE}and some block indented code{CODE_RESET}
 
 
 {POUND}#{POUND_RESET}{HEADING} another section{HEADING_RESET}
@@ -15,7 +15,7 @@ some text with `{BACKTICKS}backticks{BACKTICKS_RESET}` and `{BACKTICKS}number tw
 this is more `{BACKTICKS}backtick{BACKTICKS_RESET}`
 and more text
 
-    {PROMPT}${PROMPT_RESET} {CODE}ls dirs "quotes"{CODE_RESET}
-    {CODE}output{CODE_RESET}
+    {PROMPT}${PROMPT_RESET}{CODE} ls dirs "quotes"{CODE_RESET}
+    {PROMPT}{PROMPT_RESET}{CODE}output{CODE_RESET}
 
 

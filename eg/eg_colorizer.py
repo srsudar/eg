@@ -54,19 +54,29 @@ class EgColorizer():
     def colorize_block_indent(self, text):
         return self.color_helper(
             text,
-            '^    (.*)$',
-            self.color_config.code + r'\1' + self.color_config.reset_code
+            '^    (\$?)(.*)$',
+            (
+                '    ' +
+                self.color_config.prompt +
+                r'\1' +
+                self.color_config.prompt_reset +
+                self.color_config.code +
+                r'\2' +
+                self.color_config.code_reset
+            )
         )
 
     def colorize_backticks(self, text):
         """untested"""
         return self.color_helper(
             text,
-            '[^`]+',
+            '`([^`]+)`',
             (
+                '`' +
                 self.color_config.backticks +
                 r'\1' +
-                self.color_config.reset_backticks
+                self.color_config.backticks_reset +
+                '`'
             )
         )
 
