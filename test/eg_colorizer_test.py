@@ -108,11 +108,16 @@ def get_data_with_subs(
 def test_colorize_heading():
     """Makes sure we colorize things like '# find' correctly"""
     color_config = eg_colorizer.ColorConfig(
-        Fore.CYAN,
-        Fore.WHITE,
+        'P',
+        'H',
         Fore.YELLOW,
         Fore.MAGENTA,
-        Fore.BLACK
+        Fore.BLACK,
+        'RES',
+        'RES',
+        '',
+        '',
+        ''
     )
 
     clean = get_clean_find_file()
@@ -121,9 +126,9 @@ def test_colorize_heading():
     target = get_data_with_subs(
         raw_file,
         pound=color_config.pound,
-        pound_reset=Style.RESET_ALL,
+        pound_reset=color_config.pound_reset,
         heading=color_config.heading,
-        heading_reset=Style.RESET_ALL
+        heading_reset=color_config.heading_reset
     )
 
     colorizer = eg_colorizer.EgColorizer(color_config)

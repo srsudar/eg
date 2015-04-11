@@ -20,8 +20,13 @@ ColorConfig = namedtuple(
         'pound',
         'heading',
         'code',
-        'backtick',
-        'prompt'
+        'backticks',
+        'prompt',
+        'pound_reset',
+        'heading_reset',
+        'code_reset',
+        'backticks_reset',
+        'prompt_reset'
     ]
 )
 
@@ -35,14 +40,14 @@ class EgColorizer():
     def colorize_heading(self, text):
         return self.color_helper(
             text,
-            '(^#)(.*)$',
+            '(^#+)(.*)$',
             (
                 self.color_config.pound +
                 r'\1' +
-                Style.RESET_ALL +
+                self.color_config.pound_reset +
                 self.color_config.heading +
                 r'\2' +
-                Style.RESET_ALL
+                self.color_config.heading_reset
             )
         )
 
@@ -50,7 +55,7 @@ class EgColorizer():
         return self.color_helper(
             text,
             '^    (.*)$',
-            self.color_config.code + r'\1'
+            self.color_config.code + r'\1' + self.color_config.reset_code
         )
 
     def colorize_backticks(self, text):
@@ -58,7 +63,11 @@ class EgColorizer():
         return self.color_helper(
             text,
             '[^`]+',
-            self.color_config.backtick + r'\1'
+            (
+                self.color_config.backticks +
+                r'\1' +
+                self.color_config.reset_backticks
+            )
         )
 
     def color_helper(self, text, pattern, repl):

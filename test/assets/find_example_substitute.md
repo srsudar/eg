@@ -1,16 +1,16 @@
-{POUND}#{POUND_RESET} {HEADING}find{HEADING_RESET}
+{POUND}#{POUND_RESET}{HEADING} find{HEADING_RESET}
 
 this is a test
 
     {CODE}and some block indented code{CODE_RESET}
 
 
-{POUND}#{POUND_RESET} {HEADING}another section{HEADING_RESET}
+{POUND}#{POUND_RESET}{HEADING} another section{HEADING_RESET}
 
 some text with `{BACKTICKS}backticks{BACKTICKS_RESET}` and `{BACKTICKS}number two{BACKTICKS_RESET}`
 
 
-{POUND}##{POUND_RESET} {HEADING}a subsection{HEADING_RESET}
+{POUND}##{POUND_RESET}{HEADING} a subsection{HEADING_RESET}
 
 this is more `{BACKTICKS}backtick{BACKTICKS_RESET}`
 and more text
