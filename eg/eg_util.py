@@ -1,160 +1,21 @@
-import ConfigParser
 import os
 import subprocess
-
-from collections import namedtuple
 
 
 # Name of the environment variable where we look for the default pager
 PAGER_ENV = 'PAGER'
 DEFAULT_PAGER = 'less'
 
-# The directory containing example files, relative to the eg executable. The
-# directory structure is assumed to be:
-# eg.py*
-# eg_util.py
-# examples/
-#    |- cp.md, etc
-
-DEFAULT_EXAMPLES_DIR = os.path.join(os.path.dirname(__file__), 'examples')
-DEFAULT_EGRC_PATH = os.path.join('~', '.egrc')
 
 # The file name suffix expected for example files.
 EXAMPLE_FILE_SUFFIX = '.md'
 
 # Version of eg, revved with each update.
-VERSION = '0.0.0'
-
-# We need this just because the ConfigParser library requires it.
-DEFAULT_SECTION = 'eg-config'
-
-# Properties in the rc file.
-EG_EXAMPLES_DIR = 'examples-dir'
-CUSTOM_EXAMPLES_DIR = 'custom-dir'
+VERSION = '0.0.1'
 
 # Flags for showing where the examples for commands are coming from.
 FLAG_ONLY_CUSTOM = '+'
 FLAG_CUSTOM_AND_DEFAULT = '*'
-
-# A basic struct containing configuration values.
-#    examples_dir: path to the directory of examples that ship with eg
-#    custom_dir: path to the directory where custom examples are found
-Config = namedtuple('Config', ['examples_dir', 'custom_dir'])
-
-
-def get_expanded_path(path):
-    """Expand ~ and variables in a path. If path is not truthy, return None."""
-    if path:
-        result = path
-        result = os.path.expanduser(result)
-        result = os.path.expandvars(result)
-        return result
-    else:
-        return None
-
-
-def _get_priority(first, second, third):
-    """
-    Return the items based on priority and their truthiness. If first is
-    present, it will be returned. If only second and third, second will be
-    returned. If all three are absent, will return None.
-    """
-    if first:
-        return first
-    elif second:
-        return second
-    elif third:
-        return third
-    else:
-        return None
-
-
-def _inform_if_path_does_not_exist(path):
-    """
-    If the path does not exist, print a message saying so. This is intended to
-    be helpful to users if they specify a custom path that eg cannot find.
-    """
-    expanded_path = get_expanded_path(path)
-    if not os.path.exists(expanded_path):
-        print 'Could not find custom path at: ' + expanded_path
-
-
-def get_resolved_config_items(
-    egrc_path,
-    examples_dir,
-    custom_dir
-):
-    """
-    Create a Config namedtuple. Passed in values will override defaults.
-    """
-    # Expand the paths so we can use them with impunity later.
-    egrc_path = get_expanded_path(egrc_path)
-    examples_dir = get_expanded_path(examples_dir)
-    custom_dir = get_expanded_path(custom_dir)
-
-    # Print helpful failures.
-    if egrc_path:
-        _inform_if_path_does_not_exist(egrc_path)
-    if examples_dir:
-        _inform_if_path_does_not_exist(examples_dir)
-    if custom_dir:
-        _inform_if_path_does_not_exist(custom_dir)
-
-    # The general rule is: caller-defined, egrc-defined, defaults. We'll try and
-    # get all three then use _get_priority to choose the right one.
-
-    resolved_egrc_path = _get_priority(egrc_path, DEFAULT_EGRC_PATH, None)
-    resolved_egrc_path = get_expanded_path(resolved_egrc_path)
-
-    egrc_config = Config(examples_dir=None, custom_dir=None)
-    if os.path.isfile(resolved_egrc_path):
-        egrc_config = get_config_tuple_from_egrc(resolved_egrc_path)
-
-    resolved_examples_dir = _get_priority(
-        examples_dir,
-        egrc_config.examples_dir,
-        DEFAULT_EXAMPLES_DIR
-    )
-    resolved_custom_dir = _get_priority(
-        custom_dir,
-        egrc_config.custom_dir,
-        None
-    )
-
-    result = Config(
-        examples_dir=resolved_examples_dir,
-        custom_dir=resolved_custom_dir
-    )
-
-    return result
-
-
-def get_config_tuple_from_egrc(egrc_path):
-    """
-    Create a Config named tuple from the values specified in the .egrc. Expands
-    any paths as necessary.
-
-    egrc_path must exist and point a file.
-
-    If not present in the .egrc, properties of the Config are returned as None.
-    """
-    with open(egrc_path, 'r') as egrc:
-        config = ConfigParser.RawConfigParser()
-        config.readfp(egrc)
-
-        # default to None
-        examples_dir = None
-        custom_dir = None
-
-        if config.has_option(DEFAULT_SECTION, EG_EXAMPLES_DIR):
-            examples_dir = config.get(DEFAULT_SECTION, EG_EXAMPLES_DIR)
-            examples_dir = get_expanded_path(examples_dir)
-
-        if config.has_option(DEFAULT_SECTION, CUSTOM_EXAMPLES_DIR):
-            custom_dir = config.get(DEFAULT_SECTION, CUSTOM_EXAMPLES_DIR)
-            custom_dir = get_expanded_path(custom_dir)
-
-        return Config(examples_dir=examples_dir, custom_dir=custom_dir)
 
 
 def pager_env_is_set():
@@ -212,13 +73,13 @@ def get_file_path_for_program(program, dir_to_search):
     examples_dir cannot be None
 
     Path is not guaranteed to exist. Just says where it should be if it
-    existed. Returned paths are absolute.
+    existed. Paths must be fully expanded before being passed in (i.e. no ~ or
+    variables).
     """
     if dir_to_search is None:
         raise TypeError('examples_dir cannot be None')
     else:
         result = os.path.join(dir_to_search, program + EXAMPLE_FILE_SUFFIX)
-        result = get_expanded_path(result)
         return result
 
 
@@ -227,7 +88,8 @@ def has_default_entry_for_program(program, config):
     if config.examples_dir:
         file_path = get_file_path_for_program(
             program,
-            config.examples_dir)
+            config.examples_dir
+        )
         return os.path.isfile(file_path)
     else:
         return False

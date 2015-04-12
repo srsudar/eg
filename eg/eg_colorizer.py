@@ -1,34 +1,6 @@
 import re
 
-from collections import namedtuple
-from colorama import Fore
-from colorama import Style
 from colorama import init
-
-import pydoc
-
-# Default colors
-DEFAULT_COLOR_HASH = Fore.GREEN
-DEFAULT_COLOR_HEADING = Fore.RED + Style.BRIGHT
-DEFAULT_COLOR_CODE = Fore.RED
-DEFAULT_COLOR_BACKTICK = Fore.RED
-
-# A struct with color values
-ColorConfig = namedtuple(
-    'ColorConfig',
-    [
-        'pound',
-        'heading',
-        'code',
-        'backticks',
-        'prompt',
-        'pound_reset',
-        'heading_reset',
-        'code_reset',
-        'backticks_reset',
-        'prompt_reset'
-    ]
-)
 
 
 class EgColorizer():
@@ -87,15 +59,3 @@ class EgColorizer():
             text,
             flags=re.MULTILINE
         )
-
-
-#test = Fore.RED + 'this is a test' + Style.RESET_ALL
-
-#title = """this is nothing
-# find
-
-#next level"""
-
-#title = color_heading(title)
-
-#pydoc.pager(title)

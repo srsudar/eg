@@ -1,6 +1,7 @@
 import os
 import subprocess
 
+from eg import eg_config
 from eg import eg_util
 from mock import Mock
 from mock import patch
@@ -18,111 +19,6 @@ def test_pager_not_set_returns_false():
     with patch('os.getenv', return_value=None):
         actual = eg_util.pager_env_is_set()
         assert actual is False
-
-
-def test_config_returns_defaults_if_all_none_and_no_egrc():
-    with patch('os.path.isfile', return_value=False):
-        config = eg_util.get_resolved_config_items(None, None, None)
-        assert config.examples_dir == eg_util.DEFAULT_EXAMPLES_DIR
-        assert config.custom_dir is None
-
-
-def test_config_returns_egrc_values_if_present():
-    with patch('os.path.isfile', return_value=True):
-        examples_dir = 'test_eg_dir_from_egrc'
-        custom_dir = 'test_custom_dir_from_egrc'
-        def_config = eg_util.Config(
-            examples_dir=examples_dir,
-            custom_dir=custom_dir
-        )
-        with patch(
-            'eg.eg_util.get_config_tuple_from_egrc',
-            return_value=def_config
-        ):
-            config = eg_util.get_resolved_config_items(None, None, None)
-            assert_equal(config.examples_dir, examples_dir)
-            assert_equal(config.custom_dir, custom_dir)
-
-
-def test_config_uses_custom_egrc_path():
-    """Make sure we use the passed in egrc path rather than the default."""
-    with patch('os.path.isfile', return_value=True):
-        def_config = eg_util.Config(
-            examples_dir='eg_dir',
-            custom_dir='custom_dir'
-        )
-        egrc_path = 'test/path/to/egrc'
-        with patch(
-            'eg.eg_util.get_config_tuple_from_egrc',
-            return_value=def_config
-        ) as mocked_method:
-            eg_util.get_resolved_config_items(egrc_path, None, None)
-            mocked_method.assert_called_once_with(egrc_path)
-
-
-def test_config_returns_passed_in_values_for_dirs():
-    with patch('os.path.isfile', return_value=True):
-        examples_dir = 'test_eg_dir_user_defined'
-        custom_dir = 'test_custom_dir_user_defined'
-        egrc_examples_dir = 'egrc_examples_dir'
-        egrc_custom_dir = 'egrc_custom_dir'
-        egrc_config = eg_util.Config(
-            examples_dir=egrc_examples_dir,
-            custom_dir=egrc_custom_dir
-        )
-        with patch(
-            'eg.eg_util.get_config_tuple_from_egrc',
-            return_value=egrc_config
-        ):
-            actual = eg_util.get_resolved_config_items(
-                None,
-                examples_dir,
-                custom_dir
-            )
-            assert_equal(actual.examples_dir, examples_dir)
-            assert_equal(actual.custom_dir, custom_dir)
-
-
-def test_get_config_tuple_from_egrc_all_none_when_not_present():
-    actual = eg_util.get_config_tuple_from_egrc('test/assets/egrc_nodata')
-    target = eg_util.Config(examples_dir=None, custom_dir=None)
-    assert_equal(actual, target)
-
-
-def test_get_config_tuple_from_egrc_when_present():
-    # These are the values hardcoded into the files.
-    examples_dir = 'test/example/dir/in/egrc_withdata'
-    custom_dir = 'test/custom/dir/in/egrc_withdata'
-
-    def return_expanded_path(*args, **kwargs):
-        if args[0] == examples_dir:
-            return examples_dir
-        elif args[0] == custom_dir:
-            return custom_dir
-        else:
-            raise TypeError(
-                args[0] +
-                ' was an unexpected path--should be ' +
-                examples_dir +
-                ' or ' +
-                custom_dir
-            )
-
-    with patch(
-        'eg.eg_util.get_expanded_path',
-        side_effect=return_expanded_path
-    ) as mock_expand:
-
-        actual = eg_util.get_config_tuple_from_egrc('test/assets/egrc_withdata')
-
-        target = eg_util.Config(
-            examples_dir=examples_dir,
-            custom_dir=custom_dir
-        )
-        assert_equal(actual, target)
-
-        mock_expand.assert_any_call(examples_dir)
-        mock_expand.assert_any_call(custom_dir)
 
 
 def test_open_pager_to_line_number_invokes_correctly_for_less():
@@ -157,7 +53,12 @@ def test_get_file_path_for_program_correct():
 
 
 def test_has_default_entry_for_program_no_examples_dir():
-    config = eg_util.Config(examples_dir=None, custom_dir='customdir')
+    config = eg_config.Config(
+        examples_dir=None,
+        custom_dir='customdir',
+        color_config=None
+    )
+
     program = 'cp'
 
     has_entry = eg_util.has_default_entry_for_program(program, config)
@@ -166,7 +67,12 @@ def test_has_default_entry_for_program_no_examples_dir():
 
 
 def test_has_custom_entry_for_program_no_custom_dir():
-    config = eg_util.Config(examples_dir='examplesdir', custom_dir=None)
+    config = eg_config.Config(
+        examples_dir='examplesdir',
+        custom_dir=None,
+        color_config=None
+    )
+
     program = 'find'
 
     has_entry = eg_util.has_custom_entry_for_program(program, config)
@@ -175,7 +81,11 @@ def test_has_custom_entry_for_program_no_custom_dir():
 
 
 def test_has_default_entry_when_present():
-    config = eg_util.Config(examples_dir='examplesdir', custom_dir=None)
+    config = eg_config.Config(
+        examples_dir='examplesdir',
+        custom_dir=None,
+        color_config=None
+    )
     program = 'mv'
 
     path = '/Users/tyrion/examplesdir/mv.md'
@@ -191,7 +101,11 @@ def test_has_default_entry_when_present():
 
 
 def test_has_default_entry_when_not_present():
-    config = eg_util.Config(examples_dir='examplesdir', custom_dir=None)
+    config = eg_config.Config(
+        examples_dir='examplesdir',
+        custom_dir=None,
+        color_config=None
+    )
     program = 'cp'
 
     path = '/Users/tyrion/examplesdir/cp.md'
@@ -207,7 +121,11 @@ def test_has_default_entry_when_not_present():
 
 
 def test_has_custom_entry_when_present():
-    config = eg_util.Config(examples_dir=None, custom_dir='customdir')
+    config = eg_config.Config(
+        examples_dir=None,
+        custom_dir='customdir',
+        color_config=None
+    )
     program = 'find'
 
     path = '/Users/tyrion/customdir/find.md'
@@ -223,7 +141,12 @@ def test_has_custom_entry_when_present():
 
 
 def test_has_custom_entry_when_not_present():
-    config = eg_util.Config(examples_dir=None, custom_dir='customdir')
+    config = eg_config.Config(
+        examples_dir=None,
+        custom_dir='customdir',
+        color_config=None
+    )
+
     program = 'locate'
 
     path = '/Users/tyrion/customdir/locate.md'
@@ -278,7 +201,11 @@ def _helper_assert_path_isfile_not_present(
 
 def test_handle_program_no_entries():
     program = 'cp'
-    config = eg_util.Config(examples_dir=None, custom_dir=None)
+    config = eg_config.Config(
+        examples_dir=None,
+        custom_dir=None,
+        color_config=None
+    )
 
     with patch(
         'eg.eg_util.has_default_entry_for_program',
@@ -306,9 +233,10 @@ def test_handle_program_finds_paths_and_calls_open_pager():
     examples_dir = 'test-eg-dir'
     custom_dir = 'test-custom-dir'
 
-    config = eg_util.Config(
+    config = eg_config.Config(
         examples_dir=examples_dir,
-        custom_dir=custom_dir
+        custom_dir=custom_dir,
+        color_config=None
     )
 
     default_path = 'test-eg-dir/mv.md'
@@ -417,7 +345,11 @@ def test_list_supported_programs_only_default():
     example_dir = 'example/dir'
     custom_dir = 'custom/dir'
 
-    config = eg_util.Config(examples_dir=example_dir, custom_dir=custom_dir)
+    config = eg_config.Config(
+        examples_dir=example_dir,
+        custom_dir=custom_dir,
+        color_config=None
+    )
 
     def give_list(*args, **kwargs):
         if args[0] == example_dir:
@@ -437,7 +369,11 @@ def test_list_supported_programs_only_custom():
     example_dir = 'example/dir'
     custom_dir = 'custom/dir'
 
-    config = eg_util.Config(examples_dir=example_dir, custom_dir=custom_dir)
+    config = eg_config.Config(
+        examples_dir=example_dir,
+        custom_dir=custom_dir,
+        color_config=None
+    )
 
     def give_list(*args, **kwargs):
         if args[0] == custom_dir:
@@ -457,7 +393,11 @@ def test_list_supported_programs_both():
     examples_dir = 'example/dir'
     custom_dir = 'custom/dir'
 
-    config = eg_util.Config(examples_dir=examples_dir, custom_dir=custom_dir)
+    config = eg_config.Config(
+        examples_dir=examples_dir,
+        custom_dir=custom_dir,
+        color_config=None
+    )
 
     def give_list(*args, **kwargs):
         if args[0] == examples_dir:
@@ -483,7 +423,7 @@ def test_list_supported_programs_both():
 
 
 def test_list_supported_programs_fails_gracefully_if_no_dirs():
-    config = eg_util.Config(None, None)
+    config = eg_config.Config(None, None, None)
 
     actual = eg_util.get_list_of_all_supported_commands(config)
     target = []

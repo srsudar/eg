@@ -1,10 +1,8 @@
 #!/usr/bin/python
 import argparse
+import eg_config
 import eg_util
 import sys
-
-from colorama import Fore
-from colorama import Style
 
 
 if __name__ == '__main__':
@@ -54,7 +52,7 @@ if __name__ == '__main__':
     elif not args.version and not args.list and not args.program:
         print 'you must specify a program or pass the --list or --version flags'
     else:
-        config = eg_util.get_resolved_config_items(
+        config = eg_config.get_resolved_config_items(
             egrc_path=args.config_file,
             examples_dir=args.examples_dir,
             custom_dir=args.custom_dir

@@ -2,10 +2,8 @@ import os
 
 from collections import namedtuple
 from colorama import Fore
-from colorama import Style
 from eg import eg_colorizer
-from mock import Mock
-from mock import patch
+from eg import eg_config
 from nose.tools import assert_equal
 
 
@@ -107,7 +105,7 @@ def get_data_with_subs(
 
 def test_colorize_heading():
     """Makes sure we colorize things like '# find' correctly"""
-    color_config = eg_colorizer.ColorConfig(
+    color_config = eg_config.ColorConfig(
         'P',
         'H',
         Fore.YELLOW,
@@ -140,7 +138,7 @@ def test_colorize_heading():
 
 def test_colorize_block_indents():
     """Makes sure we colorize block indents correctly."""
-    color_config = eg_colorizer.ColorConfig(
+    color_config = eg_config.ColorConfig(
         Fore.BLACK,
         Fore.MAGENTA,
         'C',
@@ -173,7 +171,7 @@ def test_colorize_block_indents():
 
 def test_colorize_backticks():
     """Makes sure we colorize backticks correctly."""
-    color_config = eg_colorizer.ColorConfig(
+    color_config = eg_config.ColorConfig(
         Fore.BLACK,
         Fore.MAGENTA,
         Fore.YELLOW,

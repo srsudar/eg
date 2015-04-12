@@ -1,3 +1,15 @@
 [eg-config]
 examples-dir = test/example/dir/in/egrc_withdata
 custom-dir = test/custom/dir/in/egrc_withdata
+
+[color]
+pound = \x1b[32m
+heading = heading_val
+code = code_val
+backticks = backticks_val
+prompt = prompt_val
+pound_reset = pound_reset_val
+heading_reset = heading_reset_val
+code_reset = code_reset_val
+backticks_reset = backticks_reset_val
+prompt_reset = prompt_reset_val
