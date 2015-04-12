@@ -1,11 +1,14 @@
 from eg import eg_config
 from mock import patch
 from nose.tools import assert_equal
+from nose.tools import assert_false
+from nose.tools import assert_true
 
 
 def test_config_returns_defaults_if_all_none_and_no_egrc():
     with patch('os.path.isfile', return_value=False):
         config = eg_config.get_resolved_config_items(
+            None,
             None,
             None,
             None,
@@ -17,31 +20,36 @@ def test_config_returns_defaults_if_all_none_and_no_egrc():
         assert_equal(config.examples_dir, eg_config.DEFAULT_EXAMPLES_DIR)
         assert_equal(config.custom_dir, None)
         assert_equal(config.color_config, default_color_config)
+        assert_equal(config.use_color, eg_config.DEFAULT_USE_COLOR)
 
 
 def test_config_returns_egrc_values_if_present():
     """
-    If values are present, make sure we take them. Doesn't make sure they are
-    extracted correctly.
+    If values are present from an egrc, make sure we take them.
+
+    Doesn't make sure they are extracted correctly from an egrc file.
     """
     with patch('os.path.isfile', return_value=True):
         examples_dir = 'test_eg_dir_from_egrc'
         custom_dir = 'test_custom_dir_from_egrc'
         test_color_config = _get_color_config_from_egrc_withdata()
+        test_use_color = True
 
         def_config = eg_config.Config(
             examples_dir=examples_dir,
             custom_dir=custom_dir,
-            color_config=test_color_config
+            color_config=test_color_config,
+            use_color=test_use_color
         )
         with patch(
             'eg.eg_config.get_config_tuple_from_egrc',
             return_value=def_config
         ):
-            config = eg_config.get_resolved_config_items(None, None, None)
+            config = eg_config.get_resolved_config_items(None, None, None, None)
             assert_equal(config.examples_dir, examples_dir)
             assert_equal(config.custom_dir, custom_dir)
             assert_equal(config.color_config, test_color_config)
+            assert_equal(config.use_color, test_use_color)
 
 
 def test_config_uses_custom_egrc_path():
@@ -50,7 +58,8 @@ def test_config_uses_custom_egrc_path():
         def_config = eg_config.Config(
             examples_dir='eg_dir',
             custom_dir='custom_dir',
-            color_config=eg_config.get_empty_color_config()
+            color_config=eg_config.get_empty_color_config(),
+            use_color=False
         )
         egrc_path = 'test/path/to/egrc'
         with patch(
@@ -61,25 +70,28 @@ def test_config_uses_custom_egrc_path():
                 egrc_path,
                 None,
                 None,
+                None,
                 debug=False
             )
             mocked_method.assert_called_once_with(egrc_path)
 
 
-def test_config_returns_passed_in_values_for_dirs():
+def test_config_returns_values_passed_at_command_line():
     """
-    Directories passed in at the command line should override those in the
-    egrc.
+    Options passed in at the command line should override those in the egrc.
     """
     with patch('os.path.isfile', return_value=True):
         command_line_examples_dir = 'test_eg_dir_user_defined'
         command_line_custom_dir = 'test_custom_dir_user_defined'
+        command_line_use_color = 'we_should_use_color'
         egrc_examples_dir = 'egrc_examples_dir'
         egrc_custom_dir = 'egrc_custom_dir'
+        egrc_use_color = 'the_egrc_says_yes_color'
         egrc_config = eg_config.Config(
             examples_dir=egrc_examples_dir,
             custom_dir=egrc_custom_dir,
-            color_config=None
+            color_config=eg_config.get_default_color_config(),
+            use_color=egrc_use_color
         )
         with patch(
             'eg.eg_config.get_config_tuple_from_egrc',
@@ -89,11 +101,12 @@ def test_config_returns_passed_in_values_for_dirs():
                 None,
                 command_line_examples_dir,
                 command_line_custom_dir,
-                None,
+                command_line_use_color,
                 debug=False
             )
             assert_equal(actual.examples_dir, command_line_examples_dir)
             assert_equal(actual.custom_dir, command_line_custom_dir)
+            assert_equal(actual.use_color, command_line_use_color)
 
 
 def test_get_config_tuple_from_egrc_all_none_when_not_present():
@@ -108,7 +121,8 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
     target = eg_config.Config(
         examples_dir=None,
         custom_dir=None,
-        color_config=empty_color_config
+        color_config=empty_color_config,
+        use_color=None
     )
     assert_equal(actual, target)
 
@@ -116,22 +130,23 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
 def test_get_config_tuple_from_egrc_when_present():
     """Make sure we extract values correctly from the egrc."""
     # These are the values hardcoded into the files.
-    examples_dir = 'test/example/dir/in/egrc_withdata'
-    custom_dir = 'test/custom/dir/in/egrc_withdata'
+    egrc_examples_dir = 'test/example/dir/in/egrc_withdata'
+    egrc_custom_dir = 'test/custom/dir/in/egrc_withdata'
+    egrc_use_color = True
     color_config_from_file = _get_color_config_from_egrc_withdata()
 
     def return_expanded_path(*args, **kwargs):
-        if args[0] == examples_dir:
-            return examples_dir
-        elif args[0] == custom_dir:
-            return custom_dir
+        if args[0] == egrc_examples_dir:
+            return egrc_examples_dir
+        elif args[0] == egrc_custom_dir:
+            return egrc_custom_dir
         else:
             raise TypeError(
                 args[0] +
                 ' was an unexpected path--should be ' +
-                examples_dir +
+                egrc_examples_dir +
                 ' or ' +
-                custom_dir
+                egrc_custom_dir
             )
 
     with patch(
@@ -144,14 +159,15 @@ def test_get_config_tuple_from_egrc_when_present():
         )
 
         target = eg_config.Config(
-            examples_dir=examples_dir,
-            custom_dir=custom_dir,
-            color_config=color_config_from_file
+            examples_dir=egrc_examples_dir,
+            custom_dir=egrc_custom_dir,
+            color_config=color_config_from_file,
+            use_color=egrc_use_color
         )
         assert_equal(actual, target)
 
-        mock_expand.assert_any_call(examples_dir)
-        mock_expand.assert_any_call(custom_dir)
+        mock_expand.assert_any_call(egrc_examples_dir)
+        mock_expand.assert_any_call(egrc_custom_dir)
 
 
 def _get_color_config_from_egrc_withdata():
@@ -265,3 +281,17 @@ def test_default_color_config():
         eg_config.DEFAULT_COLOR_BACKTICKS_RESET
     )
     assert_equal(actual.prompt_reset, eg_config.DEFAULT_COLOR_PROMPT_RESET)
+
+
+def test_parse_bool_true_for_truthy_values():
+    """We should parse both 'True' and 'true' to True."""
+    assert_true(eg_config._parse_bool_from_raw_egrc_value('True'))
+    assert_true(eg_config._parse_bool_from_raw_egrc_value('true'))
+
+
+def test_parse_bool_false_for_non_truthy_values():
+    """Make sure we parse the likely non-truthy things as false."""
+    assert_false(eg_config._parse_bool_from_raw_egrc_value(''))
+    assert_false(eg_config._parse_bool_from_raw_egrc_value(None))
+    assert_false(eg_config._parse_bool_from_raw_egrc_value('false'))
+    assert_false(eg_config._parse_bool_from_raw_egrc_value('False'))

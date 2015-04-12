@@ -14,6 +14,7 @@ from colorama import Style
 #    |- cp.md, etc
 DEFAULT_EXAMPLES_DIR = os.path.join(os.path.dirname(__file__), 'examples')
 DEFAULT_EGRC_PATH = os.path.join('~', '.egrc')
+DEFAULT_USE_COLOR = True
 
 # We need this just because the ConfigParser library requires it.
 DEFAULT_SECTION = 'eg-config'
@@ -21,11 +22,20 @@ DEFAULT_SECTION = 'eg-config'
 # Properties in the rc file.
 EG_EXAMPLES_DIR = 'examples-dir'
 CUSTOM_EXAMPLES_DIR = 'custom-dir'
+USE_COLOR = 'color'
 
 # A basic struct containing configuration values.
 #    examples_dir: path to the directory of examples that ship with eg
 #    custom_dir: path to the directory where custom examples are found
-Config = namedtuple('Config', ['examples_dir', 'custom_dir', 'color_config'])
+Config = namedtuple(
+    'Config',
+    [
+        'examples_dir',
+        'custom_dir',
+        'use_color',
+        'color_config'
+    ]
+)
 
 # A struct with color values
 ColorConfig = namedtuple(
@@ -77,7 +87,7 @@ def get_resolved_config_items(
     egrc_path,
     examples_dir,
     custom_dir,
-    use_color=True,
+    use_color,
     debug=True
 ):
     """
@@ -109,7 +119,8 @@ def get_resolved_config_items(
     egrc_config = Config(
         examples_dir=None,
         custom_dir=None,
-        color_config=empty_color_config
+        color_config=empty_color_config,
+        use_color=None
     )
 
     if os.path.isfile(resolved_egrc_path):
@@ -126,8 +137,14 @@ def get_resolved_config_items(
         None
     )
 
+    resolved_use_color = get_priority(
+        use_color,
+        egrc_config.use_color,
+        DEFAULT_USE_COLOR
+    )
+
     color_config = None
-    if use_color:
+    if resolved_use_color:
         default_color_config = get_default_color_config()
         color_config = merge_color_configs(
             egrc_config.color_config,
@@ -137,7 +154,8 @@ def get_resolved_config_items(
     result = Config(
         examples_dir=resolved_examples_dir,
         custom_dir=resolved_custom_dir,
-        color_config=color_config
+        color_config=color_config,
+        use_color=resolved_use_color
     )
 
     return result
@@ -159,6 +177,7 @@ def get_config_tuple_from_egrc(egrc_path):
         # default to None
         examples_dir = None
         custom_dir = None
+        use_color = None
 
         if config.has_option(DEFAULT_SECTION, EG_EXAMPLES_DIR):
             examples_dir = config.get(DEFAULT_SECTION, EG_EXAMPLES_DIR)
@@ -168,12 +187,17 @@ def get_config_tuple_from_egrc(egrc_path):
             custom_dir = config.get(DEFAULT_SECTION, CUSTOM_EXAMPLES_DIR)
             custom_dir = get_expanded_path(custom_dir)
 
+        if config.has_option(DEFAULT_SECTION, USE_COLOR):
+            use_color_raw = config.get(DEFAULT_SECTION, USE_COLOR)
+            use_color = _parse_bool_from_raw_egrc_value(use_color_raw)
+
         color_config = get_custom_color_config_from_egrc(config)
 
         return Config(
             examples_dir=examples_dir,
             custom_dir=custom_dir,
-            color_config=color_config
+            color_config=color_config,
+            use_color=use_color
         )
 
 
@@ -351,3 +375,11 @@ def merge_color_configs(first, second):
     )
 
     return result
+
+
+def _parse_bool_from_raw_egrc_value(raw_value):
+    """
+    Parse the value from an egrc into a boolean.
+    """
+    truthy_values = ['True', 'true']
+    return raw_value in truthy_values

@@ -56,7 +56,8 @@ def test_has_default_entry_for_program_no_examples_dir():
     config = eg_config.Config(
         examples_dir=None,
         custom_dir='customdir',
-        color_config=None
+        color_config=None,
+        use_color=False
     )
 
     program = 'cp'
@@ -70,7 +71,8 @@ def test_has_custom_entry_for_program_no_custom_dir():
     config = eg_config.Config(
         examples_dir='examplesdir',
         custom_dir=None,
-        color_config=None
+        color_config=None,
+        use_color=False
     )
 
     program = 'find'
@@ -84,7 +86,8 @@ def test_has_default_entry_when_present():
     config = eg_config.Config(
         examples_dir='examplesdir',
         custom_dir=None,
-        color_config=None
+        color_config=None,
+        use_color=False,
     )
     program = 'mv'
 
@@ -104,7 +107,8 @@ def test_has_default_entry_when_not_present():
     config = eg_config.Config(
         examples_dir='examplesdir',
         custom_dir=None,
-        color_config=None
+        color_config=None,
+        use_color=False
     )
     program = 'cp'
 
@@ -124,7 +128,8 @@ def test_has_custom_entry_when_present():
     config = eg_config.Config(
         examples_dir=None,
         custom_dir='customdir',
-        color_config=None
+        color_config=None,
+        use_color=False
     )
     program = 'find'
 
@@ -144,7 +149,8 @@ def test_has_custom_entry_when_not_present():
     config = eg_config.Config(
         examples_dir=None,
         custom_dir='customdir',
-        color_config=None
+        color_config=None,
+        use_color=False
     )
 
     program = 'locate'
@@ -204,7 +210,8 @@ def test_handle_program_no_entries():
     config = eg_config.Config(
         examples_dir=None,
         custom_dir=None,
-        color_config=None
+        color_config=None,
+        use_color=False
     )
 
     with patch(
@@ -236,7 +243,8 @@ def test_handle_program_finds_paths_and_calls_open_pager():
     config = eg_config.Config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
-        color_config=None
+        color_config=None,
+        use_color=False
     )
 
     default_path = 'test-eg-dir/mv.md'
@@ -348,7 +356,8 @@ def test_list_supported_programs_only_default():
     config = eg_config.Config(
         examples_dir=example_dir,
         custom_dir=custom_dir,
-        color_config=None
+        color_config=None,
+        use_color=False
     )
 
     def give_list(*args, **kwargs):
@@ -372,7 +381,8 @@ def test_list_supported_programs_only_custom():
     config = eg_config.Config(
         examples_dir=example_dir,
         custom_dir=custom_dir,
-        color_config=None
+        color_config=None,
+        use_color=False
     )
 
     def give_list(*args, **kwargs):
@@ -396,7 +406,8 @@ def test_list_supported_programs_both():
     config = eg_config.Config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
-        color_config=None
+        color_config=None,
+        use_color=False
     )
 
     def give_list(*args, **kwargs):
@@ -423,9 +434,19 @@ def test_list_supported_programs_both():
 
 
 def test_list_supported_programs_fails_gracefully_if_no_dirs():
-    config = eg_config.Config(None, None, None)
+    config = eg_config.Config(None, None, None, None)
 
     actual = eg_util.get_list_of_all_supported_commands(config)
     target = []
 
     assert_equal(actual, target)
+
+
+def test_calls_colorize_is_use_color_set():
+    """We should call the colorize function if use_color = True."""
+    assert_equal(True, False)
+
+
+def test_does_not_call_colorize_if_use_color_false():
+    """We should not call colorize if use_color = False."""
+    assert_equal(True, False)

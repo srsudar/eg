@@ -36,7 +36,22 @@ if __name__ == '__main__':
     parser.add_argument(
         '--list',
         action='store_true',
-        help='show all the programs with eg entries.'
+        help='Show all the programs with eg entries.'
+    )
+
+    parser.add_argument(
+        '--color',
+        action='store_true',
+        dest='use_color',
+        default=True,
+        help='Colorize output. True by default.'
+    )
+
+    parser.add_argument(
+        '--no-color',
+        action='store_false',
+        dest='use_color',
+        help='Do not colorize output.'
     )
 
     parser.add_argument(
@@ -55,7 +70,8 @@ if __name__ == '__main__':
         config = eg_config.get_resolved_config_items(
             egrc_path=args.config_file,
             examples_dir=args.examples_dir,
-            custom_dir=args.custom_dir
+            custom_dir=args.custom_dir,
+            use_color=args.use_color
         )
 
         if args.list:
@@ -93,5 +109,4 @@ if __name__ == '__main__':
         elif args.version:
             print eg_util.VERSION
         else:
-
             eg_util.handle_program(args.program, config)
