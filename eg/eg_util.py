@@ -1,5 +1,6 @@
+import eg_colorizer
 import os
-import subprocess
+import pydoc
 
 
 # Name of the environment variable where we look for the default pager
@@ -16,23 +17,6 @@ VERSION = '0.0.1'
 # Flags for showing where the examples for commands are coming from.
 FLAG_ONLY_CUSTOM = '+'
 FLAG_CUSTOM_AND_DEFAULT = '*'
-
-
-def pager_env_is_set():
-    """Return True if a pager is specified by the environment variable."""
-    pager = os.getenv(PAGER_ENV)
-    if pager is None:
-        return False
-    else:
-        return True
-
-
-def get_pager():
-    """Return the pager to be used with examples."""
-    pager = DEFAULT_PAGER
-    if pager_env_is_set():
-        pager = os.getenv(PAGER_ENV)
-    return pager
 
 
 def handle_program(program, config):
@@ -53,16 +37,18 @@ def handle_program(program, config):
 
     # Handle the case where we have nothing for them.
     if default_file_path is None and custom_file_path is None:
-        print ('No entry found for ' +
-               program +
-               '. Run `eg --list` to see all available entries.')
+        print (
+            'No entry found for ' +
+            program +
+            '. Run `eg --list` to see all available entries.'
+        )
         return
 
-    pager = get_pager()
     open_pager_for_file(
-        pager,
         default_file_path=default_file_path,
-        custom_file_path=custom_file_path
+        custom_file_path=custom_file_path,
+        use_color=config.use_color,
+        color_config=config.color_config
     )
 
 
@@ -107,27 +93,36 @@ def has_custom_entry_for_program(program, config):
         return False
 
 
-def open_pager_for_file(pager, default_file_path=None, custom_file_path=None):
+def open_pager_for_file(
+    default_file_path=None,
+    custom_file_path=None,
+    use_color=False,
+    color_config=None
+):
     """
     Open pager to file_path. If a custom_file_path is also included, it will be
     shown before file_path in the same pager.
     """
-    if default_file_path and custom_file_path:
-        cat = subprocess.Popen(
-            ('cat', custom_file_path, default_file_path),
-            stdout=subprocess.PIPE
-        )
-        subprocess.call(
-            (pager),
-            stdin=cat.stdout
-        )
-        cat.wait()
-    elif default_file_path:
-        subprocess.call([pager, default_file_path])
-    elif custom_file_path:
-        subprocess.call([pager, custom_file_path])
-    else:
-        print 'At least one file must be defined.'
+    file_data = ''
+
+    if custom_file_path:
+        file_data += _get_contents_of_file(custom_file_path)
+
+    if default_file_path:
+        file_data += _get_contents_of_file(default_file_path)
+
+    if use_color:
+        colorizer = eg_colorizer.EgColorizer(color_config)
+        file_data = colorizer.colorize_text(file_data)
+
+    pydoc.pager(file_data)
+
+
+def _get_contents_of_file(path):
+    """Get the contents of the file at path. The file must exist."""
+    with open(path, 'r') as f:
+        result = f.read()
+        return result
 
 
 def get_list_of_all_supported_commands(config):

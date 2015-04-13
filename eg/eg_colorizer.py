@@ -10,7 +10,7 @@ class EgColorizer():
         self.color_config = color_config
 
     def colorize_heading(self, text):
-        return self.color_helper(
+        return self._color_helper(
             text,
             '(^#+)(.*)$',
             (
@@ -24,7 +24,7 @@ class EgColorizer():
         )
 
     def colorize_block_indent(self, text):
-        return self.color_helper(
+        return self._color_helper(
             text,
             '^    (\$?)(.*)$',
             (
@@ -40,7 +40,7 @@ class EgColorizer():
 
     def colorize_backticks(self, text):
         """untested"""
-        return self.color_helper(
+        return self._color_helper(
             text,
             '`([^`]+)`',
             (
@@ -52,7 +52,15 @@ class EgColorizer():
             )
         )
 
-    def color_helper(self, text, pattern, repl):
+    def colorize_text(self, text):
+        """Colorize the text."""
+        result = text
+        result = self.colorize_heading(result)
+        result = self.colorize_block_indent(result)
+        result = self.colorize_backticks(result)
+        return result
+
+    def _color_helper(self, text, pattern, repl):
         return re.sub(
             pattern,
             repl,
