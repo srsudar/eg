@@ -218,14 +218,12 @@ def get_priority(first, second, third):
     present, it will be returned. If only second and third, second will be
     returned. If all three are absent, will return None.
     """
-    if first:
+    if first is not None:
         return first
-    elif second:
+    elif second is not None:
         return second
-    elif third:
-        return third
     else:
-        return None
+        return third
 
 
 def _inform_if_path_does_not_exist(path):

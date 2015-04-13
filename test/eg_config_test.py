@@ -295,3 +295,35 @@ def test_parse_bool_false_for_non_truthy_values():
     assert_false(eg_config._parse_bool_from_raw_egrc_value(None))
     assert_false(eg_config._parse_bool_from_raw_egrc_value('false'))
     assert_false(eg_config._parse_bool_from_raw_egrc_value('False'))
+
+
+def test_get_priority_first():
+    """The first non-None value should always be returned."""
+    target = 'alpha'
+    actual = eg_config.get_priority(target, 'second', 'third')
+    assert_equal(target, actual)
+
+
+def test_get_priority_second():
+    """The second non-None should be returned if the first is None."""
+    target = 'beta'
+    actual = eg_config.get_priority(None, target, 'third')
+    assert_equal(target, actual)
+
+
+def test_get_priority_third():
+    """The last should be taken if the first two are None."""
+    target = 'gamma'
+    actual = eg_config.get_priority(None, None, target)
+    assert_equal(target, actual)
+
+
+def test_get_priority_respect_false():
+    """
+    We should accept False as a priority-worthy value.
+
+    False should be able to be specified and respected as non-None.
+    """
+    target = False
+    actual = eg_config.get_priority(False, 'second', 'third')
+    assert_equal(target, actual)
