@@ -111,6 +111,8 @@ def test_config_returns_values_passed_at_command_line():
 
 def test_get_config_tuple_from_egrc_all_none_when_not_present():
     """
+    Return correct data if the egrc has no data.
+
     We should return None for all values and an empty color_config if there is
     no data in the egrc.
     """
@@ -173,7 +175,7 @@ def test_get_config_tuple_from_egrc_when_present():
 def _get_color_config_from_egrc_withdata():
     """Get the color_config that is defined in the egrc_withdata test file."""
     test_color_config = eg_config.ColorConfig(
-        pound=r'\x1b[32m',
+        pound='\x1b[32m',
         heading='heading_val',
         code='code_val',
         backticks='backticks_val',

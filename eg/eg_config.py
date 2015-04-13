@@ -1,3 +1,4 @@
+import ast
 import ConfigParser
 import os
 
@@ -278,12 +279,14 @@ def _get_color_from_config(config, option):
     """
     Helper method to uet an option from the COLOR_SECTION of the config.
 
-    Returns None if the value is not present.
+    Returns None if the value is not present. If the value is present, it tries
+    to parse the value as a raw string literal, allowing escape sequences in the
+    egrc.
     """
     if not config.has_option(COLOR_SECTION, option):
         return None
     else:
-        return config.get(COLOR_SECTION, option)
+        return ast.literal_eval(config.get(COLOR_SECTION, option))
 
 
 def get_default_color_config():
