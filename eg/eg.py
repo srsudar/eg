@@ -43,8 +43,8 @@ if __name__ == '__main__':
         '--color',
         action='store_true',
         dest='use_color',
-        default=True,
-        help='Colorize output. True by default.'
+        default=None,
+        help='Colorize output.'
     )
 
     parser.add_argument(
