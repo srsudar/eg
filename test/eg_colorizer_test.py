@@ -4,6 +4,7 @@ from collections import namedtuple
 from colorama import Fore
 from eg import eg_colorizer
 from eg import eg_config
+from mock import patch
 from nose.tools import assert_equal
 
 
@@ -198,3 +199,26 @@ def test_colorize_backticks():
     actual = colorizer.colorize_backticks(clean)
 
     assert_equal(actual, target)
+
+
+def test_colorize_text_calls_all_sub_methods():
+    """colorize_text should call all of the helper colorize methods."""
+    with patch(
+        'eg.eg_colorizer.EgColorizer.colorize_heading',
+        return_value='text-heading'
+    ) as heading:
+        with patch(
+            'eg.eg_colorizer.EgColorizer.colorize_block_indent',
+            return_value='text-heading-indent'
+        ) as indent:
+            with patch(
+                'eg.eg_colorizer.EgColorizer.colorize_backticks',
+                return_value='text-heading-indent-backticks'
+            ) as backticks:
+                colorizer = eg_colorizer.EgColorizer(None)
+                text = 'text'
+                actual = colorizer.colorize_text(text)
+                heading.assert_called_once_with(text)
+                indent.assert_called_once_with('text-heading')
+                backticks.assert_called_once_with('text-heading-indent')
+                assert_equal('text-heading-indent-backticks', actual)
