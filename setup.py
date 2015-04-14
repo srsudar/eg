@@ -18,7 +18,7 @@ config = {
     'install_requires': ['colorama'],
     'test_requires': ['nose', 'mock'],
     'packages': ['eg'],
-    'scripts': ['bin/egg'],
+    'scripts': ['bin/eg'],
     'package_data': {
         'eg': ['examples/*']
     },
