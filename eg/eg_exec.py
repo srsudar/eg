@@ -1,6 +1,7 @@
 import argparse
 import eg_config
 import eg_util
+import pydoc
 import sys
 
 
@@ -100,11 +101,10 @@ def run_eg():
                 msg_line_6
             ]
 
-            for line in preamble:
-                print line
+            complete_message = '\n'.join(preamble)
+            complete_message += '\n' + '\n'.join(supported_programs)
 
-            for program in supported_programs:
-                print program
+            pydoc.pager(complete_message)
         elif args.version:
             print eg_util.VERSION
         else:
