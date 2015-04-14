@@ -18,7 +18,10 @@ config = {
     'install_requires': ['colorama'],
     'packages': ['eg'],
     'scripts': ['eg/eg.py'],
-    'data_files': ['eg/data/*']
+    'package_data': {
+        'eg': ['examples/*']
+    },
+    'zip_safe': False
 }
 
 setup(**config)
