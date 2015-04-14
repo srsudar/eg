@@ -1,4 +1,5 @@
 import re
+import sys
 
 
 class EgColorizer():
@@ -58,9 +59,18 @@ class EgColorizer():
         return result
 
     def _color_helper(self, text, pattern, repl):
-        return re.sub(
-            pattern,
-            repl,
-            text,
-            flags=re.MULTILINE
-        )
+        # < 2.7 didn't have the flags named argument.
+        if sys.version_info[1] < 7:
+            compiled_pattern = re.compile(pattern, re.MULTILINE)
+            return re.sub(
+                compiled_pattern,
+                repl,
+                text
+            )
+        else:
+            return re.sub(
+                pattern,
+                repl,
+                text,
+                flags=re.MULTILINE
+            )
