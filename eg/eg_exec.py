@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import argparse
 import eg_config
 import eg_util
