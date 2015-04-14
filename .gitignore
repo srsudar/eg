@@ -7,3 +7,6 @@ syntax: glob
 # python
 *.pyc
 .ropeproject/**
+*.egg-info
+dist
+build
