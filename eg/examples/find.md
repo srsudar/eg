@@ -119,7 +119,7 @@ Find files and directories only two levels deep (`-depth 2` or `-d 2`):
 
 
 Find only files (`-type f`) >= two levels (`-mindepth 2`) and <= three levels
-(`-maxdepth 3) deep.
+(`-maxdepth 3`) deep.
 
     $ find ./one -type f -mindepth 2 -maxdepth 3
     ./one/twoLevels.txt
@@ -144,8 +144,8 @@ List files greater bigger than 500k (`+500k`) and named `bigFile.txt`
 
 ## OR
 
-List files bigger than 500k (`+500k`) or named `smallFile.txt` (`-or -name
-smallFile.txt`):
+List files bigger than 500k (`+500k`) or those that are named `smallFile.txt`
+(`-or -name smallFile.txt`):
 
     find ./searchdir -size +500k -or -name smallFile.txt
 
