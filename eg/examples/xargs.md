@@ -30,7 +30,7 @@ The `-n` command can specify how many arguments should be passed to `xargs` at
 a time, splitting on whitespace. For example, this command will split the
 `1 2 3 4 5 6` given to `echo` on whitespace and take two at a time (`-n 2`).
 It will `echo` them back to `stdout`, printing the commands it is executing
-(`-t):
+(`-t`):
 
     $ echo 1 2 3 4 5 6
     1 2 3 4 5 6
