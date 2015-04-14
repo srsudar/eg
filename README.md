@@ -18,20 +18,29 @@ No more!
 `eg` will give you useful examples right at the command line. Think of it as a
 companion tool for `man`.
 
-![eg Demo](./eg-demo.gif)
-
 > `eg` comes from _exempli gratia_, and is pronounced like the letters: "ee
 gee".
+
+![eg Demo](./eg-demo.gif)
 
 
 ## Installation
 
-Clone the repo and create a symlink to `eg.py`. Make sure the location you
+### With `pip`
+
+```shell
+pip install eg
+```
+
+### Without `pip`
+
+Clone the repo and create a symlink to `eg_exec.py`. Make sure the location you
 choose for the symlink is on your path:
+
 
 ```shell
 git clone https://github.com/srsudar/eg ./
-ln -s ./eg/eg.py /usr/local/bin/eg
+ln -s ./eg/eg_exec.py /usr/local/bin/eg
 ```
 
 `eg` is in beta and doesn't ship with a binary. You'll have to have python
@@ -101,6 +110,30 @@ different location at the command line like so:
 ```shell
 eg --config-file=myfile find
 ```
+
+## Color
+
+`eg` is colorful. The default colors were chosen to be pretty-ish while boring
+enough to not create problems for basic terminals. If you want to override
+these colors, you can do so in the egrc in a `color` section.
+
+Things that can be colored are:
+
+* `pound`: pound sign before headings
+* `heading`: the text of headings
+* `code`: anything indented four spaces other than a leading `$`
+* `prompt`: a `$` that is indented four spaces
+* `backticks`: anything between two backticks
+
+Values passed to these options must be string literals. This allows escape
+characters to be inserted as needed. An egrc with heading text a nice burnt
+orange might look like this:
+
+    [eg-config]
+    custom-dir = ~/my/fancy/custom/dir
+
+    [color]
+    heading = '\x1b[38;5;172m'
 
 
 ## Format and Content of Examples
