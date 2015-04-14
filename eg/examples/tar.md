@@ -23,7 +23,7 @@ turn directory into g-zipped directory
 
 # Basic Usage
 
-`vf` means verbosely list files (`-v`) and use a file (`-f), not `stdin`.
+`vf` means verbosely list files (`v`) and use a file (`f`), not `stdin`.
 These appear in most commands.
 
 Untar a file:
@@ -46,9 +46,9 @@ work while with a hyphen it would require `tar -xvf`, with the `x` flag first.
 You can get maximum portability is you never use the hyphens, so examples here
 are shown without the hyphen.
 
-You'll almost want `vf`. `v` verbosely lists files as they are manipulated, and
-`f` means you're reading from a file, not `stdin`. You can remember `vf` if you
-remember that `tar` is Very Finnicky: `vf`.
+You'll almost always want `vf`. `v` verbosely lists files as they are
+manipulated, and `f` means you're reading from a file, not `stdin`. You can
+remember `vf` if you remember that `tar` is Very Finicky: `vf`.
 
 Extract things from a tar file with `x` for extraction. Compress things to a
 tar file with `c` for compress.
@@ -64,7 +64,7 @@ Compress directory (`c`) into g-zipped (`z`) directory:
     tar vfcz z_zipped_directory.tar.gz directory
 
 
-Compress directory (`-c`) into b-zipped (`j`) directory:
+Compress directory (`c`) into b-zipped (`j`) directory:
 
     tar vfcj b_zipped_directory.tar.bz2 directory
 
@@ -74,7 +74,7 @@ Compress directory (`-c`) into b-zipped (`j`) directory:
 
 Untar (`x`) and unzip a g-zipped (`z`) file:
 
-    tar -vfxz g_zipped_archive.tar.gz
+    tar vfxz g_zipped_archive.tar.gz
 
 
 Untar (`x`) and unzip a b-zipped (`j`) file:
