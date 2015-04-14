@@ -1,8 +1,9 @@
 #!/usr/bin/python
 import argparse
-import eg_config
-import eg_util
 import sys
+
+from eg import eg_config
+from eg import eg_util
 
 
 if __name__ == '__main__':

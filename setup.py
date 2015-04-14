@@ -16,12 +16,14 @@ config = {
     'author_email': 'sudar.sam@gmail.com',
     'version': VERSION,
     'install_requires': ['colorama'],
+    'test_requires': ['nose', 'mock'],
     'packages': ['eg'],
-    'scripts': ['eg/eg.py'],
+    'scripts': ['bin/egg'],
     'package_data': {
         'eg': ['examples/*']
     },
-    'zip_safe': False
+    'zip_safe': False,
+    'test_suite': 'nose.collector'
 }
 
 setup(**config)
