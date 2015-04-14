@@ -39,7 +39,7 @@ config = {
     'license': 'MIT',
     'author_email': 'sudar.sam@gmail.com',
     'version': VERSION,
-    'install_requires': ['colorama'],
+    'install_requires': [],
     'test_requires': ['nose', 'mock'],
     'packages': ['eg'],
     'scripts': ['bin/eg'],

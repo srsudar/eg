@@ -1,12 +1,9 @@
 import re
 
-from colorama import init
-
 
 class EgColorizer():
 
     def __init__(self, color_config):
-        init()
         self.color_config = color_config
 
     def colorize_heading(self, text):

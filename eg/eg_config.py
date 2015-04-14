@@ -3,8 +3,6 @@ import ConfigParser
 import os
 
 from collections import namedtuple
-from colorama import Fore
-from colorama import Style
 
 
 # The directory containing example files, relative to the eg executable. The
@@ -55,17 +53,26 @@ ColorConfig = namedtuple(
     ]
 )
 
-# Default colors
-DEFAULT_COLOR_POUND = Fore.BLACK + Style.BRIGHT
-DEFAULT_COLOR_HEADING = Fore.RED + Style.BRIGHT
-DEFAULT_COLOR_PROMPT = Fore.CYAN + Style.BRIGHT
-DEFAULT_COLOR_CODE = Fore.GREEN + Style.BRIGHT
-DEFAULT_COLOR_BACKTICKS = Fore.BLUE + Style.BRIGHT
-DEFAULT_COLOR_POUND_RESET = Style.RESET_ALL
-DEFAULT_COLOR_HEADING_RESET = Style.RESET_ALL
-DEFAULT_COLOR_PROMPT_RESET = Style.RESET_ALL
-DEFAULT_COLOR_CODE_RESET = Style.RESET_ALL
-DEFAULT_COLOR_BACKTICKS_RESET = Style.RESET_ALL
+# Default colors. These are intentionally simple to try and accomodate more
+# terminals. This is mostly envisioned as a unix tool, so we're not going to
+# worry about windows output.
+_BRIGHT = '\x1b[1m'
+_BLACK = '\x1b[30m'
+_RED = '\x1b[31m'
+_CYAN = '\x1b[36m'
+_GREEN = '\x1b[32m'
+_BLUE = '\x1b[34m'
+_RESET_ALL = '\x1b[0m'
+DEFAULT_COLOR_POUND = _BLACK + _BRIGHT
+DEFAULT_COLOR_HEADING = _RED + _BRIGHT
+DEFAULT_COLOR_PROMPT = _CYAN + _BRIGHT
+DEFAULT_COLOR_CODE = _GREEN + _BRIGHT
+DEFAULT_COLOR_BACKTICKS = _BLUE + _BRIGHT
+DEFAULT_COLOR_POUND_RESET = _RESET_ALL
+DEFAULT_COLOR_HEADING_RESET = _RESET_ALL
+DEFAULT_COLOR_PROMPT_RESET = _RESET_ALL
+DEFAULT_COLOR_CODE_RESET = _RESET_ALL
+DEFAULT_COLOR_BACKTICKS_RESET = _RESET_ALL
 
 CONFIG_NAMES = ColorConfig(
     pound='pound',

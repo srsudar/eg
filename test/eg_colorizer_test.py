@@ -1,11 +1,16 @@
 import os
 
 from collections import namedtuple
-from colorama import Fore
 from eg import eg_colorizer
 from eg import eg_config
 from mock import patch
 from nose.tools import assert_equal
+
+# Some hardcoded real colors.
+_YELLOW = '\x1b[33m'
+_MAGENTA = '\x1b[35m'
+_BLACK = '\x1b[30m'
+_GREEN = '\x1b[32m'
 
 
 # The flags in the test file marking where substitutions should/can occur.
@@ -109,9 +114,9 @@ def test_colorize_heading():
     color_config = eg_config.ColorConfig(
         'P',
         'H',
-        Fore.YELLOW,
-        Fore.MAGENTA,
-        Fore.BLACK,
+        _YELLOW,
+        _MAGENTA,
+        _BLACK,
         'RES',
         'RES',
         '',
@@ -140,10 +145,10 @@ def test_colorize_heading():
 def test_colorize_block_indents():
     """Makes sure we colorize block indents correctly."""
     color_config = eg_config.ColorConfig(
-        Fore.BLACK,
-        Fore.MAGENTA,
+        _BLACK,
+        _MAGENTA,
         'C',
-        Fore.YELLOW,
+        _YELLOW,
         'P',
         '',
         '',
@@ -173,11 +178,11 @@ def test_colorize_block_indents():
 def test_colorize_backticks():
     """Makes sure we colorize backticks correctly."""
     color_config = eg_config.ColorConfig(
-        Fore.BLACK,
-        Fore.MAGENTA,
-        Fore.YELLOW,
+        _BLACK,
+        _MAGENTA,
+        _YELLOW,
         'B',
-        Fore.GREEN,
+        _GREEN,
         '',
         '',
         '',
