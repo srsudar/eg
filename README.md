@@ -135,6 +135,13 @@ orange might look like this:
     [color]
     heading = '\x1b[38;5;172m'
 
+To remove color altogether, for example if the color formatting is messing up
+your output somehow, you can either pass the `--no-color` flag to `eg`, or you
+can add an option to your egrc under the `eg-config` section like so:
+
+    [eg-config]
+    color = false
+
 
 ## Format and Content of Examples
 
