@@ -43,7 +43,7 @@ git clone https://github.com/srsudar/eg ./
 ln -s ./eg/eg_exec.py /usr/local/bin/eg
 ```
 
-`eg` is in beta and doesn't ship with a binary. You'll have to have python
+`eg` doesn't ship with a binary. You'll have to have python
 2.x installed on your machine. Dependencies are very modest and should not
 require you to install anything (other than Nose if you want to run the tests).
 If you find otherwise, open an issue.
@@ -141,6 +141,26 @@ can add an option to your egrc under the `eg-config` section like so:
 
     [eg-config]
     color = false
+
+
+## Paging
+
+By default, `eg` pages using `less -R`. The `-R` switch tells `less` to
+interpret ANSI escape sequences like color rather than showing them raw. If you
+don't have `less` installed, `eg` will try to detect this and page using the
+`pydoc.pager()` function instead. In this case you might want to turn off
+color.
+
+You can specify a different pager using the `--pager-cmd` option at the command
+line or the `pager-cmd` option in the egrc. If specified in the egrc, the value
+must be a string literal. For example, this egrc would use `cat` to page:
+
+    [eg-config]
+    pager-cmd = 'cat'
+
+`pydoc.pager()` does a lot of friendly error checking, so it might still be
+useful in some situations. If you want to use `pydoc.pager()` to page, you can
+pass the `pydoc.pager` flag to the `pager-cmd`.
 
 
 ## Format and Content of Examples
@@ -279,5 +299,4 @@ $ woman find
 
 # TODO
 
-* curl
 * file
