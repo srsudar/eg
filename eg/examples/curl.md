@@ -36,7 +36,7 @@ and POST.
 `curl` can use cookies. The `--cookie` flag allows you to set name=value pairs
 at the command line. This command will issue a GET request, print verbose
 output (`-v`), and pass a cookie where TOKEN is set to data
-(`--cokie "TOKEN=data"`):
+(`--cookie "TOKEN=data"`):
 
     curl -v --cookie "TOKEN=data" http://www.example.com
 
