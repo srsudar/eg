@@ -15,6 +15,10 @@ DEFAULT_EXAMPLES_DIR = os.path.join(os.path.dirname(__file__), 'examples')
 DEFAULT_EGRC_PATH = os.path.join('~', '.egrc')
 DEFAULT_USE_COLOR = True
 
+# We're using less -R to support color on Unix machines, which by default don't
+# let their output from less be colorized.
+DEFAULT_PAGER_CMD = 'less -R'
+
 # We need this just because the ConfigParser library requires it.
 DEFAULT_SECTION = 'eg-config'
 
@@ -22,6 +26,7 @@ DEFAULT_SECTION = 'eg-config'
 EG_EXAMPLES_DIR = 'examples-dir'
 CUSTOM_EXAMPLES_DIR = 'custom-dir'
 USE_COLOR = 'color'
+PAGER_CMD = 'pager-cmd'
 
 # A basic struct containing configuration values.
 #    examples_dir: path to the directory of examples that ship with eg
@@ -32,7 +37,8 @@ Config = namedtuple(
         'examples_dir',
         'custom_dir',
         'use_color',
-        'color_config'
+        'color_config',
+        'pager_cmd'
     ]
 )
 
@@ -96,6 +102,7 @@ def get_resolved_config_items(
     examples_dir,
     custom_dir,
     use_color,
+    pager_cmd,
     debug=True
 ):
     """
@@ -128,7 +135,8 @@ def get_resolved_config_items(
         examples_dir=None,
         custom_dir=None,
         color_config=empty_color_config,
-        use_color=None
+        use_color=None,
+        pager_cmd=None
     )
 
     if os.path.isfile(resolved_egrc_path):
@@ -151,6 +159,12 @@ def get_resolved_config_items(
         DEFAULT_USE_COLOR
     )
 
+    resolved_pager_cmd = get_priority(
+        pager_cmd,
+        egrc_config.pager_cmd,
+        DEFAULT_PAGER_CMD
+    )
+
     color_config = None
     if resolved_use_color:
         default_color_config = get_default_color_config()
@@ -163,7 +177,8 @@ def get_resolved_config_items(
         examples_dir=resolved_examples_dir,
         custom_dir=resolved_custom_dir,
         color_config=color_config,
-        use_color=resolved_use_color
+        use_color=resolved_use_color,
+        pager_cmd=resolved_pager_cmd
     )
 
     return result
@@ -186,6 +201,7 @@ def get_config_tuple_from_egrc(egrc_path):
         examples_dir = None
         custom_dir = None
         use_color = None
+        pager_cmd = None
 
         if config.has_option(DEFAULT_SECTION, EG_EXAMPLES_DIR):
             examples_dir = config.get(DEFAULT_SECTION, EG_EXAMPLES_DIR)
@@ -199,13 +215,18 @@ def get_config_tuple_from_egrc(egrc_path):
             use_color_raw = config.get(DEFAULT_SECTION, USE_COLOR)
             use_color = _parse_bool_from_raw_egrc_value(use_color_raw)
 
+        if config.has_option(DEFAULT_SECTION, PAGER_CMD):
+            pager_cmd_raw = config.get(DEFAULT_SECTION, PAGER_CMD)
+            pager_cmd = ast.literal_eval(pager_cmd_raw)
+
         color_config = get_custom_color_config_from_egrc(config)
 
         return Config(
             examples_dir=examples_dir,
             custom_dir=custom_dir,
             color_config=color_config,
-            use_color=use_color
+            use_color=use_color,
+            pager_cmd=pager_cmd
         )
 
 

@@ -12,6 +12,7 @@ def test_config_returns_defaults_if_all_none_and_no_egrc():
             None,
             None,
             None,
+            None,
             debug=False
         )
 
@@ -21,6 +22,7 @@ def test_config_returns_defaults_if_all_none_and_no_egrc():
         assert_equal(config.custom_dir, None)
         assert_equal(config.color_config, default_color_config)
         assert_equal(config.use_color, eg_config.DEFAULT_USE_COLOR)
+        assert_equal(config.pager_cmd, eg_config.DEFAULT_PAGER_CMD)
 
 
 def test_config_returns_egrc_values_if_present():
@@ -34,22 +36,31 @@ def test_config_returns_egrc_values_if_present():
         custom_dir = 'test_custom_dir_from_egrc'
         test_color_config = _get_color_config_from_egrc_withdata()
         test_use_color = True
+        test_pager_cmd = 'more baby'
 
         def_config = eg_config.Config(
             examples_dir=examples_dir,
             custom_dir=custom_dir,
             color_config=test_color_config,
-            use_color=test_use_color
+            use_color=test_use_color,
+            pager_cmd=test_pager_cmd
         )
         with patch(
             'eg.eg_config.get_config_tuple_from_egrc',
             return_value=def_config
         ):
-            config = eg_config.get_resolved_config_items(None, None, None, None)
+            config = eg_config.get_resolved_config_items(
+                None,
+                None,
+                None,
+                None,
+                None
+            )
             assert_equal(config.examples_dir, examples_dir)
             assert_equal(config.custom_dir, custom_dir)
             assert_equal(config.color_config, test_color_config)
             assert_equal(config.use_color, test_use_color)
+            assert_equal(config.pager_cmd, test_pager_cmd)
 
 
 def test_config_uses_custom_egrc_path():
@@ -59,7 +70,8 @@ def test_config_uses_custom_egrc_path():
             examples_dir='eg_dir',
             custom_dir='custom_dir',
             color_config=eg_config.get_empty_color_config(),
-            use_color=False
+            use_color=False,
+            pager_cmd='less is more'
         )
         egrc_path = 'test/path/to/egrc'
         with patch(
@@ -68,6 +80,7 @@ def test_config_uses_custom_egrc_path():
         ) as mocked_method:
             eg_config.get_resolved_config_items(
                 egrc_path,
+                None,
                 None,
                 None,
                 None,
@@ -84,14 +97,17 @@ def test_config_returns_values_passed_at_command_line():
         command_line_examples_dir = 'test_eg_dir_user_defined'
         command_line_custom_dir = 'test_custom_dir_user_defined'
         command_line_use_color = 'we_should_use_color'
+        command_line_pager_cmd = 'command_line_says_pager_with_cat'
         egrc_examples_dir = 'egrc_examples_dir'
         egrc_custom_dir = 'egrc_custom_dir'
         egrc_use_color = 'the_egrc_says_yes_color'
+        egrc_pager_cmd = 'the_egrc_pages_with_more'
         egrc_config = eg_config.Config(
             examples_dir=egrc_examples_dir,
             custom_dir=egrc_custom_dir,
             color_config=eg_config.get_default_color_config(),
-            use_color=egrc_use_color
+            use_color=egrc_use_color,
+            pager_cmd=egrc_pager_cmd
         )
         with patch(
             'eg.eg_config.get_config_tuple_from_egrc',
@@ -102,11 +118,13 @@ def test_config_returns_values_passed_at_command_line():
                 command_line_examples_dir,
                 command_line_custom_dir,
                 command_line_use_color,
+                command_line_pager_cmd,
                 debug=False
             )
             assert_equal(actual.examples_dir, command_line_examples_dir)
             assert_equal(actual.custom_dir, command_line_custom_dir)
             assert_equal(actual.use_color, command_line_use_color)
+            assert_equal(actual.pager_cmd, command_line_pager_cmd)
 
 
 def test_get_config_tuple_from_egrc_all_none_when_not_present():
@@ -124,7 +142,8 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
         examples_dir=None,
         custom_dir=None,
         color_config=empty_color_config,
-        use_color=None
+        use_color=None,
+        pager_cmd=None
     )
     assert_equal(actual, target)
 
@@ -135,6 +154,7 @@ def test_get_config_tuple_from_egrc_when_present():
     egrc_examples_dir = 'test/example/dir/in/egrc_withdata'
     egrc_custom_dir = 'test/custom/dir/in/egrc_withdata'
     egrc_use_color = True
+    egrc_pager_cmd = 'more egrc'
     color_config_from_file = _get_color_config_from_egrc_withdata()
 
     def return_expanded_path(*args, **kwargs):
@@ -164,7 +184,8 @@ def test_get_config_tuple_from_egrc_when_present():
             examples_dir=egrc_examples_dir,
             custom_dir=egrc_custom_dir,
             color_config=color_config_from_file,
-            use_color=egrc_use_color
+            use_color=egrc_use_color,
+            pager_cmd=egrc_pager_cmd
         )
         assert_equal(actual, target)
 

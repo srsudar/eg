@@ -1,9 +1,7 @@
 import os
-import subprocess
 
 from eg import eg_config
 from eg import eg_util
-from mock import Mock
 from mock import patch
 from nose.tools import assert_equal
 
@@ -24,7 +22,8 @@ def test_has_default_entry_for_program_no_examples_dir():
         examples_dir=None,
         custom_dir='customdir',
         color_config=None,
-        use_color=False
+        use_color=False,
+        pager_cmd=None
     )
 
     program = 'cp'
@@ -39,7 +38,8 @@ def test_has_custom_entry_for_program_no_custom_dir():
         examples_dir='examplesdir',
         custom_dir=None,
         color_config=None,
-        use_color=False
+        use_color=False,
+        pager_cmd=None
     )
 
     program = 'find'
@@ -55,6 +55,7 @@ def test_has_default_entry_when_present():
         custom_dir=None,
         color_config=None,
         use_color=False,
+        pager_cmd=None
     )
     program = 'mv'
 
@@ -75,7 +76,8 @@ def test_has_default_entry_when_not_present():
         examples_dir='examplesdir',
         custom_dir=None,
         color_config=None,
-        use_color=False
+        use_color=False,
+        pager_cmd=None
     )
     program = 'cp'
 
@@ -96,7 +98,8 @@ def test_has_custom_entry_when_present():
         examples_dir=None,
         custom_dir='customdir',
         color_config=None,
-        use_color=False
+        use_color=False,
+        pager_cmd=None
     )
     program = 'find'
 
@@ -117,7 +120,8 @@ def test_has_custom_entry_when_not_present():
         examples_dir=None,
         custom_dir='customdir',
         color_config=None,
-        use_color=False
+        use_color=False,
+        pager_cmd=None
     )
 
     program = 'locate'
@@ -180,6 +184,7 @@ def _helper_assert_open_pager_for_file(
     custom_file_contents,
     use_color,
     color_config,
+    pager_cmd,
     combined_contents,
     colorized_contents,
     paged_contents
@@ -218,13 +223,14 @@ def _helper_assert_open_pager_for_file(
             # return_value
             colorizer_instance = patched_colorizer_class.return_value
             colorizer_instance.colorize_text.return_value = colorized_contents
-            with patch('pydoc.pager') as patched_pager:
+            with patch('eg.eg_util.page_string') as patched_page_method:
                 # Make the call then assert things happened as we expected.
                 eg_util.open_pager_for_file(
                     default_file_path,
                     custom_file_path,
                     use_color,
-                    color_config
+                    color_config,
+                    pager_cmd
                 )
 
                 if use_color:
@@ -236,7 +242,10 @@ def _helper_assert_open_pager_for_file(
                 else:
                     colorizer_instance.colorize_text.assert_no_calls()
 
-                patched_pager.assert_called_once_with(paged_contents)
+                patched_page_method.assert_called_once_with(
+                    paged_contents,
+                    pager_cmd
+                )
 
 
 def test_handle_program_no_entries():
@@ -245,7 +254,8 @@ def test_handle_program_no_entries():
         examples_dir=None,
         custom_dir=None,
         color_config=None,
-        use_color=False
+        use_color=False,
+        pager_cmd=None
     )
 
     with patch(
@@ -274,12 +284,14 @@ def test_handle_program_finds_paths_and_calls_open_pager():
     custom_dir = 'test-custom-dir'
     color_config = None
     use_color = False
+    pager_cmd = 'foo bar'
 
     config = eg_config.Config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
         color_config=color_config,
-        use_color=use_color
+        use_color=use_color,
+        pager_cmd=pager_cmd
     )
 
     default_path = 'test-eg-dir/mv.md'
@@ -342,7 +354,8 @@ def test_handle_program_finds_paths_and_calls_open_pager():
                         default_file_path=default_path,
                         custom_file_path=custom_path,
                         use_color=use_color,
-                        color_config=color_config
+                        color_config=color_config,
+                        pager_cmd=pager_cmd
                     )
 
 
@@ -359,6 +372,7 @@ def test_open_pager_for_file_only_default():
         None,
         False,
         None,
+        'some pager cmd',
         combined_contents,
         colorized_contents,
         combined_contents
@@ -378,6 +392,7 @@ def test_open_pager_for_file_only_custom():
         custom_contents,
         False,
         None,
+        'another pager cmd',
         combined_contents,
         colored_contents,
         combined_contents
@@ -399,6 +414,7 @@ def test_open_pager_for_both_file_types():
         custom_contents,
         True,
         None,
+        'yet another pager cmd',
         combined_contents,
         colorized_contents,
         colorized_contents
@@ -413,7 +429,8 @@ def test_list_supported_programs_only_default():
         examples_dir=example_dir,
         custom_dir=custom_dir,
         color_config=None,
-        use_color=False
+        use_color=False,
+        pager_cmd=None
     )
 
     def give_list(*args, **kwargs):
@@ -438,7 +455,8 @@ def test_list_supported_programs_only_custom():
         examples_dir=example_dir,
         custom_dir=custom_dir,
         color_config=None,
-        use_color=False
+        use_color=False,
+        pager_cmd=None
     )
 
     def give_list(*args, **kwargs):
@@ -463,7 +481,8 @@ def test_list_supported_programs_both():
         examples_dir=examples_dir,
         custom_dir=custom_dir,
         color_config=None,
-        use_color=False
+        use_color=False,
+        pager_cmd=None
     )
 
     def give_list(*args, **kwargs):
@@ -490,7 +509,7 @@ def test_list_supported_programs_both():
 
 
 def test_list_supported_programs_fails_gracefully_if_no_dirs():
-    config = eg_config.Config(None, None, None, None)
+    config = eg_config.Config(None, None, None, None, None)
 
     actual = eg_util.get_list_of_all_supported_commands(config)
     target = []
@@ -514,6 +533,7 @@ def test_calls_colorize_is_use_color_set():
         custom_contents,
         True,
         eg_config.get_default_color_config(),
+        'pager cmd for use color',
         combined_contents,
         colorized_contents,
         colorized_contents
@@ -536,7 +556,85 @@ def test_does_not_call_colorize_if_use_color_false():
         custom_contents,
         False,
         eg_config.get_default_color_config(),
+        'pager command whoop',
         combined_contents,
         colorized_contents,
         combined_contents
     )
+
+
+def test_calls_pipepager_if_not_less():
+    """
+    We're special casing less a bit, as it is the default value, so if a custom
+    command has been set that is NOT less, we should call pipepager straight
+    away.
+    """
+    _helper_assert_about_pager('page me plz', 'cat', 0, False)
+
+
+def test_calls_fallback_pager_if_none():
+    """
+    If pager_cmd is None, we should just use the fallback pager.
+    """
+    _helper_assert_about_pager('page me plz', None, 1, True)
+
+
+def test_calls_fallback_pager_if_no_less():
+    """
+    We should use the fallback pager if we ask to use less but less is not
+    installed on the machine.
+    """
+    # 1 for an error return from sys
+    _helper_assert_about_pager('page me plz', 'less -R', 1, True)
+
+
+def test_calls_pipepager_if_less():
+    """
+    We should call pipepager if we ask to use less and less is installed on the
+    machine.
+    """
+    _helper_assert_about_pager('a fancy value to page', 'less -R', 0, False)
+
+
+def test_calls_fallback_if_cmd_is_flag_string():
+    """
+    We are using a flag string to indicate if we should use the fallback pager.
+    """
+    _helper_assert_about_pager(
+        'page via fallback',
+        eg_util.FLAG_FALLBACK,
+        0,
+        True
+    )
+
+
+def _helper_assert_about_pager(
+    str_to_page,
+    pager_cmd,
+    has_less_return_value,
+    use_fallback
+):
+    """
+    Help with asserting about pager.
+
+    str_to_page: what you're paging
+    pager_cmd: the string you're passing to pipepager (or None)
+    has_less_return_value: return value of the system call to find out if less
+        is present on the machine. 0 means ok, != 0 means problem.
+    use_default: false if we should actually use pydoc.pipepager, true if we
+        instead are going to fallback to pydoc.pager
+    """
+    with patch('os.system', return_value=has_less_return_value):
+        with patch('pydoc.pager') as default_pager:
+            with patch('pydoc.pipepager') as pipepager:
+                eg_util.page_string(str_to_page, pager_cmd)
+
+                if use_fallback:
+                    default_pager.assert_called_once_with(str_to_page)
+                    pipepager.assert_no_calls()
+                else:
+                    default_pager.assert_no_calls()
+                    pipepager.assert_called_once_with(
+                        str_to_page,
+                        cmd=pager_cmd
+                    )

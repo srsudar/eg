@@ -3,11 +3,6 @@ import os
 import pydoc
 
 
-# Name of the environment variable where we look for the default pager
-PAGER_ENV = 'PAGER'
-DEFAULT_PAGER = 'less'
-
-
 # The file name suffix expected for example files.
 EXAMPLE_FILE_SUFFIX = '.md'
 
@@ -18,6 +13,9 @@ VERSION = '0.0.2'
 # Flags for showing where the examples for commands are coming from.
 FLAG_ONLY_CUSTOM = '+'
 FLAG_CUSTOM_AND_DEFAULT = '*'
+
+# This flag indicates that we should use the fallback pager.
+FLAG_FALLBACK = 'pydoc.pager'
 
 
 def handle_program(program, config):
@@ -49,7 +47,8 @@ def handle_program(program, config):
         default_file_path=default_file_path,
         custom_file_path=custom_file_path,
         use_color=config.use_color,
-        color_config=config.color_config
+        color_config=config.color_config,
+        pager_cmd=config.pager_cmd
     )
 
 
@@ -98,7 +97,8 @@ def open_pager_for_file(
     default_file_path=None,
     custom_file_path=None,
     use_color=False,
-    color_config=None
+    color_config=None,
+    pager_cmd=None
 ):
     """
     Open pager to file_path. If a custom_file_path is also included, it will be
@@ -116,7 +116,37 @@ def open_pager_for_file(
         colorizer = eg_colorizer.EgColorizer(color_config)
         file_data = colorizer.colorize_text(file_data)
 
-    pydoc.pager(file_data)
+    page_string(file_data, pager_cmd)
+
+
+def page_string(str_to_page, pager_cmd):
+    """
+    Page str_to_page via the pager. Tries to do a bit of fail-safe checking. For
+    example, if the command starts with less but less doesn't appear to be
+    installed on the system, it will resort to the pydoc.pager method.
+    """
+    # By default, we expect the command to be `less -R`. If that is the
+    # pager_cmd, but they don't have less on their machine, odds are they're
+    # just using the default value. In this case the pager will fail, so we'll
+    # just go via pydoc.pager, which tries to do smarter checking that we don't
+    # want to bother trying to replicate.
+    # import ipdb; ipdb.set_trace()
+    use_fallback_page_function = False
+    if pager_cmd is None:
+        use_fallback_page_function = True
+    elif pager_cmd == FLAG_FALLBACK:
+        use_fallback_page_function = True
+    elif pager_cmd.startswith('less'):
+        # stealing this check from pydoc.getpager()
+        if hasattr(os, 'system') and os.system('(less) 2>/dev/null') != 0:
+            # no less!
+            use_fallback_page_function = True
+
+    if use_fallback_page_function:
+        pydoc.pager(str_to_page)
+    else:
+        # Otherwise, obey the user.
+        pydoc.pipepager(str_to_page, cmd=pager_cmd)
 
 
 def _get_contents_of_file(path):

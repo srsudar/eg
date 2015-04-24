@@ -35,6 +35,11 @@ def run_eg():
     )
 
     parser.add_argument(
+        '--pager-cmd',
+        help='String literal that will be invoked to page output.'
+    )
+
+    parser.add_argument(
         '--list',
         action='store_true',
         help='Show all the programs with eg entries.'
@@ -72,7 +77,8 @@ def run_eg():
             egrc_path=args.config_file,
             examples_dir=args.examples_dir,
             custom_dir=args.custom_dir,
-            use_color=args.use_color
+            use_color=args.use_color,
+            pager_cmd=args.pager_cmd
         )
 
         if args.list:
