@@ -8,7 +8,7 @@ EXAMPLE_FILE_SUFFIX = '.md'
 
 # Version of eg itself.
 # Also bump in setup.py.
-VERSION = '0.0.2'
+VERSION = '0.0.3'
 
 # Flags for showing where the examples for commands are coming from.
 FLAG_ONLY_CUSTOM = '+'
