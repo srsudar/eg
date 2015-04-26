@@ -1,4 +1,4 @@
-import eg_colorizer
+from eg import eg_colorizer
 import os
 import pydoc
 

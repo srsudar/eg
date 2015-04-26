@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import argparse
-import eg_config
-import eg_util
+from eg import eg_config
+from eg import eg_util
 import pydoc
 import sys
 
@@ -71,7 +71,7 @@ def run_eg():
     if len(sys.argv) < 2:
         parser.print_help()
     elif not args.version and not args.list and not args.program:
-        print 'you must specify a program or pass the --list or --version flags'
+        print('you must specify a program or pass the --list or --version flags')
     else:
         config = eg_config.get_resolved_config_items(
             egrc_path=args.config_file,
@@ -113,7 +113,7 @@ def run_eg():
 
             pydoc.pager(complete_message)
         elif args.version:
-            print eg_util.VERSION
+            print(eg_util.VERSION)
         else:
             eg_util.handle_program(args.program, config)
 

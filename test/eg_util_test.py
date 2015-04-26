@@ -195,7 +195,7 @@ def _helper_assert_open_pager_for_file(
     # Make sure the caller is using this method correctly.
     valid_paged_contents = [colorized_contents, combined_contents]
     if paged_contents not in valid_paged_contents:
-        print 'paged_contents must be either combined or colorized _contents'
+        print('paged_contents must be either combined or colorized _contents')
         assert_equal(True, False)
 
     def return_file_contents(*args, **kwargs):
