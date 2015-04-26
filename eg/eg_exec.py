@@ -1,9 +1,14 @@
 #!/usr/bin/python
 import argparse
-from eg import eg_config
-from eg import eg_util
 import pydoc
 import sys
+
+try:
+    import eg_config
+    import eg_util
+except ImportError:
+    from eg import eg_config
+    from eg import eg_util
 
 
 def run_eg():
