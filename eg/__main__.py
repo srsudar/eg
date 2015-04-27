@@ -1,4 +1,4 @@
-from eg import eg_core
+from eg import core
 
 
-eg_core.run_eg()
+core.run_eg()

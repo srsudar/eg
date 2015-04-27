@@ -1,4 +1,4 @@
-from eg import eg_config
+from eg import config
 from mock import patch
 from nose.tools import assert_equal
 from nose.tools import assert_false
@@ -7,7 +7,7 @@ from nose.tools import assert_true
 
 def test_config_returns_defaults_if_all_none_and_no_egrc():
     with patch('os.path.isfile', return_value=False):
-        config = eg_config.get_resolved_config_items(
+        resolved_config = config.get_resolved_config_items(
             None,
             None,
             None,
@@ -16,13 +16,13 @@ def test_config_returns_defaults_if_all_none_and_no_egrc():
             debug=False
         )
 
-        default_color_config = eg_config.get_default_color_config()
+        default_color_config = config.get_default_color_config()
 
-        assert_equal(config.examples_dir, eg_config.DEFAULT_EXAMPLES_DIR)
-        assert_equal(config.custom_dir, None)
-        assert_equal(config.color_config, default_color_config)
-        assert_equal(config.use_color, eg_config.DEFAULT_USE_COLOR)
-        assert_equal(config.pager_cmd, eg_config.DEFAULT_PAGER_CMD)
+        assert_equal(resolved_config.examples_dir, config.DEFAULT_EXAMPLES_DIR)
+        assert_equal(resolved_config.custom_dir, None)
+        assert_equal(resolved_config.color_config, default_color_config)
+        assert_equal(resolved_config.use_color, config.DEFAULT_USE_COLOR)
+        assert_equal(resolved_config.pager_cmd, config.DEFAULT_PAGER_CMD)
 
 
 def test_config_returns_egrc_values_if_present():
@@ -38,7 +38,7 @@ def test_config_returns_egrc_values_if_present():
         test_use_color = True
         test_pager_cmd = 'more baby'
 
-        def_config = eg_config.Config(
+        def_config = config.Config(
             examples_dir=examples_dir,
             custom_dir=custom_dir,
             color_config=test_color_config,
@@ -46,39 +46,39 @@ def test_config_returns_egrc_values_if_present():
             pager_cmd=test_pager_cmd
         )
         with patch(
-            'eg.eg_config.get_config_tuple_from_egrc',
+            'eg.config.get_config_tuple_from_egrc',
             return_value=def_config
         ):
-            config = eg_config.get_resolved_config_items(
+            resolved_config = config.get_resolved_config_items(
                 None,
                 None,
                 None,
                 None,
                 None
             )
-            assert_equal(config.examples_dir, examples_dir)
-            assert_equal(config.custom_dir, custom_dir)
-            assert_equal(config.color_config, test_color_config)
-            assert_equal(config.use_color, test_use_color)
-            assert_equal(config.pager_cmd, test_pager_cmd)
+            assert_equal(resolved_config.examples_dir, examples_dir)
+            assert_equal(resolved_config.custom_dir, custom_dir)
+            assert_equal(resolved_config.color_config, test_color_config)
+            assert_equal(resolved_config.use_color, test_use_color)
+            assert_equal(resolved_config.pager_cmd, test_pager_cmd)
 
 
 def test_config_uses_custom_egrc_path():
     """Make sure we use the passed in egrc path rather than the default."""
     with patch('os.path.isfile', return_value=True):
-        def_config = eg_config.Config(
+        def_config = config.Config(
             examples_dir='eg_dir',
             custom_dir='custom_dir',
-            color_config=eg_config.get_empty_color_config(),
+            color_config=config.get_empty_color_config(),
             use_color=False,
             pager_cmd='less is more'
         )
         egrc_path = 'test/path/to/egrc'
         with patch(
-            'eg.eg_config.get_config_tuple_from_egrc',
+            'eg.config.get_config_tuple_from_egrc',
             return_value=def_config
         ) as mocked_method:
-            eg_config.get_resolved_config_items(
+            config.get_resolved_config_items(
                 egrc_path,
                 None,
                 None,
@@ -102,18 +102,18 @@ def test_config_returns_values_passed_at_command_line():
         egrc_custom_dir = 'egrc_custom_dir'
         egrc_use_color = 'the_egrc_says_yes_color'
         egrc_pager_cmd = 'the_egrc_pages_with_more'
-        egrc_config = eg_config.Config(
+        egrc_config = config.Config(
             examples_dir=egrc_examples_dir,
             custom_dir=egrc_custom_dir,
-            color_config=eg_config.get_default_color_config(),
+            color_config=config.get_default_color_config(),
             use_color=egrc_use_color,
             pager_cmd=egrc_pager_cmd
         )
         with patch(
-            'eg.eg_config.get_config_tuple_from_egrc',
+            'eg.config.get_config_tuple_from_egrc',
             return_value=egrc_config
         ):
-            actual = eg_config.get_resolved_config_items(
+            actual = config.get_resolved_config_items(
                 None,
                 command_line_examples_dir,
                 command_line_custom_dir,
@@ -134,11 +134,11 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
     We should return None for all values and an empty color_config if there is
     no data in the egrc.
     """
-    actual = eg_config.get_config_tuple_from_egrc('test/assets/egrc_nodata')
+    actual = config.get_config_tuple_from_egrc('test/assets/egrc_nodata')
 
-    empty_color_config = eg_config.get_empty_color_config()
+    empty_color_config = config.get_empty_color_config()
 
-    target = eg_config.Config(
+    target = config.Config(
         examples_dir=None,
         custom_dir=None,
         color_config=empty_color_config,
@@ -172,15 +172,15 @@ def test_get_config_tuple_from_egrc_when_present():
             )
 
     with patch(
-        'eg.eg_config.get_expanded_path',
+        'eg.config.get_expanded_path',
         side_effect=return_expanded_path
     ) as mock_expand:
 
-        actual = eg_config.get_config_tuple_from_egrc(
+        actual = config.get_config_tuple_from_egrc(
             'test/assets/egrc_withdata'
         )
 
-        target = eg_config.Config(
+        target = config.Config(
             examples_dir=egrc_examples_dir,
             custom_dir=egrc_custom_dir,
             color_config=color_config_from_file,
@@ -195,7 +195,7 @@ def test_get_config_tuple_from_egrc_when_present():
 
 def _get_color_config_from_egrc_withdata():
     """Get the color_config that is defined in the egrc_withdata test file."""
-    test_color_config = eg_config.ColorConfig(
+    test_color_config = config.ColorConfig(
         pound='\x1b[32m',
         heading='heading_val',
         code='code_val',
@@ -211,9 +211,9 @@ def _get_color_config_from_egrc_withdata():
 
 
 def test_merge_color_configs_first_all_none():
-    second = eg_config.get_default_color_config()
+    second = config.get_default_color_config()
 
-    first = eg_config.ColorConfig(
+    first = config.ColorConfig(
         pound=None,
         heading=None,
         code=None,
@@ -226,15 +226,15 @@ def test_merge_color_configs_first_all_none():
         prompt_reset=None
     )
 
-    merged = eg_config.merge_color_configs(first, second)
+    merged = config.merge_color_configs(first, second)
 
     assert_equal(merged, second)
 
 
 def test_merge_color_configs_take_all_first():
-    second = eg_config.get_default_color_config()
+    second = config.get_default_color_config()
 
-    first = eg_config.ColorConfig(
+    first = config.ColorConfig(
         pound='pound_color',
         heading='heading_color',
         code='code_color',
@@ -247,15 +247,15 @@ def test_merge_color_configs_take_all_first():
         prompt_reset='prmpt_reset'
     )
 
-    merged = eg_config.merge_color_configs(first, second)
+    merged = config.merge_color_configs(first, second)
 
     assert_equal(merged, first)
 
 
 def test_merge_color_configs_mixed():
-    second = eg_config.get_default_color_config()
+    second = config.get_default_color_config()
 
-    first = eg_config.ColorConfig(
+    first = config.ColorConfig(
         pound='pound_color',
         heading=None,
         code='code_color',
@@ -268,9 +268,9 @@ def test_merge_color_configs_mixed():
         prompt_reset=None
     )
 
-    merged = eg_config.merge_color_configs(first, second)
+    merged = config.merge_color_configs(first, second)
 
-    target = eg_config.ColorConfig(
+    target = config.ColorConfig(
         pound=first.pound,
         heading=second.heading,
         code=first.code,
@@ -288,56 +288,56 @@ def test_merge_color_configs_mixed():
 
 def test_default_color_config():
     """Make sure the default color config is set to the right values."""
-    actual = eg_config.get_default_color_config()
+    actual = config.get_default_color_config()
 
-    assert_equal(actual.pound, eg_config.DEFAULT_COLOR_POUND)
-    assert_equal(actual.heading, eg_config.DEFAULT_COLOR_HEADING)
-    assert_equal(actual.code, eg_config.DEFAULT_COLOR_CODE)
-    assert_equal(actual.backticks, eg_config.DEFAULT_COLOR_BACKTICKS)
-    assert_equal(actual.prompt, eg_config.DEFAULT_COLOR_PROMPT)
+    assert_equal(actual.pound, config.DEFAULT_COLOR_POUND)
+    assert_equal(actual.heading, config.DEFAULT_COLOR_HEADING)
+    assert_equal(actual.code, config.DEFAULT_COLOR_CODE)
+    assert_equal(actual.backticks, config.DEFAULT_COLOR_BACKTICKS)
+    assert_equal(actual.prompt, config.DEFAULT_COLOR_PROMPT)
 
-    assert_equal(actual.pound_reset, eg_config.DEFAULT_COLOR_POUND_RESET)
-    assert_equal(actual.heading_reset, eg_config.DEFAULT_COLOR_HEADING_RESET)
-    assert_equal(actual.code_reset, eg_config.DEFAULT_COLOR_CODE_RESET)
+    assert_equal(actual.pound_reset, config.DEFAULT_COLOR_POUND_RESET)
+    assert_equal(actual.heading_reset, config.DEFAULT_COLOR_HEADING_RESET)
+    assert_equal(actual.code_reset, config.DEFAULT_COLOR_CODE_RESET)
     assert_equal(
         actual.backticks_reset,
-        eg_config.DEFAULT_COLOR_BACKTICKS_RESET
+        config.DEFAULT_COLOR_BACKTICKS_RESET
     )
-    assert_equal(actual.prompt_reset, eg_config.DEFAULT_COLOR_PROMPT_RESET)
+    assert_equal(actual.prompt_reset, config.DEFAULT_COLOR_PROMPT_RESET)
 
 
 def test_parse_bool_true_for_truthy_values():
     """We should parse both 'True' and 'true' to True."""
-    assert_true(eg_config._parse_bool_from_raw_egrc_value('True'))
-    assert_true(eg_config._parse_bool_from_raw_egrc_value('true'))
+    assert_true(config._parse_bool_from_raw_egrc_value('True'))
+    assert_true(config._parse_bool_from_raw_egrc_value('true'))
 
 
 def test_parse_bool_false_for_non_truthy_values():
     """Make sure we parse the likely non-truthy things as false."""
-    assert_false(eg_config._parse_bool_from_raw_egrc_value(''))
-    assert_false(eg_config._parse_bool_from_raw_egrc_value(None))
-    assert_false(eg_config._parse_bool_from_raw_egrc_value('false'))
-    assert_false(eg_config._parse_bool_from_raw_egrc_value('False'))
+    assert_false(config._parse_bool_from_raw_egrc_value(''))
+    assert_false(config._parse_bool_from_raw_egrc_value(None))
+    assert_false(config._parse_bool_from_raw_egrc_value('false'))
+    assert_false(config._parse_bool_from_raw_egrc_value('False'))
 
 
 def test_get_priority_first():
     """The first non-None value should always be returned."""
     target = 'alpha'
-    actual = eg_config.get_priority(target, 'second', 'third')
+    actual = config.get_priority(target, 'second', 'third')
     assert_equal(target, actual)
 
 
 def test_get_priority_second():
     """The second non-None should be returned if the first is None."""
     target = 'beta'
-    actual = eg_config.get_priority(None, target, 'third')
+    actual = config.get_priority(None, target, 'third')
     assert_equal(target, actual)
 
 
 def test_get_priority_third():
     """The last should be taken if the first two are None."""
     target = 'gamma'
-    actual = eg_config.get_priority(None, None, target)
+    actual = config.get_priority(None, None, target)
     assert_equal(target, actual)
 
 
@@ -348,5 +348,5 @@ def test_get_priority_respect_false():
     False should be able to be specified and respected as non-None.
     """
     target = False
-    actual = eg_config.get_priority(False, 'second', 'third')
+    actual = config.get_priority(False, 'second', 'third')
     assert_equal(target, actual)

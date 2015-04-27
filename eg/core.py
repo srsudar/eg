@@ -2,8 +2,8 @@ import argparse
 import pydoc
 import sys
 
-from eg import eg_config
-from eg import eg_util
+from eg import config
+from eg import util
 
 
 def run_eg():
@@ -71,9 +71,11 @@ def run_eg():
     if len(sys.argv) < 2:
         parser.print_help()
     elif not args.version and not args.list and not args.program:
-        print('you must specify a program or pass the --list or --version flags')
+        print(
+            'you must specify a program or pass the --list or --version flags'
+        )
     else:
-        config = eg_config.get_resolved_config_items(
+        resolved_config = config.get_resolved_config_items(
             egrc_path=args.config_file,
             examples_dir=args.examples_dir,
             custom_dir=args.custom_dir,
@@ -83,16 +85,16 @@ def run_eg():
 
         if args.list:
             # Show what's available.
-            supported_programs = eg_util.get_list_of_all_supported_commands(
-                config
+            supported_programs = util.get_list_of_all_supported_commands(
+                resolved_config
             )
             msg_line_1 = 'Legend: '
             msg_line_2 = ('    ' +
-                          eg_util.FLAG_ONLY_CUSTOM +
+                          util.FLAG_ONLY_CUSTOM +
                           ' only custom files'
                           )
             msg_line_3 = ('    ' +
-                          eg_util.FLAG_CUSTOM_AND_DEFAULT +
+                          util.FLAG_CUSTOM_AND_DEFAULT +
                           ' custom and default files'
                           )
             msg_line_4 = '    ' + '  only default files (no symbol)'
@@ -113,9 +115,9 @@ def run_eg():
 
             pydoc.pager(complete_message)
         elif args.version:
-            print(eg_util.VERSION)
+            print(util.VERSION)
         else:
-            eg_util.handle_program(args.program, config)
+            util.handle_program(args.program, resolved_config)
 
 
 # We want people to be able to use eg without pip, by so we'll allow this to be

@@ -1,7 +1,7 @@
 import os
 import pydoc
 
-from eg import eg_colorizer
+from eg import color
 
 
 # The file name suffix expected for example files.
@@ -114,7 +114,7 @@ def open_pager_for_file(
         file_data += _get_contents_of_file(default_file_path)
 
     if use_color:
-        colorizer = eg_colorizer.EgColorizer(color_config)
+        colorizer = color.EgColorizer(color_config)
         file_data = colorizer.colorize_text(file_data)
 
     page_string(file_data, pager_cmd)
