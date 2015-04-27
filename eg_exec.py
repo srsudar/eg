@@ -3,12 +3,8 @@ import argparse
 import pydoc
 import sys
 
-try:
-    import eg_config
-    import eg_util
-except ImportError:
-    from eg import eg_config
-    from eg import eg_util
+from eg import eg_config
+from eg import eg_util
 
 
 def run_eg():

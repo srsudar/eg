@@ -1,10 +1,7 @@
 import os
 import pydoc
 
-try:
-    import eg_colorizer
-except ImportError:
-    from eg import eg_colorizer
+from eg import eg_colorizer
 
 
 # The file name suffix expected for example files.

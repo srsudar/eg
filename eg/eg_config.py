@@ -1,11 +1,13 @@
 import ast
+import os
+
+from collections import namedtuple
+
+# Support Python 2 and 3.
 try:
     import ConfigParser
 except:
     from configparser import ConfigParser
-import os
-
-from collections import namedtuple
 
 
 # The directory containing example files, relative to the eg executable. The
@@ -199,7 +201,7 @@ def get_config_tuple_from_egrc(egrc_path):
     with open(egrc_path, 'r') as egrc:
         try:
             config = ConfigParser.RawConfigParser()
-        except AttributeError as e:
+        except AttributeError:
             config = ConfigParser()
         config.readfp(egrc)
 
