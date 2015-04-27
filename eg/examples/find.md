@@ -158,3 +158,25 @@ List files bigger than 50 megabytes (`-size +50M`) that are not named
     find ./searchdir -size +50M ! -name unwanted.txt
 
 
+
+# Execute Commands on Results
+
+You can execute a command on all matched files using the `-exec` option. The
+string `{}` will be replaced with the name of the matched file, and the command
+must be terminated with an escaped semicolon (`\;`).
+
+
+## Delete
+
+Find all files (`-type f`) ending with a tilde (`-name '*~'`) and remove them
+(`-exec rm -f {} \;`):
+
+    find ./searchdir -type f -name '*~' -exec rm {} \;
+    
+
+## Change Permissions
+
+Make all files (`-type f`) ending in .php (`-name '*.php'`) executable by
+owner, group, and world (`-exec chmod a+x {} \;`):
+
+    find ./searchdir -type f -name '*.php' -exec chmod a+x {} \;
