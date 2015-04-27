@@ -1,4 +1,3 @@
-#!/usr/bin/python
 from eg import eg_core
 
 
