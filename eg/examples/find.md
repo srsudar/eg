@@ -164,13 +164,13 @@ You can execute some command on all matched files
 
 ## remove 
 
-Find and remove all tilda file
+Find and remove all files ending with a tilde.
 
     find . -type f -name '*~' -exec rm -f '{}' \;
     
 ## chmod
 
-Change permition of all php files and sub directories
+Change permission of all php files and sub directories
 
     find . -type d -exec chmod 755 {} \;
     find . -type f -name '*.php' -exec chmod 644 {} \;
