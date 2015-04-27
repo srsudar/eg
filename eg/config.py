@@ -1,8 +1,13 @@
 import ast
-import ConfigParser
 import os
 
 from collections import namedtuple
+
+# Support Python 2 and 3.
+try:
+    import ConfigParser
+except:
+    from configparser import ConfigParser
 
 
 # The directory containing example files, relative to the eg executable. The
@@ -194,7 +199,10 @@ def get_config_tuple_from_egrc(egrc_path):
     If not present in the .egrc, properties of the Config are returned as None.
     """
     with open(egrc_path, 'r') as egrc:
-        config = ConfigParser.RawConfigParser()
+        try:
+            config = ConfigParser.RawConfigParser()
+        except AttributeError:
+            config = ConfigParser()
         config.readfp(egrc)
 
         # default to None
@@ -262,7 +270,7 @@ def _inform_if_path_does_not_exist(path):
     """
     expanded_path = get_expanded_path(path)
     if not os.path.exists(expanded_path):
-        print 'Could not find custom path at: ' + expanded_path
+        print('Could not find custom path at: {}'.format(expanded_path))
 
 
 def get_custom_color_config_from_egrc(config):

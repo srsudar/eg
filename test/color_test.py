@@ -1,8 +1,8 @@
 import os
 
 from collections import namedtuple
-from eg import eg_colorizer
-from eg import eg_config
+from eg import color
+from eg import config
 from mock import patch
 from nose.tools import assert_equal
 
@@ -111,7 +111,7 @@ def get_data_with_subs(
 
 def test_colorize_heading():
     """Makes sure we colorize things like '# find' correctly"""
-    color_config = eg_config.ColorConfig(
+    color_config = config.ColorConfig(
         'P',
         'H',
         _YELLOW,
@@ -135,7 +135,7 @@ def test_colorize_heading():
         heading_reset=color_config.heading_reset
     )
 
-    colorizer = eg_colorizer.EgColorizer(color_config)
+    colorizer = color.EgColorizer(color_config)
 
     actual = colorizer.colorize_heading(clean)
 
@@ -144,7 +144,7 @@ def test_colorize_heading():
 
 def test_colorize_block_indents():
     """Makes sure we colorize block indents correctly."""
-    color_config = eg_config.ColorConfig(
+    color_config = config.ColorConfig(
         _BLACK,
         _MAGENTA,
         'C',
@@ -168,7 +168,7 @@ def test_colorize_block_indents():
         prompt_reset=color_config.prompt_reset
     )
 
-    colorizer = eg_colorizer.EgColorizer(color_config)
+    colorizer = color.EgColorizer(color_config)
 
     actual = colorizer.colorize_block_indent(clean)
 
@@ -177,7 +177,7 @@ def test_colorize_block_indents():
 
 def test_colorize_backticks():
     """Makes sure we colorize backticks correctly."""
-    color_config = eg_config.ColorConfig(
+    color_config = config.ColorConfig(
         _BLACK,
         _MAGENTA,
         _YELLOW,
@@ -199,7 +199,7 @@ def test_colorize_backticks():
         backticks_reset=color_config.backticks_reset,
     )
 
-    colorizer = eg_colorizer.EgColorizer(color_config)
+    colorizer = color.EgColorizer(color_config)
 
     actual = colorizer.colorize_backticks(clean)
 
@@ -209,18 +209,18 @@ def test_colorize_backticks():
 def test_colorize_text_calls_all_sub_methods():
     """colorize_text should call all of the helper colorize methods."""
     with patch(
-        'eg.eg_colorizer.EgColorizer.colorize_heading',
+        'eg.color.EgColorizer.colorize_heading',
         return_value='text-heading'
     ) as heading:
         with patch(
-            'eg.eg_colorizer.EgColorizer.colorize_block_indent',
+            'eg.color.EgColorizer.colorize_block_indent',
             return_value='text-heading-indent'
         ) as indent:
             with patch(
-                'eg.eg_colorizer.EgColorizer.colorize_backticks',
+                'eg.color.EgColorizer.colorize_backticks',
                 return_value='text-heading-indent-backticks'
             ) as backticks:
-                colorizer = eg_colorizer.EgColorizer(None)
+                colorizer = color.EgColorizer(None)
                 text = 'text'
                 actual = colorizer.colorize_text(text)
                 heading.assert_called_once_with(text)

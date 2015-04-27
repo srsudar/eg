@@ -1,7 +1,7 @@
 import os
 
-from eg import eg_config
-from eg import eg_util
+from eg import config
+from eg import util
 from mock import patch
 from nose.tools import assert_equal
 
@@ -9,16 +9,16 @@ from nose.tools import assert_equal
 def test_get_file_path_for_program_correct():
     program = 'cp'
     examples_dir = '/Users/tyrion/test/eg_dir'
-    program_file = program + eg_util.EXAMPLE_FILE_SUFFIX
+    program_file = program + util.EXAMPLE_FILE_SUFFIX
     target = os.path.join(examples_dir, program_file)
 
-    actual = eg_util.get_file_path_for_program(program, examples_dir)
+    actual = util.get_file_path_for_program(program, examples_dir)
 
     assert_equal(actual, target)
 
 
 def test_has_default_entry_for_program_no_examples_dir():
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir=None,
         custom_dir='customdir',
         color_config=None,
@@ -28,13 +28,13 @@ def test_has_default_entry_for_program_no_examples_dir():
 
     program = 'cp'
 
-    has_entry = eg_util.has_default_entry_for_program(program, config)
+    has_entry = util.has_default_entry_for_program(program, test_config)
 
     assert_equal(False, has_entry)
 
 
 def test_has_custom_entry_for_program_no_custom_dir():
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir='examplesdir',
         custom_dir=None,
         color_config=None,
@@ -44,13 +44,13 @@ def test_has_custom_entry_for_program_no_custom_dir():
 
     program = 'find'
 
-    has_entry = eg_util.has_custom_entry_for_program(program, config)
+    has_entry = util.has_custom_entry_for_program(program, test_config)
 
     assert_equal(False, has_entry)
 
 
 def test_has_default_entry_when_present():
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir='examplesdir',
         custom_dir=None,
         color_config=None,
@@ -62,7 +62,7 @@ def test_has_default_entry_when_present():
     path = '/Users/tyrion/examplesdir/mv.md'
 
     _helper_assert_path_isfile_not_present(
-        config,
+        test_config,
         program,
         path,
         'default',
@@ -72,7 +72,7 @@ def test_has_default_entry_when_present():
 
 
 def test_has_default_entry_when_not_present():
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir='examplesdir',
         custom_dir=None,
         color_config=None,
@@ -84,7 +84,7 @@ def test_has_default_entry_when_not_present():
     path = '/Users/tyrion/examplesdir/cp.md'
 
     _helper_assert_path_isfile_not_present(
-        config,
+        test_config,
         program,
         path,
         'default',
@@ -94,7 +94,7 @@ def test_has_default_entry_when_not_present():
 
 
 def test_has_custom_entry_when_present():
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir=None,
         custom_dir='customdir',
         color_config=None,
@@ -106,7 +106,7 @@ def test_has_custom_entry_when_present():
     path = '/Users/tyrion/customdir/find.md'
 
     _helper_assert_path_isfile_not_present(
-        config,
+        test_config,
         program,
         path,
         'custom',
@@ -116,7 +116,7 @@ def test_has_custom_entry_when_present():
 
 
 def test_has_custom_entry_when_not_present():
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir=None,
         custom_dir='customdir',
         color_config=None,
@@ -129,7 +129,7 @@ def test_has_custom_entry_when_not_present():
     path = '/Users/tyrion/customdir/locate.md'
 
     _helper_assert_path_isfile_not_present(
-        config,
+        test_config,
         program,
         path,
         'custom',
@@ -156,7 +156,7 @@ def _helper_assert_path_isfile_not_present(
             'defaultOrCustom must be default or custom, not ' + defaultOrCustom
         )
     with patch(
-        'eg.eg_util.get_file_path_for_program',
+        'eg.util.get_file_path_for_program',
         return_value=file_path_for_program
     ) as mock_get_path:
         with patch('os.path.isfile', return_value=isfile) as mock_isfile:
@@ -166,10 +166,10 @@ def _helper_assert_path_isfile_not_present(
 
             if (defaultOrCustom == 'default'):
                 correct_dir = config.examples_dir
-                actual = eg_util.has_default_entry_for_program(program, config)
+                actual = util.has_default_entry_for_program(program, config)
             else:
                 correct_dir = config.custom_dir
-                actual = eg_util.has_custom_entry_for_program(program, config)
+                actual = util.has_custom_entry_for_program(program, config)
 
             mock_get_path.assert_called_once_with(program, correct_dir)
             mock_isfile.assert_called_once_with(file_path_for_program)
@@ -195,7 +195,7 @@ def _helper_assert_open_pager_for_file(
     # Make sure the caller is using this method correctly.
     valid_paged_contents = [colorized_contents, combined_contents]
     if paged_contents not in valid_paged_contents:
-        print 'paged_contents must be either combined or colorized _contents'
+        print('paged_contents must be either combined or colorized _contents')
         assert_equal(True, False)
 
     def return_file_contents(*args, **kwargs):
@@ -213,19 +213,19 @@ def _helper_assert_open_pager_for_file(
             )
 
     with patch(
-        'eg.eg_util._get_contents_of_file',
+        'eg.util._get_contents_of_file',
         side_effect=return_file_contents
     ):
         with patch(
-            'eg.eg_colorizer.EgColorizer',
+            'eg.color.EgColorizer',
         ) as patched_colorizer_class:
             # The actual instance created by these calls is stored at
             # return_value
             colorizer_instance = patched_colorizer_class.return_value
             colorizer_instance.colorize_text.return_value = colorized_contents
-            with patch('eg.eg_util.page_string') as patched_page_method:
+            with patch('eg.util.page_string') as patched_page_method:
                 # Make the call then assert things happened as we expected.
-                eg_util.open_pager_for_file(
+                util.open_pager_for_file(
                     default_file_path,
                     custom_file_path,
                     use_color,
@@ -250,7 +250,7 @@ def _helper_assert_open_pager_for_file(
 
 def test_handle_program_no_entries():
     program = 'cp'
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir=None,
         custom_dir=None,
         color_config=None,
@@ -259,20 +259,20 @@ def test_handle_program_no_entries():
     )
 
     with patch(
-        'eg.eg_util.has_default_entry_for_program',
+        'eg.util.has_default_entry_for_program',
         return_value=False
     ) as mock_has_default:
         with patch(
-            'eg.eg_util.has_custom_entry_for_program',
+            'eg.util.has_custom_entry_for_program',
             return_value=False
         ) as mock_has_custom:
             with patch(
-                'eg.eg_util.open_pager_for_file'
+                'eg.util.open_pager_for_file'
             ) as mock_open_pager:
-                eg_util.handle_program(program, config)
+                util.handle_program(program, test_config)
 
-                mock_has_default.assert_called_once_with(program, config)
-                mock_has_custom.assert_called_once_with(program, config)
+                mock_has_default.assert_called_once_with(program, test_config)
+                mock_has_custom.assert_called_once_with(program, test_config)
 
                 assert_equal(mock_open_pager.call_count, 0)
 
@@ -286,7 +286,7 @@ def test_handle_program_finds_paths_and_calls_open_pager():
     use_color = False
     pager_cmd = 'foo bar'
 
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
         color_config=color_config,
@@ -316,29 +316,29 @@ def test_handle_program_finds_paths_and_calls_open_pager():
                 custom_dir)
 
     with patch(
-        'eg.eg_util.has_default_entry_for_program',
+        'eg.util.has_default_entry_for_program',
         return_value=True
     ) as mock_has_default:
         with patch(
-            'eg.eg_util.has_custom_entry_for_program',
+            'eg.util.has_custom_entry_for_program',
             return_value=True
         ) as mock_has_custom:
             with patch(
-                'eg.eg_util.open_pager_for_file'
+                'eg.util.open_pager_for_file'
             ) as mock_open_pager:
                 with patch(
-                    'eg.eg_util.get_file_path_for_program',
+                    'eg.util.get_file_path_for_program',
                     side_effect=return_correct_path
                 ) as mock_get_file:
-                    eg_util.handle_program(program, config)
+                    util.handle_program(program, test_config)
 
                     mock_has_default.assert_called_once_with(
                         program,
-                        config
+                        test_config
                     )
                     mock_has_custom.assert_called_once_with(
                         program,
-                        config
+                        test_config
                     )
 
                     mock_get_file.assert_any_call(
@@ -425,7 +425,7 @@ def test_list_supported_programs_only_default():
     example_dir = 'example/dir'
     custom_dir = 'custom/dir'
 
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir=example_dir,
         custom_dir=custom_dir,
         color_config=None,
@@ -441,7 +441,7 @@ def test_list_supported_programs_only_default():
 
     with patch('os.path.isdir', return_value=True):
         with patch('os.listdir', side_effect=give_list):
-            actual = eg_util.get_list_of_all_supported_commands(config)
+            actual = util.get_list_of_all_supported_commands(test_config)
             target = ['cp', 'find', 'xargs']
 
             assert_equal(actual, target)
@@ -451,7 +451,7 @@ def test_list_supported_programs_only_custom():
     example_dir = 'example/dir'
     custom_dir = 'custom/dir'
 
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir=example_dir,
         custom_dir=custom_dir,
         color_config=None,
@@ -467,7 +467,7 @@ def test_list_supported_programs_only_custom():
 
     with patch('os.path.isdir', return_value=True):
         with patch('os.listdir', side_effect=give_list):
-            actual = eg_util.get_list_of_all_supported_commands(config)
+            actual = util.get_list_of_all_supported_commands(test_config)
             target = ['awk +', 'bar +', 'xor +']
 
             assert_equal(actual, target)
@@ -477,7 +477,7 @@ def test_list_supported_programs_both():
     examples_dir = 'example/dir'
     custom_dir = 'custom/dir'
 
-    config = eg_config.Config(
+    test_config = config.Config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
         color_config=None,
@@ -494,7 +494,7 @@ def test_list_supported_programs_both():
 
     with patch('os.path.isdir', return_value=True):
         with patch('os.listdir', side_effect=give_list):
-            actual = eg_util.get_list_of_all_supported_commands(config)
+            actual = util.get_list_of_all_supported_commands(test_config)
 
             target = [
                 'alpha',
@@ -509,9 +509,9 @@ def test_list_supported_programs_both():
 
 
 def test_list_supported_programs_fails_gracefully_if_no_dirs():
-    config = eg_config.Config(None, None, None, None, None)
+    test_config = config.Config(None, None, None, None, None)
 
-    actual = eg_util.get_list_of_all_supported_commands(config)
+    actual = util.get_list_of_all_supported_commands(test_config)
     target = []
 
     assert_equal(actual, target)
@@ -532,7 +532,7 @@ def test_calls_colorize_is_use_color_set():
         custom_path,
         custom_contents,
         True,
-        eg_config.get_default_color_config(),
+        config.get_default_color_config(),
         'pager cmd for use color',
         combined_contents,
         colorized_contents,
@@ -555,7 +555,7 @@ def test_does_not_call_colorize_if_use_color_false():
         custom_path,
         custom_contents,
         False,
-        eg_config.get_default_color_config(),
+        config.get_default_color_config(),
         'pager command whoop',
         combined_contents,
         colorized_contents,
@@ -602,7 +602,7 @@ def test_calls_fallback_if_cmd_is_flag_string():
     """
     _helper_assert_about_pager(
         'page via fallback',
-        eg_util.FLAG_FALLBACK,
+        util.FLAG_FALLBACK,
         0,
         True
     )
@@ -627,7 +627,7 @@ def _helper_assert_about_pager(
     with patch('os.system', return_value=has_less_return_value):
         with patch('pydoc.pager') as default_pager:
             with patch('pydoc.pipepager') as pipepager:
-                eg_util.page_string(str_to_page, pager_cmd)
+                util.page_string(str_to_page, pager_cmd)
 
                 if use_fallback:
                     default_pager.assert_called_once_with(str_to_page)
