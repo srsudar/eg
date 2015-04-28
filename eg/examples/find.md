@@ -180,3 +180,5 @@ Make all files (`-type f`) ending in .php (`-name '*.php'`) executable by
 owner, group, and world (`-exec chmod a+x {} \;`):
 
     find ./searchdir -type f -name '*.php' -exec chmod a+x {} \;
+
+
