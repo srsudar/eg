@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
-from eg import eg_exec
+from eg import core
 
 
 if __name__ == '__main__':
-    eg_exec.run_eg()
+    core.run_eg()
