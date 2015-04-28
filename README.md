@@ -40,12 +40,17 @@ choose for the symlink is on your path:
 
 ```shell
 git clone https://github.com/srsudar/eg ./
-ln -s ./eg/eg_exec.py /usr/local/bin/eg
+ln -s /absolute/path/to/eg-repo/eg_exec.py /usr/local/bin/eg
 ```
 
-`eg` doesn't ship with a binary. You'll have to have python
-2.x installed on your machine. Dependencies are very modest and should not
-require you to install anything (other than Nose if you want to run the tests).
+> Note that the location of `eg_exec.py` changed in version 0.1.x in order to
+support Python 3 as well as 2. Old symlinks will print a message explaining the
+change, but you'll have to update your links to point at the new location. Or
+you can install with `pip`.
+
+`eg` doesn't ship with a binary. Dependencies are very modest and should not
+require you to install anything (other than
+[Nose](https://github.com/nose-devs/nose/) if you want to run the tests).
 If you find otherwise, open an issue.
 
 
