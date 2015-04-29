@@ -1,21 +1,45 @@
 # rsync
 
-Synchronize two different directories, but ignore deleted files:
+copy the contents of source_dir into destination_dir
 
-    rsync -av <directory1> <directory2>
+    rsync -av source_dir/ destination_dir
 
-Synchronize two different directories and delete files in `directory2`
-if they have been deleted from `directory1` with `--delete`:
 
-    rsync -av --delete <directory1> <directory2>
+update the contents of destination_dir to be the same as source_dir
 
-Run rsync without really doing the synchronization (for checking
-purpose) with `--dry-run`:
+    rsync -av --delete source_dir/ destination_dir
 
-    rsync --dry-run -av --delete <directory1> <directory2>
+
+copy the contents of source_dir to a remote machine
+
+    rsync -av source_dir/ user@remote_machine:/path/to/destination_dir
+
+
+see what actions would be performed without changing any files
+
+    rsync -av --delete --dry-run source_dir/ destination_dir
+
+
 
 # Basic usage
 
-Synchronize your local machine with another:
+`rsync` can be used copy files and to make two directories identical.  Most of
+the time you will want the `-a` flag, which stands for archive, and the `-v`
+flag to verbosely list what exactly it is doing.
 
-    rsync -av --delete <localpath> <distantmachine>@<distantpath>
+To copy contents of one directory to another run the command without the
+`--delete` flag. This can increase the number of files in the destination
+directory, but will never remove any files in the destination directory. A
+trailing slash when specifying the source directory indicates to copy the
+contents rather than the directory itself:
+
+    rsync -av <source_dir>/ <destination_dir>
+
+
+To make the contents of the two directories identical, use the `--delete` flag.
+This will remove any files in the destination directory that are not present in
+the source directory:
+
+    rsync -av <source_dir>/ <destination_dir>
+
+
