@@ -1,43 +1,35 @@
 # df
 
-In the following examples, `path` is optional.
+display free disk space in human-readable format
 
-Report filesystem disk space usage:
-
-    df [path]
+    df -h
 
 
-Include all filesystems:
+display human-readable free disk space of file system where foo.txt is stored
+
+    df -h foo.txt
+
+
+display free disk space of all file systems
 
     df -a
 
 
-Show information in a human-readable format:
+display free disk space of locally mounted file systems
 
-    df -h [path]
-    
-    
-Report filesystem I-node space usage:
-
-    df -i [path]
+    df -l
 
 
-Limit listing to local filesystems:
+display human-readable free disk space of nfs-type file systems
 
-    df -l [path]
-    
+    df -hT nfs
 
-Include filesystem type:
 
-    df -T [path]
-    
-    
-Show only certain filesystem type:
 
-    df -t ext3
-    
-    
-Exclude only certain filesystem type:
+# Basic Usage
 
-    df -x ext3
+Show the free disk space of a file system in human-readable (`-h`) format:
+
+    df -h
+
 

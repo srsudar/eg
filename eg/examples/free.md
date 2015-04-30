@@ -1,21 +1,20 @@
 # free
 
-Show memory usage:
+show memory usage
 
     free
 
 
-Show memory usage in a specific measure unit:
+show memory usage in megabytes
 
-    free [-b|-k|-m|-g|--tera]
+    free -m
 
 
-Include a total line:
 
-    free -t
-    
-    
-Show in a wide format:
+# Basic Usage
 
-    free -w
+Show the memory usage on the system:
+
+    free
+
 
