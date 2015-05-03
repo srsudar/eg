@@ -181,4 +181,8 @@ owner, group, and world (`-exec chmod a+x {} \;`):
 
     find ./searchdir -type f -name '*.php' -exec chmod a+x {} \;
 
+Correcting permissions of an unzipped file:
+
+    find ./searchdir -type d -exec chmod 755 '{}' \;
+    find ./searchdir -type f -exec chmod 644 '{}' \;
 
