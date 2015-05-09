@@ -15,18 +15,21 @@ print the last 10 bytes of a file
     tail -c 10 file.txt
 
 
-print a file starting by line 10
+print a file starting at line 10
 
     tail +10 file.txt
 
 
-print and monitor the last lines of a file as it grow
+print and monitor the last lines of a file as it grows
 
     tail -f file.txt
 
 
+
 # Basic Usage
 
-print the last lines of a file
+Print the last lines of a file:
 
     tail <file>
+
+

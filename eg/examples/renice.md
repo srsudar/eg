@@ -1,6 +1,6 @@
 # renice
 
-change the priority of a running process 
+change the priority of a running process with id 2230
 
     renice -n -15 -p 2230
 
@@ -10,11 +10,14 @@ change priorities of all the process owned by user foo
     renice -n 5 -u foo
 
 
+
 # Basic Usage
 
-alter priority of a running process
+Alter priority of a running process:
 
-    renice -n <priority> <processID>
+    renice -n <priority> -p <processID>
     
 
-niceness values range from -20 (highest priority) to 19 (lowest priority)
+Niceness values range from -20 (highest priority) to 19 (lowest priority).
+
+
