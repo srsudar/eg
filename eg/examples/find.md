@@ -187,9 +187,8 @@ Find all files (`-type f`) ending with a tilde (`-name '*~'`) and remove them
 
 ## Change Permissions
 
-Make all files (`-type f`) ending in .php (`-name '*.php'`) executable by
-owner, group, and world (`-exec chmod a+x {} \;`):
+Give all files (`-type f`) 755 permissions (`-exec chmod 755 '{}' \;`):
 
-    find ./searchdir -type f -name '*.php' -exec chmod a+x {} \;
+    find ./searchdir -type f -exec chmod 755 '{}' \;
 
 

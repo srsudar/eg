@@ -20,26 +20,31 @@ def run_eg():
     )
 
     parser.add_argument(
+        '-f',
         '--config-file',
         help='Path to the .egrc file, if it is not in the default location.'
     )
 
     parser.add_argument(
+        '-e',
         '--examples-dir',
         help='The location to the examples/ dir that ships with eg'
     )
 
     parser.add_argument(
+        '-c',
         '--custom-dir',
         help='Path to a directory containing user-defined examples.'
     )
 
     parser.add_argument(
+        '-p',
         '--pager-cmd',
         help='String literal that will be invoked to page output.'
     )
 
     parser.add_argument(
+        '-l',
         '--list',
         action='store_true',
         help='Show all the programs with eg entries.'
