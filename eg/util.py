@@ -99,7 +99,8 @@ def open_pager_for_file(
     custom_file_path=None,
     use_color=False,
     color_config=None,
-    pager_cmd=None
+    pager_cmd=None,
+    subs=None,
 ):
     """
     Open pager to file_path. If a custom_file_path is also included, it will be
@@ -116,6 +117,9 @@ def open_pager_for_file(
     if use_color:
         colorizer = color.EgColorizer(color_config)
         file_data = colorizer.colorize_text(file_data)
+
+    for substitution in subs:
+        file_data = substitution.apply_and_get_result(file_data)
 
     page_string(file_data, pager_cmd)
 

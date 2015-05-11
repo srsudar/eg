@@ -36,6 +36,11 @@ PAGER_CMD = 'pager-cmd'
 # A basic struct containing configuration values.
 #    examples_dir: path to the directory of examples that ship with eg
 #    custom_dir: path to the directory where custom examples are found
+#    use_color: True if we should colorize output, else False
+#    color_config: the config object specifying which colors to use
+#    pager_cmd: the command to use to page output
+#    squeeze: True if we should remove blank lines, else false
+#    subs: a list of Substitution objects to apply to the output
 Config = namedtuple(
     'Config',
     [
@@ -43,7 +48,9 @@ Config = namedtuple(
         'custom_dir',
         'use_color',
         'color_config',
-        'pager_cmd'
+        'pager_cmd',
+        'squeeze',
+        'subs',
     ]
 )
 
@@ -100,6 +107,9 @@ CONFIG_NAMES = ColorConfig(
 
 # The name of the section in the config file containing colors.
 COLOR_SECTION = 'color'
+
+# The name of the section in the config file containing substitutions.
+SUBSTITUTION_SECTION = 'substitutions'
 
 
 def get_resolved_config_items(
@@ -323,6 +333,19 @@ def _get_color_from_config(config, option):
         return None
     else:
         return ast.literal_eval(config.get(COLOR_SECTION, option))
+
+
+def get_substitutions_from_config(config):
+    """
+    Return a list of Substitution objects from the config. Returns an empty list
+    if no Substitutions are specified. If there are problems parsing the values,
+    a help message will be printed and an error will be thrown.
+    """
+    # pattern_names = config.options(SUBSTITUTION_SECTION)
+    # for name in pattern_names:
+    #     pattern_val = config.get(SUBSTITUTION_SECTION, name)
+    # TODO
+    raise NotImplemented
 
 
 def get_default_color_config():
