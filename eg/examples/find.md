@@ -92,6 +92,17 @@ Find files exactly 2 megabytes (`-size 2M`):
 
     find ./searchdir -size 2M
 
+# Time
+    
+    -mtime 0 means in the 24 hours it HAVE BEEN changed
+
+    -mtime 3 means in the 72 hours it HAVE BEEN changed
+
+    -cmin +60 which means it HAS NOT BEEN changed in a hour
+
+    -cmin -3 means it has been changed in the last three minutes
+
+    -newer file use other file to compare
 
 
 ## Ranges

@@ -63,7 +63,7 @@ Fields are 1-indexed--i.e. `$2` would refer to the second colum in a file.
 
     Tyrion   Lannister    555.360.1234
     Jamie    Lannister    555.360.9876
-    Jon      Snow         555.206.4444
+    Jon      Snow         555.206.4545
     Arya     Stark        555.206.1111
 
 
