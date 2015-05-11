@@ -69,6 +69,11 @@ Compress directory (`c`) into b-zipped (`j`) directory:
     tar vfcj b_zipped_directory.tar.bz2 directory
 
 
+Compress directory (`c`) into xz-zipped (`J`) directory:
+
+    tar vfcJ xz_zipped_directory.tar.xz directory
+
+
 
 # Untarring
 
@@ -80,6 +85,11 @@ Untar (`x`) and unzip a g-zipped (`z`) file:
 Untar (`x`) and unzip a b-zipped (`j`) file:
 
     tar vfxj b_zipped_archive.tar.bz2
+
+
+Untar (`x`) and unzip a xz-zipped (`J`) file:
+
+    tar vfxJ xz_zipped_archive.tar.xz
 
 
 
