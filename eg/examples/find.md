@@ -172,7 +172,7 @@ Find all files (`-type f`) ending with a tilde (`-name '*~'`) and remove them
 (`-exec rm -f {} \;`):
 
     find ./searchdir -type f -name '*~' -exec rm {} \;
-    
+
 
 ## Change Permissions
 

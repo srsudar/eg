@@ -62,6 +62,7 @@ def run_eg():
         '-s',
         '--squeeze',
         action='store_true',
+        default=None,
         help='Show fewer blank lines in output.'
     )
 
