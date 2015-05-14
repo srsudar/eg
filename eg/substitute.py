@@ -1,3 +1,4 @@
+import re
 
 
 class Substitution:
@@ -24,4 +25,16 @@ class Substitution:
         Perform the substitution represented by this object on string and return
         the result.
         """
-        raise NotImplemented
+        if self.is_multiline:
+            compiled_pattern = re.compile(self.pattern, re.MULTILINE)
+        else:
+            compiled_pattern = re.compile(self.pattern)
+
+        result = re.sub(compiled_pattern, self.repl, string)
+        return result
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.__dict__ == other.__dict__
+        else:
+            return False

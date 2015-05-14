@@ -2,6 +2,7 @@ import ast
 import os
 
 from collections import namedtuple
+from eg import substitute
 
 # Support Python 2 and 3.
 try:
@@ -24,6 +25,8 @@ DEFAULT_USE_COLOR = True
 # let their output from less be colorized.
 DEFAULT_PAGER_CMD = 'less -R'
 
+DEFAULT_SQUEEZE = False
+
 # We need this just because the ConfigParser library requires it.
 DEFAULT_SECTION = 'eg-config'
 
@@ -32,6 +35,7 @@ EG_EXAMPLES_DIR = 'examples-dir'
 CUSTOM_EXAMPLES_DIR = 'custom-dir'
 USE_COLOR = 'color'
 PAGER_CMD = 'pager-cmd'
+SQUEEZE = 'squeeze'
 
 # A basic struct containing configuration values.
 #    examples_dir: path to the directory of examples that ship with eg
@@ -118,6 +122,8 @@ def get_resolved_config_items(
     custom_dir,
     use_color,
     pager_cmd,
+    squeeze,
+    subs,
     debug=True
 ):
     """
@@ -151,7 +157,9 @@ def get_resolved_config_items(
         custom_dir=None,
         color_config=empty_color_config,
         use_color=None,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=None,
+        subs=None
     )
 
     if os.path.isfile(resolved_egrc_path):
@@ -188,12 +196,26 @@ def get_resolved_config_items(
             default_color_config
         )
 
+    resolved_squeeze = get_priority(
+        squeeze,
+        egrc_config.squeeze,
+        DEFAULT_SQUEEZE
+    )
+
+    resolved_subs = get_priority(
+        subs,
+        egrc_config.subs,
+        get_default_subs()
+    )
+
     result = Config(
         examples_dir=resolved_examples_dir,
         custom_dir=resolved_custom_dir,
         color_config=color_config,
         use_color=resolved_use_color,
-        pager_cmd=resolved_pager_cmd
+        pager_cmd=resolved_pager_cmd,
+        squeeze=resolved_squeeze,
+        subs=resolved_subs
     )
 
     return result
@@ -220,6 +242,8 @@ def get_config_tuple_from_egrc(egrc_path):
         custom_dir = None
         use_color = None
         pager_cmd = None
+        squeeze = None
+        subs = None
 
         if config.has_option(DEFAULT_SECTION, EG_EXAMPLES_DIR):
             examples_dir = config.get(DEFAULT_SECTION, EG_EXAMPLES_DIR)
@@ -239,12 +263,21 @@ def get_config_tuple_from_egrc(egrc_path):
 
         color_config = get_custom_color_config_from_egrc(config)
 
+        if config.has_option(DEFAULT_SECTION, SQUEEZE):
+            squeeze_raw = config.get(DEFAULT_SECTION, SQUEEZE)
+            squeeze = _parse_bool_from_raw_egrc_value(squeeze_raw)
+
+        if config.has_section(SUBSTITUTION_SECTION):
+            subs = get_substitutions_from_config(config)
+
         return Config(
             examples_dir=examples_dir,
             custom_dir=custom_dir,
             color_config=color_config,
             use_color=use_color,
-            pager_cmd=pager_cmd
+            pager_cmd=pager_cmd,
+            squeeze=squeeze,
+            subs=subs
         )
 
 
@@ -335,17 +368,44 @@ def _get_color_from_config(config, option):
         return ast.literal_eval(config.get(COLOR_SECTION, option))
 
 
+def parse_substitution_from_list(list_rep):
+    """
+    Parse a substitution from the list representation in the config file.
+    """
+    # We are expecting [pattern, replacement [, is_multiline]]
+    if type(list_rep) is not list:
+        raise SyntaxError('Substitution must be a list')
+    if len(list_rep) < 2:
+        raise SyntaxError('Substitution must be a list of size 2')
+
+    pattern = list_rep[0]
+    replacement = list_rep[1]
+
+    # By default, substitutions are not multiline.
+    is_multiline = False
+    if (len(list_rep) > 2):
+        is_multiline = list_rep[2]
+        if type(is_multiline) is not bool:
+            raise SyntaxError('is_multiline must be a boolean')
+
+    result = substitute.Substitution(pattern, replacement, is_multiline)
+    return result
+
+
 def get_substitutions_from_config(config):
     """
     Return a list of Substitution objects from the config. Returns an empty list
     if no Substitutions are specified. If there are problems parsing the values,
     a help message will be printed and an error will be thrown.
     """
-    # pattern_names = config.options(SUBSTITUTION_SECTION)
-    # for name in pattern_names:
-    #     pattern_val = config.get(SUBSTITUTION_SECTION, name)
-    # TODO
-    raise NotImplemented
+    result = []
+    pattern_names = config.options(SUBSTITUTION_SECTION)
+    for name in pattern_names:
+        pattern_val = config.get(SUBSTITUTION_SECTION, name)
+        list_rep = ast.literal_eval(pattern_val)
+        substitution = parse_substitution_from_list(list_rep)
+        result.append(substitution)
+    return result
 
 
 def get_default_color_config():
@@ -443,3 +503,13 @@ def _parse_bool_from_raw_egrc_value(raw_value):
     """
     truthy_values = ['True', 'true']
     return raw_value in truthy_values
+
+
+def get_default_subs():
+    """
+    Get the list of default substitutions. We're not storing this as a module
+    level object like the other DEFAULT values, as lists are mutable, and we
+    could get into trouble by modifying that list and not having it remain empty
+    as might be expected.
+    """
+    return []

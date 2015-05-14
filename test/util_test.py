@@ -1,9 +1,22 @@
 import os
 
 from eg import config
+from eg import substitute
 from eg import util
+from mock import Mock
 from mock import patch
 from nose.tools import assert_equal
+
+PATH_UNSQUEEZED_FILE = os.path.join(
+    'test',
+    'assets',
+    'pwd_unsqueezed.md'
+)
+PATH_SQUEEZED_FILE = os.path.join(
+    'test',
+    'assets',
+    'pwd_squeezed.md'
+)
 
 
 def test_get_file_path_for_program_correct():
@@ -23,7 +36,9 @@ def test_has_default_entry_for_program_no_examples_dir():
         custom_dir='customdir',
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
 
     program = 'cp'
@@ -39,7 +54,9 @@ def test_has_custom_entry_for_program_no_custom_dir():
         custom_dir=None,
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
 
     program = 'find'
@@ -55,7 +72,9 @@ def test_has_default_entry_when_present():
         custom_dir=None,
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
     program = 'mv'
 
@@ -77,7 +96,9 @@ def test_has_default_entry_when_not_present():
         custom_dir=None,
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
     program = 'cp'
 
@@ -99,7 +120,9 @@ def test_has_custom_entry_when_present():
         custom_dir='customdir',
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
     program = 'find'
 
@@ -121,7 +144,9 @@ def test_has_custom_entry_when_not_present():
         custom_dir='customdir',
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
 
     program = 'locate'
@@ -177,85 +202,128 @@ def _helper_assert_path_isfile_not_present(
             assert_equal(actual, has_entry)
 
 
-def _helper_assert_open_pager_for_file(
-    default_file_path,
-    default_file_contents,
-    custom_file_path,
-    custom_file_contents,
-    use_color,
-    color_config,
-    pager_cmd,
-    combined_contents,
-    colorized_contents,
-    paged_contents
-):
-    """
-    Helper method for testing open_pager_for_file method.
-    """
-    # Make sure the caller is using this method correctly.
-    valid_paged_contents = [colorized_contents, combined_contents]
-    if paged_contents not in valid_paged_contents:
-        print('paged_contents must be either combined or colorized _contents')
-        assert_equal(True, False)
+# def _helper_assert_open_pager_for_file(
+#     default_file_path,
+#     default_file_contents,
+#     custom_file_path,
+#     custom_file_contents,
+#     use_color,
+#     color_config,
+#     pager_cmd,
+#     squeeze,
+#     subs,
+#     combined_contents,
+#     colorized_contents,
+#     squeezed_contents,
+#     subbed_contents,
+#     paged_contents
+# ):
+#     """
+#     Helper method for testing open_pager_for_file method.
 
-    def return_file_contents(*args, **kwargs):
-        if args[0] == default_file_path:
-            return default_file_contents
-        elif args[0] == custom_file_path:
-            return custom_file_contents
-        else:
-            raise TypeError(
-                args[0] +
-                ' was an unexpected path--should be ' +
-                default_file_path +
-                ' or ' +
-                custom_file_path
-            )
+#         default_file_path: path for the default file
+#         default_file_contents: contents of the default file
+#         custom_file_path: path for the custom file
+#         custom_file_contents: path for the custom contents
+#         use_color: boolean indicating whether or not to use color
+#         color_config: config object for colorization
+#         pager_cmd: string to use to page the string
+#         squeeze: true if the squeeze command should be applied
+#         subs: array of Substitutions to perform
+#         combined_contents: combined contents that should be recovered from the
+#             two file contents
+#         colorized_contents: the contents of the file to be returned by the
+#             colorizer
+#         squeezed_contents: file contents to be returned by the squeeze command
+#         subbed_contents: the result of all the substitutions specified by subs
+#         paged_contents: the final string that should be paged as output
+#     """
+#     # Make sure the caller is using this method correctly.
+#     valid_paged_contents = [
+#         colorized_contents,
+#         combined_contents,
+#         squeezed_contents,
+#         subbed_contents
+#     ]
+#     if paged_contents not in valid_paged_contents:
+#         print('paged_contents must be either combined or colorized _contents')
+#         assert_equal(True, False)
 
-    with patch(
-        'eg.util._get_contents_of_file',
-        side_effect=return_file_contents
-    ):
-        with patch(
-            'eg.color.EgColorizer',
-        ) as patched_colorizer_class:
-            # The actual instance created by these calls is stored at
-            # return_value
-            colorizer_instance = patched_colorizer_class.return_value
-            colorizer_instance.colorize_text.return_value = colorized_contents
-            with patch('eg.util.page_string') as patched_page_method:
-                # Make the call then assert things happened as we expected.
-                util.open_pager_for_file(
-                    default_file_path,
-                    custom_file_path,
-                    use_color,
-                    color_config,
-                    pager_cmd
-                )
+#     def return_file_contents(*args, **kwargs):
+#         if args[0] == default_file_path:
+#             return default_file_contents
+#         elif args[0] == custom_file_path:
+#             return custom_file_contents
+#         else:
+#             raise TypeError(
+#                 args[0] +
+#                 ' was an unexpected path--should be ' +
+#                 default_file_path +
+#                 ' or ' +
+#                 custom_file_path
+#             )
 
-                if use_color:
-                    # Make sure we created the colorizer with the correct config
-                    # and that we called colorizing method correctly.
-                    colorizer_instance.colorize_text.assert_called_once_with(
-                        combined_contents
-                    )
-                else:
-                    colorizer_instance.colorize_text.assert_no_calls()
+#     with patch(
+#         'eg.util._get_contents_of_file',
+#         side_effect=return_file_contents
+#     ):
+#         with patch(
+#             'eg.color.EgColorizer',
+#         ) as patched_colorizer_class:
+#             # The actual instance created by these calls is stored at
+#             # return_value
+#             colorizer_instance = patched_colorizer_class.return_value
+#             colorizer_instance.colorize_text.return_value = colorized_contents
+#             with patch(
+#                 'eg.util.get_squeezed_contents',
+#                 return_value=squeezed_contents
+#             ) as squeeze_method:
+#                 with patch(
+#                     'eg.util.get_substituted_contents',
+#                     return_value=subbed_contents
+#                 ) as substitute_method:
+#                     with patch('eg.util.page_string') as patched_page_method:
+#                         # Make the call then assert things happened as we
+#                         # expected.
+#                         util.open_pager_for_file(
+#                             default_file_path,
+#                             custom_file_path,
+#                             use_color,
+#                             color_config,
+#                             pager_cmd
+#                         )
 
-                patched_page_method.assert_called_once_with(
-                    paged_contents,
-                    pager_cmd
-                )
+#                         contents_so_far = combined_contents
+
+#                         if use_color:
+#                             # Make sure we created the colorizer with the correct config
+#                             # and that we called colorizing method correctly.
+#                             colorizer_instance.colorize_text.assert_called_once_with(
+#                                 combined_contents
+#                             )
+#                         else:
+#                             colorizer_instance.colorize_text.assert_no_calls()
+
+#                         patched_page_method.assert_called_once_with(
+#                             paged_contents,
+#                             pager_cmd
+#                         )
 
 
 def test_handle_program_no_entries():
+    """
+    We should do the right thing if there are no entries for a given program.
+    """
+    # TODO: update for new raw, format, page structure
     program = 'cp'
     test_config = config.Config(
         examples_dir=None,
         custom_dir=None,
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
 
     with patch(
@@ -267,17 +335,44 @@ def test_handle_program_no_entries():
             return_value=False
         ) as mock_has_custom:
             with patch(
-                'eg.util.open_pager_for_file'
-            ) as mock_open_pager:
-                util.handle_program(program, test_config)
+                'eg.util.get_contents_from_files'
+            ) as mock_get_contents:
+                with patch(
+                    'eg.util.get_formatted_contents'
+                ) as mock_format:
+                    with patch(
+                        'eg.util.page_string'
+                    ) as mock_page_string:
+                        util.handle_program(program, test_config)
 
-                mock_has_default.assert_called_once_with(program, test_config)
-                mock_has_custom.assert_called_once_with(program, test_config)
+                        mock_has_default.assert_called_once_with(
+                            program,
+                            test_config
+                        )
 
-                assert_equal(mock_open_pager.call_count, 0)
+                        mock_has_custom.assert_called_once_with(
+                            program,
+                            test_config
+                        )
+
+                        # We should have aborted and not called any of the other
+                        # methods.
+                        assert_equal(mock_get_contents.call_count, 0)
+                        assert_equal(mock_format.call_count, 0)
+                        assert_equal(mock_page_string.call_count, 0)
+
+
+def test_handle_program_pipes_input_and_pages_correctly():
+    """
+    handle_program needs to get the raw file contents, format them, and pipe
+    them by calling the pager method. This test makes sure that pipeline is
+    respected.
+    """
+    raise NotImplementedError
 
 
 def test_handle_program_finds_paths_and_calls_open_pager():
+    # TODO: update for new raw, format, page function
     program = 'mv'
 
     examples_dir = 'test-eg-dir'
@@ -285,13 +380,17 @@ def test_handle_program_finds_paths_and_calls_open_pager():
     color_config = None
     use_color = False
     pager_cmd = 'foo bar'
+    squeeze = False
+    subs = ['foo', 'bar']
 
     test_config = config.Config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
         color_config=color_config,
         use_color=use_color,
-        pager_cmd=pager_cmd
+        pager_cmd=pager_cmd,
+        squeeze=squeeze,
+        subs=subs
     )
 
     default_path = 'test-eg-dir/mv.md'
@@ -355,70 +454,72 @@ def test_handle_program_finds_paths_and_calls_open_pager():
                         custom_file_path=custom_path,
                         use_color=use_color,
                         color_config=color_config,
-                        pager_cmd=pager_cmd
+                        pager_cmd=pager_cmd,
+                        squeeze=squeeze,
+                        subs=subs
                     )
 
 
-def test_open_pager_for_file_only_default():
-    default_path = 'test/default/path'
-    default_contents = 'contents of the default file'
-    combined_contents = default_contents
-    colorized_contents = 'COLOR: ' + combined_contents
+# def test_open_pager_for_file_only_default():
+#     default_path = 'test/default/path'
+#     default_contents = 'contents of the default file'
+#     combined_contents = default_contents
+#     colorized_contents = 'COLOR: ' + combined_contents
 
-    _helper_assert_open_pager_for_file(
-        default_path,
-        default_contents,
-        None,
-        None,
-        False,
-        None,
-        'some pager cmd',
-        combined_contents,
-        colorized_contents,
-        combined_contents
-    )
-
-
-def test_open_pager_for_file_only_custom():
-    custom_path = 'test/custom/path'
-    custom_contents = 'contents of the custom file'
-    combined_contents = custom_contents
-    colored_contents = 'COLOR: ' + combined_contents
-
-    _helper_assert_open_pager_for_file(
-        None,
-        None,
-        custom_path,
-        custom_contents,
-        False,
-        None,
-        'another pager cmd',
-        combined_contents,
-        colored_contents,
-        combined_contents
-    )
+#     _helper_assert_open_pager_for_file(
+#         default_path,
+#         default_contents,
+#         None,
+#         None,
+#         False,
+#         None,
+#         'some pager cmd',
+#         combined_contents,
+#         colorized_contents,
+#         combined_contents
+#     )
 
 
-def test_open_pager_for_both_file_types():
-    default_path = 'test/default/path'
-    default_contents = 'contents of the default file'
-    custom_path = 'test/custom/path'
-    custom_contents = 'contents of the custom file'
-    combined_contents = custom_contents + default_contents
-    colorized_contents = 'COLORIZED: ' + combined_contents
+# def test_open_pager_for_file_only_custom():
+#     custom_path = 'test/custom/path'
+#     custom_contents = 'contents of the custom file'
+#     combined_contents = custom_contents
+#     colored_contents = 'COLOR: ' + combined_contents
 
-    _helper_assert_open_pager_for_file(
-        default_path,
-        default_contents,
-        custom_path,
-        custom_contents,
-        True,
-        None,
-        'yet another pager cmd',
-        combined_contents,
-        colorized_contents,
-        colorized_contents
-    )
+#     _helper_assert_open_pager_for_file(
+#         None,
+#         None,
+#         custom_path,
+#         custom_contents,
+#         False,
+#         None,
+#         'another pager cmd',
+#         combined_contents,
+#         colored_contents,
+#         combined_contents
+#     )
+
+
+# def test_open_pager_for_both_file_types():
+#     default_path = 'test/default/path'
+#     default_contents = 'contents of the default file'
+#     custom_path = 'test/custom/path'
+#     custom_contents = 'contents of the custom file'
+#     combined_contents = custom_contents + default_contents
+#     colorized_contents = 'COLORIZED: ' + combined_contents
+
+#     _helper_assert_open_pager_for_file(
+#         default_path,
+#         default_contents,
+#         custom_path,
+#         custom_contents,
+#         True,
+#         None,
+#         'yet another pager cmd',
+#         combined_contents,
+#         colorized_contents,
+#         colorized_contents
+#     )
 
 
 def test_list_supported_programs_only_default():
@@ -430,7 +531,9 @@ def test_list_supported_programs_only_default():
         custom_dir=custom_dir,
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
 
     def give_list(*args, **kwargs):
@@ -456,7 +559,9 @@ def test_list_supported_programs_only_custom():
         custom_dir=custom_dir,
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
 
     def give_list(*args, **kwargs):
@@ -482,7 +587,9 @@ def test_list_supported_programs_both():
         custom_dir=custom_dir,
         color_config=None,
         use_color=False,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
     )
 
     def give_list(*args, **kwargs):
@@ -509,7 +616,7 @@ def test_list_supported_programs_both():
 
 
 def test_list_supported_programs_fails_gracefully_if_no_dirs():
-    test_config = config.Config(None, None, None, None, None)
+    test_config = config.Config(None, None, None, None, None, None, None)
 
     actual = util.get_list_of_all_supported_commands(test_config)
     target = []
@@ -517,50 +624,50 @@ def test_list_supported_programs_fails_gracefully_if_no_dirs():
     assert_equal(actual, target)
 
 
-def test_calls_colorize_is_use_color_set():
-    """We should call the colorize function if use_color = True."""
-    default_file = 'def_path'
-    default_contents = 'def contents'
-    custom_path = 'custom_path',
-    custom_contents = 'custom contents'
-    combined_contents = custom_contents + default_contents
-    colorized_contents = 'colorized: ' + combined_contents
+# def test_calls_colorize_is_use_color_set():
+#     """We should call the colorize function if use_color = True."""
+#     default_file = 'def_path'
+#     default_contents = 'def contents'
+#     custom_path = 'custom_path',
+#     custom_contents = 'custom contents'
+#     combined_contents = custom_contents + default_contents
+#     colorized_contents = 'colorized: ' + combined_contents
 
-    _helper_assert_open_pager_for_file(
-        default_file,
-        default_contents,
-        custom_path,
-        custom_contents,
-        True,
-        config.get_default_color_config(),
-        'pager cmd for use color',
-        combined_contents,
-        colorized_contents,
-        colorized_contents
-    )
+#     _helper_assert_open_pager_for_file(
+#         default_file,
+#         default_contents,
+#         custom_path,
+#         custom_contents,
+#         True,
+#         config.get_default_color_config(),
+#         'pager cmd for use color',
+#         combined_contents,
+#         colorized_contents,
+#         colorized_contents
+#     )
 
 
-def test_does_not_call_colorize_if_use_color_false():
-    """We should not call colorize if use_color = False."""
-    default_file = 'def_path'
-    default_contents = 'def contents'
-    custom_path = 'custom_path',
-    custom_contents = 'custom contents'
-    combined_contents = custom_contents + default_contents
-    colorized_contents = 'colorized: ' + combined_contents
+# def test_does_not_call_colorize_if_use_color_false():
+#     """We should not call colorize if use_color = False."""
+#     default_file = 'def_path'
+#     default_contents = 'def contents'
+#     custom_path = 'custom_path',
+#     custom_contents = 'custom contents'
+#     combined_contents = custom_contents + default_contents
+#     colorized_contents = 'colorized: ' + combined_contents
 
-    _helper_assert_open_pager_for_file(
-        default_file,
-        default_contents,
-        custom_path,
-        custom_contents,
-        False,
-        config.get_default_color_config(),
-        'pager command whoop',
-        combined_contents,
-        colorized_contents,
-        combined_contents
-    )
+#     _helper_assert_open_pager_for_file(
+#         default_file,
+#         default_contents,
+#         custom_path,
+#         custom_contents,
+#         False,
+#         config.get_default_color_config(),
+#         'pager command whoop',
+#         combined_contents,
+#         colorized_contents,
+#         combined_contents
+#     )
 
 
 def test_calls_pipepager_if_not_less():
@@ -638,3 +745,330 @@ def _helper_assert_about_pager(
                         str_to_page,
                         cmd=pager_cmd
                     )
+
+
+def _helper_assert_file_contents(
+    default_path,
+    default_contents,
+    custom_path,
+    custom_contents,
+    target_contents
+):
+    """
+    Helper method to assert things about the get_contents_from_files method.
+    Does not actually hit the disk.
+
+    default_path: the path of a default file
+    default_contents: the contents of the default file
+    custom_path: the path to a custom file
+    custom_contents: the contents of the custom file
+    target_contents: the final combined contents that should be returned by the
+        get_contents_from_files method.
+    """
+
+    # This method will be used by the mock framework to return the right file
+    # contents based on the file name.
+    def return_file_contents(*args, **kwargs):
+        if args[0] == default_path:
+            return default_contents
+        elif args[0] == custom_path:
+            return custom_contents
+        else:
+            raise TypeError(
+                args[0] +
+                ' was an unexpected path--should be ' +
+                default_path +
+                ' or ' +
+                custom_path
+            )
+
+    with patch(
+        'eg.util._get_contents_of_file',
+        side_effect=return_file_contents
+    ):
+        actual = util.get_contents_from_files(default_path, custom_path)
+        assert_equal(actual, target_contents)
+
+
+def test_get_contents_from_files_only_default():
+    """
+    Retrieve the correct file contents when only a default file is present.
+    """
+    default_path = 'test/default/path'
+    default_contents = 'contents of the default file'
+    _helper_assert_file_contents(
+        default_path,
+        default_contents,
+        None,
+        None,
+        default_contents
+    )
+
+
+def test_get_contents_from_files_only_custom():
+    """
+    Retrieve only the custom file contents when we only have a custom file
+    path.
+    """
+    custom_path = 'test/custom/path'
+    custom_contents = 'contents of the custom file'
+    _helper_assert_file_contents(
+        None,
+        None,
+        custom_path,
+        custom_contents,
+        custom_contents
+    )
+
+
+def test_get_contents_from_file_both_default_and_custom():
+    default_path = 'test/default/path'
+    default_contents = 'contents of the default file'
+    custom_path = 'test/custom/path'
+    custom_contents = 'contents of the custom file'
+    combined_contents = custom_contents + default_contents
+    _helper_assert_file_contents(
+        default_path,
+        default_contents,
+        custom_path,
+        custom_contents,
+        combined_contents
+    )
+
+
+def _helper_assert_formatted_contents(
+    starting_contents,
+    use_color,
+    color_config,
+    squeeze,
+    subs,
+    colorized_contents,
+    squeezed_contents,
+    subbed_contents,
+    formatted_result
+):
+    """
+    Helper method to assist in asserting things about the get_formatted_contents
+    method.
+
+    starting_contents: the starting string that we are working with
+    use_color: True if we should use color
+    color_config: the color config to be passed to get_colorized_contents
+    squeeze: True if we should squeeze
+    subs: the list of Substitutions that we should pass to
+        get_substituted_contents
+    colored_contents: the result of get_colorized_contents
+    squeezed_contents: the result of get_squeezed_contents
+    subbed_contents: the result of subbed_contents
+    formatted_result: the final, formatted string that should be returned
+    """
+    with patch(
+        'eg.util.get_colorized_contents',
+        return_value=colorized_contents
+    ) as color_method:
+        with patch(
+            'eg.util.get_squeezed_contents',
+            return_value=squeezed_contents
+        ) as squeeze_method:
+            with patch(
+                'eg.util.get_substituted_contents',
+                return_value=subbed_contents
+            ) as sub_method:
+                actual = util.get_formatted_contents(
+                    starting_contents,
+                    use_color,
+                    color_config,
+                    subs,
+                    squeeze
+                )
+
+                # We'll update the contents as they get formatted to make sure
+                # we pass the right thing to the various methods.
+                contents_thus_far = starting_contents
+
+                if use_color:
+                    color_method.assert_called_once_with(
+                        contents_thus_far,
+                        color_config
+                    )
+                    contents_thus_far = colorized_contents
+                else:
+                    color_method.assert_no_calls()
+
+                if squeeze:
+                    squeeze_method.assert_called_once_with(contents_thus_far)
+                    contents_thus_far = squeezed_contents
+                else:
+                    squeeze_method.assert_no_calls()
+
+                if subs:
+                    sub_method.assert_called_once_with(
+                        contents_thus_far,
+                        subs
+                    )
+                    contents_thus_far = subbed_contents
+                else:
+                    sub_method.assert_no_calls()
+
+                assert_equal(actual, formatted_result)
+
+
+def test_get_formatted_contents_does_not_format_methods_if_all_falsey():
+    """
+    We should invoke none of the formatter methods if the flags are false and
+    subs is not truthy.
+    """
+    starting_contents = 'this is where we start'
+    _helper_assert_formatted_contents(
+        starting_contents=starting_contents,
+        use_color=False,
+        color_config='some color config',
+        squeeze=False,
+        subs=None,
+        colorized_contents='this was colored',
+        squeezed_contents='this was squeezed',
+        subbed_contents='these contents were subbed',
+        formatted_result=starting_contents
+    )
+
+
+def test_get_formatted_contents_calls_colorize_if_use_color():
+    """
+    Colorize the contents if use_color = True.
+    """
+    starting_contents = 'this is where we start'
+    colorized_contents = 'COLORIZED: this is where we start'
+    _helper_assert_formatted_contents(
+        starting_contents=starting_contents,
+        use_color=True,
+        color_config='some color config',
+        squeeze=False,
+        subs=None,
+        colorized_contents=colorized_contents,
+        squeezed_contents='this was squeezed',
+        subbed_contents='these contents were subbed',
+        formatted_result=colorized_contents
+    )
+
+
+def test_get_formatted_contents_squeezes():
+    """If squeeze, we need to squeeze."""
+    starting_contents = 'this is where we start'
+    squeezed_contents = 'this is the result of a squeezing'
+    _helper_assert_formatted_contents(
+        starting_contents=starting_contents,
+        use_color=False,
+        color_config='some color config',
+        squeeze=True,
+        subs=None,
+        colorized_contents='this was colored',
+        squeezed_contents=squeezed_contents,
+        subbed_contents='these contents were subbed',
+        formatted_result=squeezed_contents
+    )
+
+
+def test_get_formatted_contents_subsitutes():
+    """If subs is truthy, get_substituted contents should be called."""
+    starting_contents = 'this is where we start'
+    subbed_contents = 'substituted like a teacher'
+    _helper_assert_formatted_contents(
+        starting_contents=starting_contents,
+        use_color=False,
+        color_config='some color config',
+        squeeze=False,
+        subs=['truthy', 'list'],
+        colorized_contents='this was colored',
+        squeezed_contents='this was squeezed',
+        subbed_contents=subbed_contents,
+        formatted_result=subbed_contents
+    )
+
+
+def test_perform_all_formatting():
+    """
+    When use_color, squeeze, and subs are all truthy, all the formatting
+    should be applied in that order.
+    """
+    starting_contents = 'the starting point for grand formatting'
+    subbed_contents = 'subbed is the last thing called so should be the result'
+    _helper_assert_formatted_contents(
+        starting_contents=starting_contents,
+        use_color=True,
+        color_config='some color config',
+        squeeze=True,
+        subs=['truthy', 'list'],
+        colorized_contents='this was colored',
+        squeezed_contents='this was squeezed',
+        subbed_contents=subbed_contents,
+        formatted_result=subbed_contents
+    )
+
+
+def _get_file_as_string(path):
+    """Get the contents of the file as a string."""
+    with open(path, 'r') as f:
+        data = f.read()
+    return data
+
+
+def test_get_squeezed_contents_correctly_squeezes():
+    """
+    Our squeeze method should follow our convention, which is to remove the
+    blank line between a description and an example, to keep two blank lines
+    between sections, and otherwise have only single blank lines.
+    """
+    unsqueezed = _get_file_as_string(PATH_UNSQUEEZED_FILE)
+    # the target squeezed output is a reference implementation in
+    # pwd_squeezed.md.
+    target = _get_file_as_string(PATH_SQUEEZED_FILE)
+
+    actual = util.get_squeezed_contents(unsqueezed)
+    assert_equal(actual, target)
+
+
+def test_get_substituted_contents_handles_empty_subs():
+    """Nothing should be formatted if there are no substitutions."""
+    raw_contents = 'this should not be subbed'
+    actual = util.get_substituted_contents(raw_contents, [])
+    assert_equal(actual, raw_contents)
+
+
+def test_get_substituted_contents_substitutes_calls_correct_methods():
+    """
+    The get_substituted_contents method calls things in the correct order.
+    """
+    sub_one = Mock(auto_spec=substitute.Substitution)
+    sub_one_result = 'result of sub one'
+    sub_one.apply_and_get_result.return_value = sub_one_result
+
+    sub_two = Mock(auto_spec=substitute.Substitution)
+    sub_two_result = 'result of sub two'
+    sub_two.apply_and_get_result.return_value = sub_two_result
+
+    starting_contents = 'the string we should be substituting into'
+    target = sub_two_result
+    subs = [sub_one, sub_two]
+
+    actual = util.get_substituted_contents(starting_contents, subs)
+
+    sub_one.apply_and_get_result.assert_called_once_with(starting_contents)
+    sub_two.apply_and_get_result.assert_called_once_with(sub_one_result)
+
+    assert_equal(actual, target)
+
+
+def test_get_substituted_contents_substitutes_correctly():
+    """
+    Basic test to make sure Substitutions can get applied correctly.
+    """
+    sub_one = substitute.Substitution('foo', 'bar', False)
+    sub_two = substitute.Substitution('bar\n\n', 'baz\n', True)
+
+    start = 'foo\n\n something else\n\n    bar\n\n'
+    target = 'baz\n something else\n\n    baz\n'
+
+    subs = [sub_one, sub_two]
+    actual = util.get_substituted_contents(start, subs)
+
+    assert_equal(actual, target)

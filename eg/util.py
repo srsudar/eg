@@ -44,13 +44,20 @@ def handle_program(program, config):
         )
         return
 
-    open_pager_for_file(
-        default_file_path=default_file_path,
-        custom_file_path=custom_file_path,
+    raw_contents = get_contents_from_files(
+        default_file_path,
+        custom_file_path
+    )
+
+    formatted_contents = get_formatted_contents(
+        raw_contents,
         use_color=config.use_color,
         color_config=config.color_config,
-        pager_cmd=config.pager_cmd
+        squeeze=config.squeeze,
+        subs=config.subs
     )
+
+    page_string(formatted_contents, pager_cmd=config.pager_cmd)
 
 
 def get_file_path_for_program(program, dir_to_search):
@@ -94,15 +101,33 @@ def has_custom_entry_for_program(program, config):
         return False
 
 
+def get_contents_from_files(default_file_path, custom_file_path):
+    """
+    Take the paths to two files and return the contents as a string. If
+    custom_file_path is valid, it will be shown before the contents of the
+    default file.
+    """
+    # file_data = ''
+
+    # if custom_file_path:
+    #     file_data += _get_contents_of_file(custom_file_path)
+
+    # if default_file_path:
+    #     file_data += _get_contents_of_file(default_file_path)
+    raise NotImplementedError
+
+
 def open_pager_for_file(
-    default_file_path=None,
-    custom_file_path=None,
+    starting_contents=None,
     use_color=False,
     color_config=None,
     pager_cmd=None,
-    subs=None,
+    squeeze=None,
+    subs=None
 ):
     """
+    Apply formatting to the starting_contents as necessary and return the
+    result.
     Open pager to file_path. If a custom_file_path is also included, it will be
     shown before file_path in the same pager.
     """
@@ -118,8 +143,11 @@ def open_pager_for_file(
         colorizer = color.EgColorizer(color_config)
         file_data = colorizer.colorize_text(file_data)
 
-    for substitution in subs:
-        file_data = substitution.apply_and_get_result(file_data)
+    if squeeze:
+        file_data = get_squeezed_contents(file_data)
+
+    if subs:
+        file_data = get_substituted_contents(file_data)
 
     page_string(file_data, pager_cmd)
 
@@ -232,3 +260,40 @@ def get_list_of_all_supported_commands(config):
         result.append(get_without_suffix(cus_cmd) + ' ' + FLAG_ONLY_CUSTOM)
 
     return result
+
+
+def get_squeezed_contents(contents):
+    """
+    Squeeze the contents by removing blank lines.
+    """
+    raise NotImplementedError
+
+
+def get_colorized_contents(contents, color_config):
+    """Colorize the contents based on the color_config."""
+    raise NotImplementedError
+
+
+def get_substituted_contents(contents, substitutions):
+    """
+    Perform a list of substitutions and return the result.
+
+        contents: the starting string on which to beging substitutions
+        substitutions: list of Substitution objects to call, in order, with the
+            result of the previous substitution.
+    """
+    raise NotImplementedError
+
+
+def get_formatted_contents(
+    raw_contents,
+    use_color,
+    color_config,
+    squeeze,
+    subs
+):
+    """
+    Apply formatting to raw_contents and return the result. Formatting is
+    applied in the order: color, squeeze, subs.
+    """
+    raise NotImplementedError
