@@ -169,9 +169,9 @@ must be terminated with an escaped semicolon (`\;`).
 ## Delete
 
 Find all files (`-type f`) ending with a tilde (`-name '*~'`) and remove them
-(`-exec rm -f {} \;`):
+(`-delete`):
 
-    find ./searchdir -type f -name '*~' -exec rm {} \;
+    find ./searchdir -type f -name '*~' -delete
     
 
 ## Change Permissions
