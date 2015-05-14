@@ -59,6 +59,13 @@ def run_eg():
     )
 
     parser.add_argument(
+        '-s',
+        '--squeeze',
+        action='store_true',
+        help='Show fewer blank lines in output.'
+    )
+
+    parser.add_argument(
         '--no-color',
         action='store_false',
         dest='use_color',
@@ -85,7 +92,8 @@ def run_eg():
             examples_dir=args.examples_dir,
             custom_dir=args.custom_dir,
             use_color=args.use_color,
-            pager_cmd=args.pager_cmd
+            pager_cmd=args.pager_cmd,
+            squeeze=args.squeeze
         )
 
         if args.list:

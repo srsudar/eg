@@ -123,13 +123,10 @@ def get_resolved_config_items(
     use_color,
     pager_cmd,
     squeeze,
-    subs,
     debug=True
 ):
     """
     Create a Config namedtuple. Passed in values will override defaults.
-
-    use_color: false if should not colorize output. true by default
     """
     # Expand the paths so we can use them with impunity later.
     egrc_path = get_expanded_path(egrc_path)
@@ -150,7 +147,7 @@ def get_resolved_config_items(
     resolved_egrc_path = get_priority(egrc_path, DEFAULT_EGRC_PATH, None)
     resolved_egrc_path = get_expanded_path(resolved_egrc_path)
 
-    # Start as if nothing was defined in th egrc.
+    # Start as if nothing was defined in the egrc.
     empty_color_config = get_empty_color_config()
     egrc_config = Config(
         examples_dir=None,
@@ -202,8 +199,9 @@ def get_resolved_config_items(
         DEFAULT_SQUEEZE
     )
 
+    # Pass in None, as subs can't be specified at the command line.
     resolved_subs = get_priority(
-        subs,
+        None,
         egrc_config.subs,
         get_default_subs()
     )

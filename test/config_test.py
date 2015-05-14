@@ -42,7 +42,6 @@ def test_config_returns_defaults_if_all_none_and_no_egrc():
             None,
             None,
             None,
-            None,
             debug=False
         )
 
@@ -92,7 +91,6 @@ def test_config_returns_egrc_values_if_present():
                 None,
                 None,
                 None,
-                None
             )
             assert_equal(resolved_config.examples_dir, examples_dir)
             assert_equal(resolved_config.custom_dir, custom_dir)
@@ -127,7 +125,6 @@ def test_config_uses_custom_egrc_path():
                 None,
                 None,
                 None,
-                None,
                 debug=False
             )
             mocked_get_config_from_egrc.assert_called_once_with(egrc_path)
@@ -143,8 +140,6 @@ def test_config_returns_values_passed_at_command_line():
         command_line_use_color = 'we_should_use_color'
         command_line_pager_cmd = 'command_line_says_pager_with_cat'
         command_line_squeeze = 'command_line_wants_to_squeeze'
-        # you can't specify subs at the command line.
-        command_line_subs = None
 
         egrc_examples_dir = 'egrc_examples_dir'
         egrc_custom_dir = 'egrc_custom_dir'
@@ -172,7 +167,6 @@ def test_config_returns_values_passed_at_command_line():
                 command_line_use_color,
                 command_line_pager_cmd,
                 command_line_squeeze,
-                command_line_subs,
                 debug=False
             )
             assert_equal(actual.examples_dir, command_line_examples_dir)

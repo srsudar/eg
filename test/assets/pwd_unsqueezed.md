@@ -13,8 +13,9 @@ a second command
 
 # Basic Usage
 
-    $ pwd
-    /Users/tyrion
+Print the current working directory:
+
+    pwd
 
 
 

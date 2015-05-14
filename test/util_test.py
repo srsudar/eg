@@ -362,17 +362,11 @@ def test_handle_program_no_entries():
                         assert_equal(mock_page_string.call_count, 0)
 
 
-def test_handle_program_pipes_input_and_pages_correctly():
-    """
-    handle_program needs to get the raw file contents, format them, and pipe
-    them by calling the pager method. This test makes sure that pipeline is
-    respected.
-    """
-    raise NotImplementedError
-
-
 def test_handle_program_finds_paths_and_calls_open_pager():
-    # TODO: update for new raw, format, page function
+    """
+    If there are entries for the program, handle_program needs to get the paths,
+    get the contents, format the contents, and page the resulting string.
+    """
     program = 'mv'
 
     examples_dir = 'test-eg-dir'
@@ -382,6 +376,9 @@ def test_handle_program_finds_paths_and_calls_open_pager():
     pager_cmd = 'foo bar'
     squeeze = False
     subs = ['foo', 'bar']
+
+    file_contents = 'I am the contents of mv.md.'
+    formatted_contents = 'and I am the formatted contents of mv.md.'
 
     test_config = config.Config(
         examples_dir=examples_dir,
@@ -423,41 +420,55 @@ def test_handle_program_finds_paths_and_calls_open_pager():
             return_value=True
         ) as mock_has_custom:
             with patch(
-                'eg.util.open_pager_for_file'
-            ) as mock_open_pager:
+                'eg.util.get_contents_from_files',
+                return_value=file_contents
+            ) as mock_get_contents:
                 with patch(
                     'eg.util.get_file_path_for_program',
                     side_effect=return_correct_path
                 ) as mock_get_file:
-                    util.handle_program(program, test_config)
+                    with patch(
+                        'eg.util.get_formatted_contents',
+                        return_value=formatted_contents
+                    ) as mock_get_formatted_contents:
+                        with patch('eg.util.page_string') as mock_page_string:
+                            util.handle_program(program, test_config)
 
-                    mock_has_default.assert_called_once_with(
-                        program,
-                        test_config
-                    )
-                    mock_has_custom.assert_called_once_with(
-                        program,
-                        test_config
-                    )
+                            mock_has_default.assert_called_once_with(
+                                program,
+                                test_config
+                            )
+                            mock_has_custom.assert_called_once_with(
+                                program,
+                                test_config
+                            )
 
-                    mock_get_file.assert_any_call(
-                        program,
-                        examples_dir
-                    )
-                    mock_get_file.assert_any_call(
-                        program,
-                        custom_dir,
-                    )
+                            mock_get_file.assert_any_call(
+                                program,
+                                examples_dir
+                            )
+                            mock_get_file.assert_any_call(
+                                program,
+                                custom_dir,
+                            )
 
-                    mock_open_pager.assert_called_once_with(
-                        default_file_path=default_path,
-                        custom_file_path=custom_path,
-                        use_color=use_color,
-                        color_config=color_config,
-                        pager_cmd=pager_cmd,
-                        squeeze=squeeze,
-                        subs=subs
-                    )
+                            mock_get_contents.assert_called_once_with(
+                                default_path,
+                                custom_path
+                            )
+
+                            mock_get_formatted_contents.assert_called_once_with(
+                                file_contents,
+                                use_color=test_config.use_color,
+                                color_config=test_config.color_config,
+                                squeeze=test_config.squeeze,
+                                subs=test_config.subs
+                            )
+
+                            mock_page_string.assert_called_once_with(
+                                formatted_contents,
+                                test_config.pager_cmd
+                            )
 
 
 # def test_open_pager_for_file_only_default():
@@ -878,8 +889,8 @@ def _helper_assert_formatted_contents(
                     starting_contents,
                     use_color,
                     color_config,
-                    subs,
-                    squeeze
+                    squeeze,
+                    subs
                 )
 
                 # We'll update the contents as they get formatted to make sure
@@ -1022,8 +1033,8 @@ def test_get_squeezed_contents_correctly_squeezes():
     # the target squeezed output is a reference implementation in
     # pwd_squeezed.md.
     target = _get_file_as_string(PATH_SQUEEZED_FILE)
-
     actual = util.get_squeezed_contents(unsqueezed)
+
     assert_equal(actual, target)
 
 
@@ -1072,3 +1083,22 @@ def test_get_substituted_contents_substitutes_correctly():
     actual = util.get_substituted_contents(start, subs)
 
     assert_equal(actual, target)
+
+
+def test_get_colorized_contents_calls_methods():
+    """
+    We should call the correct methods on the EgColorizer objects when we color
+    a file.
+    """
+    raw_contents = 'these are uncolored contents'
+    colored_contents = 'COLORED: ' + raw_contents
+    color_config = 'some color config'
+    with patch('eg.color.EgColorizer') as patched_colorizer_class:
+        # The actual instance created by these calls is stored at return_value.
+        colorizer_instance = patched_colorizer_class.return_value
+        colorizer_instance.colorize_text.return_value = colored_contents
+
+        actual = util.get_colorized_contents(raw_contents, color_config)
+
+        assert_equal(actual, colored_contents)
+        colorizer_instance.colorize_text.assert_called_once_with(raw_contents)

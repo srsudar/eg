@@ -2,6 +2,7 @@ import os
 import pydoc
 
 from eg import color
+from eg import substitute
 
 
 # The file name suffix expected for example files.
@@ -57,7 +58,7 @@ def handle_program(program, config):
         subs=config.subs
     )
 
-    page_string(formatted_contents, pager_cmd=config.pager_cmd)
+    page_string(formatted_contents, config.pager_cmd)
 
 
 def get_file_path_for_program(program, dir_to_search):
@@ -107,30 +108,6 @@ def get_contents_from_files(default_file_path, custom_file_path):
     custom_file_path is valid, it will be shown before the contents of the
     default file.
     """
-    # file_data = ''
-
-    # if custom_file_path:
-    #     file_data += _get_contents_of_file(custom_file_path)
-
-    # if default_file_path:
-    #     file_data += _get_contents_of_file(default_file_path)
-    raise NotImplementedError
-
-
-def open_pager_for_file(
-    starting_contents=None,
-    use_color=False,
-    color_config=None,
-    pager_cmd=None,
-    squeeze=None,
-    subs=None
-):
-    """
-    Apply formatting to the starting_contents as necessary and return the
-    result.
-    Open pager to file_path. If a custom_file_path is also included, it will be
-    shown before file_path in the same pager.
-    """
     file_data = ''
 
     if custom_file_path:
@@ -139,17 +116,35 @@ def open_pager_for_file(
     if default_file_path:
         file_data += _get_contents_of_file(default_file_path)
 
-    if use_color:
-        colorizer = color.EgColorizer(color_config)
-        file_data = colorizer.colorize_text(file_data)
+    return file_data
 
-    if squeeze:
-        file_data = get_squeezed_contents(file_data)
 
-    if subs:
-        file_data = get_substituted_contents(file_data)
+# def open_pager_for_file(
+#     starting_contents=None,
+#     use_color=False,
+#     color_config=None,
+#     pager_cmd=None,
+#     squeeze=None,
+#     subs=None
+# ):
+#     """
+#     Apply formatting to the starting_contents as necessary and return the
+#     result.
+#     Open pager to file_path. If a custom_file_path is also included, it will be
+#     shown before file_path in the same pager.
+#     """
+#     string_to_page = starting_contents
 
-    page_string(file_data, pager_cmd)
+#     if use_color:
+#         string_to_page = get_colorized_contents(string_to_page)
+
+#     if squeeze:
+#         string_to_page = get_squeezed_contents(string_to_page)
+
+#     if subs:
+#         string_to_page = get_substituted_contents(string_to_page, subs)
+
+#     page_string(string_to_page, pager_cmd)
 
 
 def page_string(str_to_page, pager_cmd):
@@ -264,25 +259,43 @@ def get_list_of_all_supported_commands(config):
 
 def get_squeezed_contents(contents):
     """
-    Squeeze the contents by removing blank lines.
+    Squeeze the contents by removing blank lines between definition and example
+    and remove duplicate blank lines except between sections.
     """
-    raise NotImplementedError
+    line_between_example_code = substitute.Substitution(
+        '\n\n    ',
+        '\n    ',
+        True
+    )
+    lines_between_examples = substitute.Substitution('\n\n\n', '\n\n', True)
+    lines_between_sections = substitute.Substitution('\n\n\n\n', '\n\n\n', True)
+
+    result = contents
+    result = line_between_example_code.apply_and_get_result(result)
+    result = lines_between_examples.apply_and_get_result(result)
+    result = lines_between_sections.apply_and_get_result(result)
+    return result
 
 
 def get_colorized_contents(contents, color_config):
     """Colorize the contents based on the color_config."""
-    raise NotImplementedError
+    colorizer = color.EgColorizer(color_config)
+    result = colorizer.colorize_text(contents)
+    return result
 
 
 def get_substituted_contents(contents, substitutions):
     """
     Perform a list of substitutions and return the result.
 
-        contents: the starting string on which to beging substitutions
-        substitutions: list of Substitution objects to call, in order, with the
-            result of the previous substitution.
+    contents: the starting string on which to beging substitutions
+    substitutions: list of Substitution objects to call, in order, with the
+        result of the previous substitution.
     """
-    raise NotImplementedError
+    result = contents
+    for sub in substitutions:
+        result = sub.apply_and_get_result(result)
+    return result
 
 
 def get_formatted_contents(
@@ -296,4 +309,15 @@ def get_formatted_contents(
     Apply formatting to raw_contents and return the result. Formatting is
     applied in the order: color, squeeze, subs.
     """
-    raise NotImplementedError
+    result = raw_contents
+
+    if use_color:
+        result = get_colorized_contents(result, color_config)
+
+    if squeeze:
+        result = get_squeezed_contents(result)
+
+    if subs:
+        result = get_substituted_contents(result, subs)
+
+    return result
