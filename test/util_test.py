@@ -749,9 +749,9 @@ def _helper_assert_about_pager(
 
                 if use_fallback:
                     default_pager.assert_called_once_with(str_to_page)
-                    pipepager.assert_no_calls()
+                    assert_equal(pipepager.call_count, 0)
                 else:
-                    default_pager.assert_no_calls()
+                    assert_equal(default_pager.call_count, 0)
                     pipepager.assert_called_once_with(
                         str_to_page,
                         cmd=pager_cmd
@@ -904,13 +904,13 @@ def _helper_assert_formatted_contents(
                     )
                     contents_thus_far = colorized_contents
                 else:
-                    color_method.assert_no_calls()
+                    assert_equal(color_method.call_count, 0)
 
                 if squeeze:
                     squeeze_method.assert_called_once_with(contents_thus_far)
                     contents_thus_far = squeezed_contents
                 else:
-                    squeeze_method.assert_no_calls()
+                    assert_equal(squeeze_method.call_count, 0)
 
                 if subs:
                     sub_method.assert_called_once_with(
@@ -919,7 +919,7 @@ def _helper_assert_formatted_contents(
                     )
                     contents_thus_far = subbed_contents
                 else:
-                    sub_method.assert_no_calls()
+                    assert_equal(sub_method.call_count, 0)
 
                 assert_equal(actual, formatted_result)
 
