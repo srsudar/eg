@@ -65,6 +65,13 @@ examples.
 
 `eg --list` will show all the commands for which `eg` has examples.
 
+The complete usage statement, as shown by `eg --help`, is:
+
+```
+eg [-h] [-v] [-f CONFIG_FILE] [-e EXAMPLES_DIR] [-c CUSTOM_DIR] [-p PAGER_CMD]
+   [-l] [--color] [-s] [--no-color] [program]
+```
+
 
 ## How it Works
 
@@ -116,7 +123,17 @@ different location at the command line like so:
 eg --config-file=myfile find
 ```
 
-## Color
+
+## Formatting Output
+
+`eg` is highly customizable when it comes to output. You have three ways to try
+and customize what is piped out the pager, applied in this order:
+
+1. Color
+1. Squeezing out excess blank lines
+1. Regex-based substitutions
+
+### Color
 
 `eg` is colorful. The default colors were chosen to be pretty-ish while boring
 enough to not create problems for basic terminals. If you want to override
@@ -148,6 +165,56 @@ can add an option to your egrc under the `eg-config` section like so:
     color = false
 
 
+### Squeezing Blank Lines
+
+The example files use a lot of blank lines to try and be readable at a glance.
+Not everyone likes this many blank lines. If you hate all duplicate lines, you
+can use your favorite pager to remove all duplicate commands, like:
+
+```
+eg --pager-cmd 'less -sR' find
+```
+
+This will use `less -sR` to page, which will format color correctly (`-R`) and
+remove all duplicate blank lines (`-s`).
+
+`eg` also provides its own custom squeezed output format, removing all blank
+lines within a single example and only putting duplicate blank lines between
+sections. This can be configured at the command line with `--squeeze` or in
+the egrc with the `squeeze` option, like:
+
+    [eg-config]
+    squeeze = true
+
+Running `eg --squeeze find` removes excess newlines like so:
+
+![Squeezed Output](./squeezed_output.png)
+
+
+### Regex Substitutions
+
+Additional changes to the output can be accomplished with regular expressions
+and the egrc. Patterns and replacements are applied using Python's `re` module,
+so look to the [documentation](https://docs.python.org/2/library/re.html) for
+specifics. Substitutions should be specified in the egrc as a list with the
+syntax: `[pattern, replacement, compile_as_multiline]`. If
+`compile_as_multiline` is absent or `False`, the pattern will not be compiled
+as multiline, which affects the syntax expected by `re`. The `re.sub` method is
+called with the compiled pattern and `replacement`.
+
+Substitutions must be named and must be in the `[substitution]` section of the
+egrc. For example, this would remove all the four-space indents beginning
+lines:
+
+    [substitution]
+    remove-indents = ['^    ', '', True]
+
+This powerful feature can be used to perform complex transformations, including
+support additional coloring of output beyond what is supported natively by
+`eg`. If you wish there was an option to remove or add blank lines, color
+something new, remove section symbols, etc, this is a good place to start.
+
+
 ## Paging
 
 By default, `eg` pages using `less -R`. The `-R` switch tells `less` to
@@ -166,6 +233,8 @@ must be a string literal. For example, this egrc would use `cat` to page:
 `pydoc.pager()` does a lot of friendly error checking, so it might still be
 useful in some situations. If you want to use `pydoc.pager()` to page, you can
 pass the `pydoc.pager` flag to the `pager-cmd`.
+
+
 
 
 ## Format and Content of Examples

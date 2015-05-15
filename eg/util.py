@@ -119,34 +119,6 @@ def get_contents_from_files(default_file_path, custom_file_path):
     return file_data
 
 
-# def open_pager_for_file(
-#     starting_contents=None,
-#     use_color=False,
-#     color_config=None,
-#     pager_cmd=None,
-#     squeeze=None,
-#     subs=None
-# ):
-#     """
-#     Apply formatting to the starting_contents as necessary and return the
-#     result.
-#     Open pager to file_path. If a custom_file_path is also included, it will be
-#     shown before file_path in the same pager.
-#     """
-#     string_to_page = starting_contents
-
-#     if use_color:
-#         string_to_page = get_colorized_contents(string_to_page)
-
-#     if squeeze:
-#         string_to_page = get_squeezed_contents(string_to_page)
-
-#     if subs:
-#         string_to_page = get_substituted_contents(string_to_page, subs)
-
-#     page_string(string_to_page, pager_cmd)
-
-
 def page_string(str_to_page, pager_cmd):
     """
     Page str_to_page via the pager. Tries to do a bit of fail-safe checking. For

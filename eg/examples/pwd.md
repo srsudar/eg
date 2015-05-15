@@ -8,8 +8,9 @@ print the current working directory
 
 # Basic Usage
 
-    $ pwd
-    /Users/tyrion
+Print the current working directory:
+
+    pwd
 
 
 

@@ -202,119 +202,10 @@ def _helper_assert_path_isfile_not_present(
             assert_equal(actual, has_entry)
 
 
-# def _helper_assert_open_pager_for_file(
-#     default_file_path,
-#     default_file_contents,
-#     custom_file_path,
-#     custom_file_contents,
-#     use_color,
-#     color_config,
-#     pager_cmd,
-#     squeeze,
-#     subs,
-#     combined_contents,
-#     colorized_contents,
-#     squeezed_contents,
-#     subbed_contents,
-#     paged_contents
-# ):
-#     """
-#     Helper method for testing open_pager_for_file method.
-
-#         default_file_path: path for the default file
-#         default_file_contents: contents of the default file
-#         custom_file_path: path for the custom file
-#         custom_file_contents: path for the custom contents
-#         use_color: boolean indicating whether or not to use color
-#         color_config: config object for colorization
-#         pager_cmd: string to use to page the string
-#         squeeze: true if the squeeze command should be applied
-#         subs: array of Substitutions to perform
-#         combined_contents: combined contents that should be recovered from the
-#             two file contents
-#         colorized_contents: the contents of the file to be returned by the
-#             colorizer
-#         squeezed_contents: file contents to be returned by the squeeze command
-#         subbed_contents: the result of all the substitutions specified by subs
-#         paged_contents: the final string that should be paged as output
-#     """
-#     # Make sure the caller is using this method correctly.
-#     valid_paged_contents = [
-#         colorized_contents,
-#         combined_contents,
-#         squeezed_contents,
-#         subbed_contents
-#     ]
-#     if paged_contents not in valid_paged_contents:
-#         print('paged_contents must be either combined or colorized _contents')
-#         assert_equal(True, False)
-
-#     def return_file_contents(*args, **kwargs):
-#         if args[0] == default_file_path:
-#             return default_file_contents
-#         elif args[0] == custom_file_path:
-#             return custom_file_contents
-#         else:
-#             raise TypeError(
-#                 args[0] +
-#                 ' was an unexpected path--should be ' +
-#                 default_file_path +
-#                 ' or ' +
-#                 custom_file_path
-#             )
-
-#     with patch(
-#         'eg.util._get_contents_of_file',
-#         side_effect=return_file_contents
-#     ):
-#         with patch(
-#             'eg.color.EgColorizer',
-#         ) as patched_colorizer_class:
-#             # The actual instance created by these calls is stored at
-#             # return_value
-#             colorizer_instance = patched_colorizer_class.return_value
-#             colorizer_instance.colorize_text.return_value = colorized_contents
-#             with patch(
-#                 'eg.util.get_squeezed_contents',
-#                 return_value=squeezed_contents
-#             ) as squeeze_method:
-#                 with patch(
-#                     'eg.util.get_substituted_contents',
-#                     return_value=subbed_contents
-#                 ) as substitute_method:
-#                     with patch('eg.util.page_string') as patched_page_method:
-#                         # Make the call then assert things happened as we
-#                         # expected.
-#                         util.open_pager_for_file(
-#                             default_file_path,
-#                             custom_file_path,
-#                             use_color,
-#                             color_config,
-#                             pager_cmd
-#                         )
-
-#                         contents_so_far = combined_contents
-
-#                         if use_color:
-#                             # Make sure we created the colorizer with the correct config
-#                             # and that we called colorizing method correctly.
-#                             colorizer_instance.colorize_text.assert_called_once_with(
-#                                 combined_contents
-#                             )
-#                         else:
-#                             colorizer_instance.colorize_text.assert_no_calls()
-
-#                         patched_page_method.assert_called_once_with(
-#                             paged_contents,
-#                             pager_cmd
-#                         )
-
-
 def test_handle_program_no_entries():
     """
     We should do the right thing if there are no entries for a given program.
     """
-    # TODO: update for new raw, format, page structure
     program = 'cp'
     test_config = config.Config(
         examples_dir=None,
@@ -471,68 +362,6 @@ def test_handle_program_finds_paths_and_calls_open_pager():
                             )
 
 
-# def test_open_pager_for_file_only_default():
-#     default_path = 'test/default/path'
-#     default_contents = 'contents of the default file'
-#     combined_contents = default_contents
-#     colorized_contents = 'COLOR: ' + combined_contents
-
-#     _helper_assert_open_pager_for_file(
-#         default_path,
-#         default_contents,
-#         None,
-#         None,
-#         False,
-#         None,
-#         'some pager cmd',
-#         combined_contents,
-#         colorized_contents,
-#         combined_contents
-#     )
-
-
-# def test_open_pager_for_file_only_custom():
-#     custom_path = 'test/custom/path'
-#     custom_contents = 'contents of the custom file'
-#     combined_contents = custom_contents
-#     colored_contents = 'COLOR: ' + combined_contents
-
-#     _helper_assert_open_pager_for_file(
-#         None,
-#         None,
-#         custom_path,
-#         custom_contents,
-#         False,
-#         None,
-#         'another pager cmd',
-#         combined_contents,
-#         colored_contents,
-#         combined_contents
-#     )
-
-
-# def test_open_pager_for_both_file_types():
-#     default_path = 'test/default/path'
-#     default_contents = 'contents of the default file'
-#     custom_path = 'test/custom/path'
-#     custom_contents = 'contents of the custom file'
-#     combined_contents = custom_contents + default_contents
-#     colorized_contents = 'COLORIZED: ' + combined_contents
-
-#     _helper_assert_open_pager_for_file(
-#         default_path,
-#         default_contents,
-#         custom_path,
-#         custom_contents,
-#         True,
-#         None,
-#         'yet another pager cmd',
-#         combined_contents,
-#         colorized_contents,
-#         colorized_contents
-#     )
-
-
 def test_list_supported_programs_only_default():
     example_dir = 'example/dir'
     custom_dir = 'custom/dir'
@@ -633,52 +462,6 @@ def test_list_supported_programs_fails_gracefully_if_no_dirs():
     target = []
 
     assert_equal(actual, target)
-
-
-# def test_calls_colorize_is_use_color_set():
-#     """We should call the colorize function if use_color = True."""
-#     default_file = 'def_path'
-#     default_contents = 'def contents'
-#     custom_path = 'custom_path',
-#     custom_contents = 'custom contents'
-#     combined_contents = custom_contents + default_contents
-#     colorized_contents = 'colorized: ' + combined_contents
-
-#     _helper_assert_open_pager_for_file(
-#         default_file,
-#         default_contents,
-#         custom_path,
-#         custom_contents,
-#         True,
-#         config.get_default_color_config(),
-#         'pager cmd for use color',
-#         combined_contents,
-#         colorized_contents,
-#         colorized_contents
-#     )
-
-
-# def test_does_not_call_colorize_if_use_color_false():
-#     """We should not call colorize if use_color = False."""
-#     default_file = 'def_path'
-#     default_contents = 'def contents'
-#     custom_path = 'custom_path',
-#     custom_contents = 'custom contents'
-#     combined_contents = custom_contents + default_contents
-#     colorized_contents = 'colorized: ' + combined_contents
-
-#     _helper_assert_open_pager_for_file(
-#         default_file,
-#         default_contents,
-#         custom_path,
-#         custom_contents,
-#         False,
-#         config.get_default_color_config(),
-#         'pager command whoop',
-#         combined_contents,
-#         colorized_contents,
-#         combined_contents
-#     )
 
 
 def test_calls_pipepager_if_not_less():
