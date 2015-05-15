@@ -392,12 +392,14 @@ def parse_substitution_from_list(list_rep):
 
 def get_substitutions_from_config(config):
     """
-    Return a list of Substitution objects from the config. Returns an empty list
-    if no Substitutions are specified. If there are problems parsing the values,
-    a help message will be printed and an error will be thrown.
+    Return a list of Substitution objects from the config, sorted alphabetically
+    by pattern name. Returns an empty list if no Substitutions are specified. If
+    there are problems parsing the values, a help message will be printed and an
+    error will be thrown.
     """
     result = []
     pattern_names = config.options(SUBSTITUTION_SECTION)
+    pattern_names.sort()
     for name in pattern_names:
         pattern_val = config.get(SUBSTITUTION_SECTION, name)
         list_rep = ast.literal_eval(pattern_val)

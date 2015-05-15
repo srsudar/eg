@@ -18,5 +18,5 @@ backticks_reset = 'backticks_reset_val'
 prompt_reset = 'prompt_reset_val'
 
 [substitutions]
-fewer_new_lines = ['\n\n\n', '\n\n', True]
-no_indent = [r'    ', r'', False]
+beta_fewer_new_lines = ['\n\n\n', '\n\n', True]
+alpha_no_indent = [r'    ', r'', False]

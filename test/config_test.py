@@ -208,9 +208,10 @@ def test_get_config_tuple_from_egrc_when_present():
     egrc_pager_cmd = 'more egrc'
     color_config_from_file = _get_color_config_from_egrc_withdata()
     egrc_squeeze = True
+    # Order matters--we apply substitutions alphabetically.
     egrc_subs = [
-        substitute.Substitution('\n\n\n', '\n\n', True),
-        substitute.Substitution(r'    ', r'', False)
+        substitute.Substitution(r'    ', r'', False),
+        substitute.Substitution('\n\n\n', '\n\n', True)
     ]
 
     def return_expanded_path(*args, **kwargs):
@@ -485,9 +486,10 @@ def test_get_substitution_from_config_finds_multiple_substitutions():
     Retrieve multiple substitutions from a config in the appropriate order.
     Integration test--actually pulls from a file.
     """
-    # These is hardcoded matching the value in the file.
-    first_sub = substitute.Substitution('\n\n\n', '\n\n', True)
-    second_sub = substitute.Substitution(r'    ', r'', False)
+    # These are hardcoded matching the value in the file. They will be sorted
+    # alphabetically by pattern name.
+    first_sub = substitute.Substitution(r'    ', r'', False)
+    second_sub = substitute.Substitution('\n\n\n', '\n\n', True)
     target = [first_sub, second_sub]
 
     config_obj = _get_egrc_config(PATH_EGRC_WITH_DATA)

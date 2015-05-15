@@ -214,6 +214,9 @@ support additional coloring of output beyond what is supported natively by
 `eg`. If you wish there was an option to remove or add blank lines, color
 something new, remove section symbols, etc, this is a good place to start.
 
+If multiple substitutions are present, they are sorted by alphabetically by
+name before being applied.
+
 
 ## Paging
 
