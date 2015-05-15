@@ -470,23 +470,14 @@ def test_calls_pipepager_if_not_less():
     command has been set that is NOT less, we should call pipepager straight
     away.
     """
-    _helper_assert_about_pager('page me plz', 'cat', 0, False)
+    _helper_assert_about_pager('page me plz', 'cat', False)
 
 
 def test_calls_fallback_pager_if_none():
     """
     If pager_cmd is None, we should just use the fallback pager.
     """
-    _helper_assert_about_pager('page me plz', None, 1, True)
-
-
-def test_calls_fallback_pager_if_no_less():
-    """
-    We should use the fallback pager if we ask to use less but less is not
-    installed on the machine.
-    """
-    # 1 for an error return from sys
-    _helper_assert_about_pager('page me plz', 'less -R', 1, True)
+    _helper_assert_about_pager('page me plz', None, True)
 
 
 def test_calls_pipepager_if_less():
@@ -494,7 +485,7 @@ def test_calls_pipepager_if_less():
     We should call pipepager if we ask to use less and less is installed on the
     machine.
     """
-    _helper_assert_about_pager('a fancy value to page', 'less -R', 0, False)
+    _helper_assert_about_pager('a fancy value to page', 'less -R', False)
 
 
 def test_calls_fallback_if_cmd_is_flag_string():
@@ -504,7 +495,6 @@ def test_calls_fallback_if_cmd_is_flag_string():
     _helper_assert_about_pager(
         'page via fallback',
         util.FLAG_FALLBACK,
-        0,
         True
     )
 
@@ -512,7 +502,6 @@ def test_calls_fallback_if_cmd_is_flag_string():
 def _helper_assert_about_pager(
     str_to_page,
     pager_cmd,
-    has_less_return_value,
     use_fallback
 ):
     """
@@ -520,25 +509,22 @@ def _helper_assert_about_pager(
 
     str_to_page: what you're paging
     pager_cmd: the string you're passing to pipepager (or None)
-    has_less_return_value: return value of the system call to find out if less
-        is present on the machine. 0 means ok, != 0 means problem.
     use_default: false if we should actually use pydoc.pipepager, true if we
         instead are going to fallback to pydoc.pager
     """
-    with patch('os.system', return_value=has_less_return_value):
-        with patch('pydoc.pager') as default_pager:
-            with patch('pydoc.pipepager') as pipepager:
-                util.page_string(str_to_page, pager_cmd)
+    with patch('pydoc.pager') as default_pager:
+        with patch('pydoc.pipepager') as pipepager:
+            util.page_string(str_to_page, pager_cmd)
 
-                if use_fallback:
-                    default_pager.assert_called_once_with(str_to_page)
-                    assert_equal(pipepager.call_count, 0)
-                else:
-                    assert_equal(default_pager.call_count, 0)
-                    pipepager.assert_called_once_with(
-                        str_to_page,
-                        cmd=pager_cmd
-                    )
+            if use_fallback:
+                default_pager.assert_called_once_with(str_to_page)
+                assert_equal(pipepager.call_count, 0)
+            else:
+                assert_equal(default_pager.call_count, 0)
+                pipepager.assert_called_once_with(
+                    str_to_page,
+                    cmd=pager_cmd
+                )
 
 
 def _helper_assert_file_contents(

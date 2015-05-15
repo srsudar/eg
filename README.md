@@ -218,10 +218,7 @@ something new, remove section symbols, etc, this is a good place to start.
 ## Paging
 
 By default, `eg` pages using `less -R`. The `-R` switch tells `less` to
-interpret ANSI escape sequences like color rather than showing them raw. If you
-don't have `less` installed, `eg` will try to detect this and page using the
-`pydoc.pager()` function instead. In this case you might want to turn off
-color.
+interpret ANSI escape sequences like color rather than showing them raw.
 
 You can specify a different pager using the `--pager-cmd` option at the command
 line or the `pager-cmd` option in the egrc. If specified in the egrc, the value
@@ -232,7 +229,7 @@ must be a string literal. For example, this egrc would use `cat` to page:
 
 `pydoc.pager()` does a lot of friendly error checking, so it might still be
 useful in some situations. If you want to use `pydoc.pager()` to page, you can
-pass the `pydoc.pager` flag to the `pager-cmd`.
+pass the `pydoc.pager` as the `pager-cmd`.
 
 
 
