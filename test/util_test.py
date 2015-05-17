@@ -1196,3 +1196,20 @@ def test_is_example_file_true_if_not_suffix():
     file_name = 'aliases.json'
     actual = util._is_example_file(file_name)
     assert_equal(actual, False)
+
+
+def test_can_parse_alias_file():
+    """
+    Make sure aliases.json file can be parsed.
+
+    This is to make sure an edit doesn't accidentally corrupt it.
+    """
+    # We'll have to hardcode this.
+    alias_file_path = os.path.join(
+        config.DEFAULT_EXAMPLES_DIR,
+        util.ALIAS_FILE_NAME
+    )
+    alias_file_contents = util._get_contents_of_file(alias_file_path)
+    alias_dict = json.loads(alias_file_contents)
+    # We'll check that link goes to ln, as we know that one will be present.
+    assert_equal(alias_dict['link'], 'ln')
