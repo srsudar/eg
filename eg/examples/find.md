@@ -166,18 +166,18 @@ string `{}` will be replaced with the name of the matched file, and the command
 must be terminated with an escaped semicolon (`\;`).
 
 
-## Delete
-
-Find all files (`-type f`) ending with a tilde (`-name '*~'`) and remove them
-(`-exec rm -f {} \;`):
-
-    find ./searchdir -type f -name '*~' -exec rm {} \;
-
-
 ## Change Permissions
 
 Give all files (`-type f`) 755 permissions (`-exec chmod 755 '{}' \;`):
 
     find ./searchdir -type f -exec chmod 755 '{}' \;
+
+
+## Delete
+
+Deleting files has its own flag. Find all files (`-type f`) ending with a tilde
+(`-name '*~'`) and remove them (`-delete`):
+
+    find ./searchdir -type f -name '*~' -delete
 
 
