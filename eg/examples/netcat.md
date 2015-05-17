@@ -2,27 +2,27 @@
 
 listen on port 1337
 
-    netcat -l 1337
+    nc -l 1337
 
 
 send a file to the address 192.168.1.42 on port 1337
 
-    cat file | netcat 192.168.1.42 1337
+    cat file | nc 192.168.1.42 1337
 
 
 send a file to the address 192.168.1.42 on port 1337 with progress
 
-    pv file | netcat 192.168.1.42 1337
+    pv file | nc 192.168.1.42 1337
 
 
-check if port 80 is open without sending any data
+check if 127.0.0.1 is listening on port 80 but do not connect
 
-    nc -vz 80
+    nc -vz 127.0.0.1 80
 
 
 receive input on port 1337 and save as file
 
-    netcat -l 1337 >file
+    nc -l 1337 >file
 
 
 
@@ -30,11 +30,11 @@ receive input on port 1337 and save as file
 
 Send what is read from stdin to an address and a port:
 
-    netcat <address> <port>
+    nc <address> <port>
 
 
 Listen on a port and send it to stdout:
 
-    netcat -l <port>
+    nc -l <port>
 
 
