@@ -1,1 +1,0 @@
-eg/examples/netcat.md
