@@ -87,7 +87,7 @@ Untar (`x`) and unzip a b-zipped (`j`) file:
     tar vfxj b_zipped_archive.tar.bz2
 
 
-Untar (`x`) and unzip a xz-zipped (`J`) file:
+Untar (`x`) and unzip an xz-zipped (`J`) file:
 
     tar vfxJ xz_zipped_archive.tar.xz
 
