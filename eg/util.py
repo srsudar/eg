@@ -1,3 +1,4 @@
+import json
 import os
 import pydoc
 
@@ -19,20 +20,26 @@ FLAG_CUSTOM_AND_DEFAULT = '*'
 # This flag indicates that we should use the fallback pager.
 FLAG_FALLBACK = 'pydoc.pager'
 
+# The name of the file storing mappings of aliases to programs with entries.
+ALIAS_FILE_NAME = 'aliases.json'
+
 
 def handle_program(program, config):
     default_file_path = None
     custom_file_path = None
 
-    if has_default_entry_for_program(program, config):
+    # try to resolve any aliases
+    resolved_program = get_resolved_program(program, config)
+
+    if has_default_entry_for_program(resolved_program, config):
         default_file_path = get_file_path_for_program(
-            program,
+            resolved_program,
             config.examples_dir
         )
 
-    if has_custom_entry_for_program(program, config):
+    if has_custom_entry_for_program(resolved_program, config):
         custom_file_path = get_file_path_for_program(
-            program,
+            resolved_program,
             config.custom_dir
         )
 
@@ -148,6 +155,13 @@ def _get_contents_of_file(path):
         return result
 
 
+def _is_example_file(file_name):
+    """
+    True if the file_name is an example file, else False.
+    """
+    return file_name.endswith(EXAMPLE_FILE_SUFFIX)
+
+
 def get_list_of_all_supported_commands(config):
     """
     Generate a list of all the commands that have examples known to eg. The
@@ -168,6 +182,10 @@ def get_list_of_all_supported_commands(config):
         default_files = os.listdir(config.examples_dir)
     if config.custom_dir and os.path.isdir(config.custom_dir):
         custom_files = os.listdir(config.custom_dir)
+
+    # Now filter so we only have example files, not things like aliases.json.
+    default_files = [path for path in default_files if _is_example_file(path)]
+    custom_files = [path for path in custom_files if _is_example_file(path)]
 
     # Now we get tricky. We're going to output the correct information by
     # iterating through each list only once. Keep pointers to our position in
@@ -285,3 +303,44 @@ def get_formatted_contents(
         result = get_substituted_contents(result, subs)
 
     return result
+
+
+def get_resolved_program(program, config_obj):
+    """
+    Take a program that may be an alias for another program and return the
+    resolved program.
+
+    It only ever resolves a single level of aliasing, so does not support
+    aliasing to an alias.
+
+    Returns the original program if the program is not an alias.
+    """
+    alias_dict = get_alias_dict(config_obj)
+    if program in alias_dict:
+        return alias_dict[program]
+    else:
+        return program
+
+
+def get_alias_dict(config_obj):
+    """
+    Return a dictionary consisting of all aliases known to eg.
+
+    The format is {'alias': 'resolved_program'}.
+
+    If the aliases file does not exist, returns an empty dict.
+    """
+    alias_file_path = _get_alias_file_path(config_obj)
+    if not os.path.isfile(alias_file_path):
+        return {}
+
+    alias_file_contents = _get_contents_of_file(alias_file_path)
+    result = json.loads(alias_file_contents)
+    return result
+
+
+def _get_alias_file_path(config_obj):
+    """
+    Return the file path for the aliases dict.
+    """
+    return os.path.join(config_obj.examples_dir, ALIAS_FILE_NAME)

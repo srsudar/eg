@@ -1,3 +1,4 @@
+import json
 import os
 
 from eg import config
@@ -218,42 +219,51 @@ def test_handle_program_no_entries():
     )
 
     with patch(
-        'eg.util.has_default_entry_for_program',
-        return_value=False
-    ) as mock_has_default:
+        'eg.util.get_resolved_program',
+        return_value=program
+    ) as mock_resolve_program:
         with patch(
-            'eg.util.has_custom_entry_for_program',
+            'eg.util.has_default_entry_for_program',
             return_value=False
-        ) as mock_has_custom:
+        ) as mock_has_default:
             with patch(
-                'eg.util.get_contents_from_files'
-            ) as mock_get_contents:
+                'eg.util.has_custom_entry_for_program',
+                return_value=False
+            ) as mock_has_custom:
                 with patch(
-                    'eg.util.get_formatted_contents'
-                ) as mock_format:
+                    'eg.util.get_contents_from_files'
+                ) as mock_get_contents:
                     with patch(
-                        'eg.util.page_string'
-                    ) as mock_page_string:
-                        util.handle_program(program, test_config)
+                        'eg.util.get_formatted_contents'
+                    ) as mock_format:
+                        with patch(
+                            'eg.util.page_string'
+                        ) as mock_page_string:
+                            util.handle_program(program, test_config)
 
-                        mock_has_default.assert_called_once_with(
-                            program,
-                            test_config
-                        )
+                            mock_resolve_program.assert_called_once_with(
+                                program,
+                                test_config
+                            )
 
-                        mock_has_custom.assert_called_once_with(
-                            program,
-                            test_config
-                        )
+                            mock_has_default.assert_called_once_with(
+                                program,
+                                test_config
+                            )
 
-                        # We should have aborted and not called any of the other
-                        # methods.
-                        assert_equal(mock_get_contents.call_count, 0)
-                        assert_equal(mock_format.call_count, 0)
-                        assert_equal(mock_page_string.call_count, 0)
+                            mock_has_custom.assert_called_once_with(
+                                program,
+                                test_config
+                            )
+
+                            # We should have aborted and not called any of the
+                            # other methods.
+                            assert_equal(mock_get_contents.call_count, 0)
+                            assert_equal(mock_format.call_count, 0)
+                            assert_equal(mock_page_string.call_count, 0)
 
 
-def test_handle_program_finds_paths_and_calls_open_pager():
+def test_handle_program_finds_paths_and_calls_open_pager_no_alias():
     """
     If there are entries for the program, handle_program needs to get the paths,
     get the contents, format the contents, and page the resulting string.
@@ -303,63 +313,199 @@ def test_handle_program_finds_paths_and_calls_open_pager():
                 custom_dir)
 
     with patch(
-        'eg.util.has_default_entry_for_program',
-        return_value=True
-    ) as mock_has_default:
+        'eg.util.get_resolved_program',
+        return_value=program
+    ) as mock_resolve:
         with patch(
-            'eg.util.has_custom_entry_for_program',
+            'eg.util.has_default_entry_for_program',
             return_value=True
-        ) as mock_has_custom:
+        ) as mock_has_default:
             with patch(
-                'eg.util.get_contents_from_files',
-                return_value=file_contents
-            ) as mock_get_contents:
+                'eg.util.has_custom_entry_for_program',
+                return_value=True
+            ) as mock_has_custom:
                 with patch(
-                    'eg.util.get_file_path_for_program',
-                    side_effect=return_correct_path
-                ) as mock_get_file:
+                    'eg.util.get_contents_from_files',
+                    return_value=file_contents
+                ) as mock_get_contents:
                     with patch(
-                        'eg.util.get_formatted_contents',
-                        return_value=formatted_contents
-                    ) as mock_get_formatted_contents:
-                        with patch('eg.util.page_string') as mock_page_string:
-                            util.handle_program(program, test_config)
+                        'eg.util.get_file_path_for_program',
+                        side_effect=return_correct_path
+                    ) as mock_get_file:
+                        with patch(
+                            'eg.util.get_formatted_contents',
+                            return_value=formatted_contents
+                        ) as mock_format:
+                            with patch('eg.util.page_string') as mock_page:
+                                util.handle_program(program, test_config)
 
-                            mock_has_default.assert_called_once_with(
-                                program,
-                                test_config
-                            )
-                            mock_has_custom.assert_called_once_with(
-                                program,
-                                test_config
-                            )
+                                mock_resolve.assert_called_once_with(
+                                    program,
+                                    test_config
+                                )
 
-                            mock_get_file.assert_any_call(
-                                program,
-                                examples_dir
-                            )
-                            mock_get_file.assert_any_call(
-                                program,
-                                custom_dir,
-                            )
+                                mock_has_default.assert_called_once_with(
+                                    program,
+                                    test_config
+                                )
+                                mock_has_custom.assert_called_once_with(
+                                    program,
+                                    test_config
+                                )
 
-                            mock_get_contents.assert_called_once_with(
-                                default_path,
-                                custom_path
-                            )
+                                mock_get_file.assert_any_call(
+                                    program,
+                                    examples_dir
+                                )
+                                mock_get_file.assert_any_call(
+                                    program,
+                                    custom_dir,
+                                )
 
-                            mock_get_formatted_contents.assert_called_once_with(
-                                file_contents,
-                                use_color=test_config.use_color,
-                                color_config=test_config.color_config,
-                                squeeze=test_config.squeeze,
-                                subs=test_config.subs
-                            )
+                                mock_get_contents.assert_called_once_with(
+                                    default_path,
+                                    custom_path
+                                )
 
-                            mock_page_string.assert_called_once_with(
-                                formatted_contents,
-                                test_config.pager_cmd
-                            )
+                                mock_format.assert_called_once_with(
+                                    file_contents,
+                                    use_color=test_config.use_color,
+                                    color_config=test_config.color_config,
+                                    squeeze=test_config.squeeze,
+                                    subs=test_config.subs
+                                )
+
+                                mock_page.assert_called_once_with(
+                                    formatted_contents,
+                                    test_config.pager_cmd
+                                )
+
+
+def test_handle_program_finds_paths_and_calls_open_pager_with_alias():
+    """
+    If there are entries for the program, handle_program needs to get the paths,
+    get the contents, format the contents, and page the resulting string.
+    """
+    alias_for_program = 'link'
+    resolved_program = 'ln'
+
+    examples_dir = 'test-eg-dir'
+    custom_dir = 'test-custom-dir'
+    color_config = None
+    use_color = False
+    pager_cmd = 'foo bar'
+    squeeze = False
+    subs = ['foo', 'bar']
+
+    file_contents = 'I am the contents of ln.md.'
+    formatted_contents = 'and I am the formatted contents of ln.md.'
+
+    test_config = config.Config(
+        examples_dir=examples_dir,
+        custom_dir=custom_dir,
+        color_config=color_config,
+        use_color=use_color,
+        pager_cmd=pager_cmd,
+        squeeze=squeeze,
+        subs=subs
+    )
+
+    default_path = 'test-eg-dir/ln.md'
+    custom_path = 'test-custom-dir/ln.md'
+
+    def return_correct_path(*args, **kwargs):
+        program_param = args[0]
+        dir_param = args[1]
+        if program_param != resolved_program:
+            raise NameError(
+                'expected ' +
+                resolved_program +
+                ', got ' +
+                program_param
+            )
+        if dir_param == examples_dir:
+            return default_path
+        elif dir_param == custom_dir:
+            return custom_path
+        else:
+            raise NameError(
+                'got ' +
+                dir_param +
+                ', expected ' +
+                examples_dir +
+                ' or ' +
+                custom_dir)
+
+    with patch(
+        'eg.util.get_resolved_program',
+        return_value=resolved_program
+    ) as mock_resolve:
+        with patch(
+            'eg.util.has_default_entry_for_program',
+            return_value=True
+        ) as mock_has_default:
+            with patch(
+                'eg.util.has_custom_entry_for_program',
+                return_value=True
+            ) as mock_has_custom:
+                with patch(
+                    'eg.util.get_contents_from_files',
+                    return_value=file_contents
+                ) as mock_get_contents:
+                    with patch(
+                        'eg.util.get_file_path_for_program',
+                        side_effect=return_correct_path
+                    ) as mock_get_file:
+                        with patch(
+                            'eg.util.get_formatted_contents',
+                            return_value=formatted_contents
+                        ) as mock_format:
+                            with patch('eg.util.page_string') as mock_page:
+                                util.handle_program(
+                                    alias_for_program,
+                                    test_config
+                                )
+
+                                mock_resolve.assert_called_once_with(
+                                    alias_for_program,
+                                    test_config
+                                )
+
+                                mock_has_default.assert_called_once_with(
+                                    resolved_program,
+                                    test_config
+                                )
+                                mock_has_custom.assert_called_once_with(
+                                    resolved_program,
+                                    test_config
+                                )
+
+                                mock_get_file.assert_any_call(
+                                    resolved_program,
+                                    examples_dir
+                                )
+                                mock_get_file.assert_any_call(
+                                    resolved_program,
+                                    custom_dir,
+                                )
+
+                                mock_get_contents.assert_called_once_with(
+                                    default_path,
+                                    custom_path
+                                )
+
+                                mock_format.assert_called_once_with(
+                                    file_contents,
+                                    use_color=test_config.use_color,
+                                    color_config=test_config.color_config,
+                                    squeeze=test_config.squeeze,
+                                    subs=test_config.subs
+                                )
+
+                                mock_page.assert_called_once_with(
+                                    formatted_contents,
+                                    test_config.pager_cmd
+                                )
 
 
 def test_list_supported_programs_only_default():
@@ -378,7 +524,8 @@ def test_list_supported_programs_only_default():
 
     def give_list(*args, **kwargs):
         if args[0] == example_dir:
-            return ['cp.md', 'find.md', 'xargs.md']
+            # include the aliases file, which we expect to be in this directory.
+            return ['aliases', 'cp.md', 'find.md', 'xargs.md']
         else:
             return []
 
@@ -434,10 +581,10 @@ def test_list_supported_programs_both():
 
     def give_list(*args, **kwargs):
         if args[0] == examples_dir:
-            return ['alpha', 'bar.md', 'both.md', 'examples']
+            return ['alpha.md', 'bar.md', 'both.md', 'examples.md']
         else:
             # custom_dir
-            return ['azy.md', 'both.md', 'examples', 'zeta']
+            return ['azy.md', 'both.md', 'examples.md', 'zeta.md']
 
     with patch('os.path.isdir', return_value=True):
         with patch('os.listdir', side_effect=give_list):
@@ -871,3 +1018,181 @@ def test_get_colorized_contents_calls_methods():
 
         assert_equal(actual, colored_contents)
         colorizer_instance.colorize_text.assert_called_once_with(raw_contents)
+
+
+def _helper_assert_get_resolved_program(
+    program,
+    resolved_program,
+    config_obj,
+    alias_dict
+):
+    """
+    program: the program to resolved for as an alias
+    resolved_program: the result of the resolution.
+    config_obj: the config_obj to use toe resolve the alias path
+    alias_dict: the dict of aliases to be returned
+    """
+    with patch('eg.util.get_alias_dict', return_value=alias_dict) as mock_dict:
+        actual = util.get_resolved_program(program, config_obj)
+        assert_equal(actual, resolved_program)
+        mock_dict.assert_called_once_with(config_obj)
+
+
+def test_get_resolved_program_no_alias():
+    """
+    A program that is not an alias should return itself.
+    """
+    alias_dict = {
+        'link': 'ln',
+        'nc': 'netcat'
+    }
+    config_obj = 'a config'
+    _helper_assert_get_resolved_program('link', 'ln', config_obj, alias_dict)
+
+
+def test_get_resolved_program_is_alias():
+    """
+    A program that is an alias should return the resolved value.
+    """
+    alias_dict = {
+        'link': 'ln',
+        'nc': 'netcat'
+    }
+    config_obj = 'some new config'
+    _helper_assert_get_resolved_program('cp', 'cp', config_obj, alias_dict)
+
+
+def test_get_alias_dict_returns_contents_of_correct_file():
+    """
+    get_alias_dict should read data from the file at the default path.
+    """
+    alias_dict = {
+        'link': 'ln',
+        'nc': 'netcat'
+    }
+    config_obj = config.Config(
+        examples_dir='path/to/examples/dir',
+        custom_dir='path/to/custom/dir',
+        use_color=True,
+        color_config='a color config',
+        pager_cmd='less -ismore',
+        squeeze=True,
+        subs=['alpha_sub', 'beta_sub']
+    )
+
+    alias_file_path = 'path/to/alias/file'
+    alias_dict_str = json.dumps(alias_dict)
+    _helper_assert_get_alias_dict(
+        alias_dict_str,
+        alias_dict,
+        config_obj,
+        alias_file_path,
+        True
+    )
+
+
+def test_get_alias_dict_fails_gracefully_if_not_file():
+    """
+    Since users can specify a directory for examples that might not contain the
+    aliases file, we want to fail gracefully if the file doesn't exist.
+    """
+    contents_of_alias_dict_file = 'should never be reached'
+    config_obj = config.Config(
+        examples_dir='path/to/examples/dir',
+        custom_dir='path/to/custom/dir',
+        use_color=True,
+        color_config='a color config',
+        pager_cmd='less -ismore',
+        squeeze=True,
+        subs=['alpha_sub', 'beta_sub']
+    )
+    alias_file_path = 'path/to/the/alias/file'
+    _helper_assert_get_alias_dict(
+        contents_of_alias_dict_file,
+        {},
+        config_obj,
+        alias_file_path,
+        False
+    )
+
+
+def _helper_assert_get_alias_dict(
+    contents_of_alias_dict_file,
+    target_alias_dict,
+    config_obj,
+    alias_file_path,
+    alias_file_path_is_file
+):
+    """
+    contents_of_alias_dict_file: the string contents of the file storing the
+        dictionary of aliases
+    target_alias_dict: the target result of get_alias_dict
+    config_obj: the Config object
+    alias_file_path: the path to be returned by _get_alias_file_path
+    alias_file_path_is_file: True if the alias path is a file, else False
+    """
+    with patch(
+        'eg.util._get_contents_of_file',
+        return_value=contents_of_alias_dict_file
+    ) as mock_get_contents:
+        with patch(
+            'eg.util._get_alias_file_path',
+            return_value=alias_file_path
+        ) as mock_get_alias_file_path:
+            with patch(
+                'os.path.isfile',
+                return_value=alias_file_path_is_file
+            ) as mock_is_file:
+                actual = util.get_alias_dict(config_obj)
+
+                assert_equal(actual, target_alias_dict)
+
+                mock_get_alias_file_path.assert_called_once_with(config_obj)
+                mock_is_file.assert_called_once_with(alias_file_path)
+
+                if alias_file_path_is_file:
+                    mock_get_contents.assert_called_once_with(alias_file_path)
+                else:
+                    assert_equal(mock_get_contents.call_count, 0)
+
+
+def test_get_alias_file_path():
+    """
+    _get_alias_file_path should just join the example dir and the alias file
+    name, to make sure we look in the right place for the file.
+    """
+    config_obj = config.Config(
+        examples_dir='handy/dandy/examples/dir',
+        custom_dir='path/to/custom/dir',
+        use_color=True,
+        color_config='a color config',
+        pager_cmd='less -ismore',
+        squeeze=True,
+        subs=['alpha_sub', 'beta_sub']
+    )
+    join_result = 'joined path'
+    with patch('os.path.join', return_value=join_result) as mock_join:
+        actual = util._get_alias_file_path(config_obj)
+        assert_equal(actual, join_result)
+        mock_join.assert_called_once_with(
+            config_obj.examples_dir,
+            util.ALIAS_FILE_NAME
+        )
+
+
+def test_is_example_file_true_if_has_suffix():
+    """
+    Should be true if ends in EXAMPLE_FILE_SUFFIX.
+    """
+    file_name = 'find.md'
+    actual = util._is_example_file(file_name)
+    assert_equal(actual, True)
+
+
+def test_is_example_file_true_if_not_suffix():
+    """
+    Should be false if the file does not end in EXAMPLE_FILE_SUFFIX.
+    """
+    file_name = 'aliases.json'
+    actual = util._is_example_file(file_name)
+    assert_equal(actual, False)
