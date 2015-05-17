@@ -1,4 +1,7 @@
 {
   "link": "ln",
-  "nc": "netcat"
+  "nc": "netcat",
+  "g++": "gcc",
+  "clang": "gcc",
+  "clang++": "gcc"
 }
