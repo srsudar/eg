@@ -508,6 +508,36 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias():
                                 )
 
 
+def _helper_assert_list_supported_programs(
+    config_obj,
+    default_list,
+    custom_list,
+    alias_dict,
+    target_list
+):
+    """
+    config_obj: Config object to be passed to get_list function
+    default_list: the list of default programs
+    custom_list: the list of programs with custom programs
+    alias_dict: dict of aliases
+    target_list: list of string that should be returned
+    """
+    def give_list(*args, **kwargs):
+        dir_name = args[0]
+        if dir_name == config_obj.custom_dir:
+            return custom_list
+        elif dir_name == config_obj.examples_dir:
+            return default_list
+        else:
+            raise NameError('Not the default or custom dir: ' + dir_name)
+
+    with patch('os.path.isdir', return_value=True):
+        with patch('os.listdir', side_effect=give_list):
+            with patch('eg.util.get_alias_dict', return_value=alias_dict):
+                actual = util.get_list_of_all_supported_commands(config_obj)
+                assert_equal(actual, target_list)
+
+
 def test_list_supported_programs_only_default():
     example_dir = 'example/dir'
     custom_dir = 'custom/dir'
@@ -521,20 +551,16 @@ def test_list_supported_programs_only_default():
         squeeze=False,
         subs=None
     )
-
-    def give_list(*args, **kwargs):
-        if args[0] == example_dir:
-            # include the aliases file, which we expect to be in this directory.
-            return ['aliases', 'cp.md', 'find.md', 'xargs.md']
-        else:
-            return []
-
-    with patch('os.path.isdir', return_value=True):
-        with patch('os.listdir', side_effect=give_list):
-            actual = util.get_list_of_all_supported_commands(test_config)
-            target = ['cp', 'find', 'xargs']
-
-            assert_equal(actual, target)
+    examples_list = ['aliases', 'cp.md', 'find.md', 'xargs.md']
+    custom_list = []
+    target = ['cp', 'find', 'xargs']
+    _helper_assert_list_supported_programs(
+        test_config,
+        examples_list,
+        custom_list,
+        {},
+        target
+    )
 
 
 def test_list_supported_programs_only_custom():
@@ -550,19 +576,14 @@ def test_list_supported_programs_only_custom():
         squeeze=False,
         subs=None
     )
-
-    def give_list(*args, **kwargs):
-        if args[0] == custom_dir:
-            return ['awk.md', 'bar.md', 'xor.md']
-        else:
-            return []
-
-    with patch('os.path.isdir', return_value=True):
-        with patch('os.listdir', side_effect=give_list):
-            actual = util.get_list_of_all_supported_commands(test_config)
-            target = ['awk +', 'bar +', 'xor +']
-
-            assert_equal(actual, target)
+    target = ['awk +', 'bar +', 'xor +']
+    _helper_assert_list_supported_programs(
+        test_config,
+        [],
+        ['awk.md', 'bar.md', 'xor.md'],
+        {},
+        target
+    )
 
 
 def test_list_supported_programs_both():
@@ -578,28 +599,85 @@ def test_list_supported_programs_both():
         squeeze=False,
         subs=None
     )
+    examples_list = ['alpha.md', 'bar.md', 'both.md', 'examples.md']
+    custom_list = ['azy.md', 'both.md', 'examples.md', 'zeta.md']
+    target = [
+        'alpha',
+        'azy +',
+        'bar',
+        'both *',
+        'examples *',
+        'zeta +'
+    ]
+    _helper_assert_list_supported_programs(
+        test_config,
+        examples_list,
+        custom_list,
+        {},
+        target
+    )
 
-    def give_list(*args, **kwargs):
-        if args[0] == examples_dir:
-            return ['alpha.md', 'bar.md', 'both.md', 'examples.md']
-        else:
-            # custom_dir
-            return ['azy.md', 'both.md', 'examples.md', 'zeta.md']
 
-    with patch('os.path.isdir', return_value=True):
-        with patch('os.listdir', side_effect=give_list):
-            actual = util.get_list_of_all_supported_commands(test_config)
+def test_list_supported_commands_includes_aliases():
+    examples_dir = 'examples/dir/for/aliases'
+    custom_dir = 'custom/dir/for/aliases'
 
-            target = [
-                'alpha',
-                'azy +',
-                'bar',
-                'both *',
-                'examples *',
-                'zeta +'
-            ]
+    test_config = config.Config(
+        examples_dir=examples_dir,
+        custom_dir=custom_dir,
+        color_config=None,
+        use_color=False,
+        pager_cmd=None,
+        squeeze=False,
+        subs=None
+    )
+    # Things we want to cover:
+    #   normal alias
+    #   alias that shadows a custom-only declaration
+    #   alias that points to a * or + program
 
-            assert_equal(actual, target)
+    examples_list = [
+        'alpha.md',
+        'bar.md',
+        'both.md',
+        'default-only.md',
+        'examples.md',
+        'z-hidden-by-alias.md'
+    ]
+    custom_list = [
+        'aaa.md',
+        'azy.md',
+        'both.md',
+        'examples.md',
+        'zeta.md'
+    ]
+    alias_dict = {
+        'aaa': 'alpha',
+        'y-alias-for-both': 'both',
+        'alias-for-azy': 'azy',
+        'z-hidden-by-alias': 'azy'
+    }
+
+    target = [
+        'aaa -> alpha',  # shadow the custom file
+        'alias-for-azy -> azy +',
+        'alpha',
+        'azy +',
+        'bar',
+        'both *',
+        'default-only',
+        'examples *',
+        'y-alias-for-both -> both *',
+        'z-hidden-by-alias -> azy +',
+        'zeta +'
+    ]
+    _helper_assert_list_supported_programs(
+        test_config,
+        examples_list,
+        custom_list,
+        alias_dict,
+        target
+    )
 
 
 def test_list_supported_programs_fails_gracefully_if_no_dirs():

@@ -174,6 +174,12 @@ def get_list_of_all_supported_commands(config):
         cp    (only default)
         cp *  (only custom)
         cp +  (default and custom)
+
+    Aliases are shown as
+    alias -> resolved, with resolved having its '*' or '+' as expected. Aliases
+    that shadow custom-only file names are expected to be shown instead of the
+    custom file names. This is intentional, as that is the behavior for file
+    resolution--an alias will hide a custom file.
     """
     default_files = []
     custom_files = []
@@ -187,17 +193,6 @@ def get_list_of_all_supported_commands(config):
     default_files = [path for path in default_files if _is_example_file(path)]
     custom_files = [path for path in custom_files if _is_example_file(path)]
 
-    # Now we get tricky. We're going to output the correct information by
-    # iterating through each list only once. Keep pointers to our position in
-    # the list. If they point to the same value, output that value with the
-    # 'both' flag and increment both. Just one, output with the appropriate flag
-    # and increment.
-
-    ptr_default = 0
-    ptr_custom = 0
-
-    result = []
-
     def get_without_suffix(file_name):
         """
         Return the file name without the suffix, or the file name itself
@@ -205,37 +200,46 @@ def get_list_of_all_supported_commands(config):
         """
         return file_name.split(EXAMPLE_FILE_SUFFIX)[0]
 
-    while ptr_default < len(default_files) and ptr_custom < len(custom_files):
-        def_cmd = default_files[ptr_default]
-        cus_cmd = custom_files[ptr_custom]
+    default_files = [get_without_suffix(f) for f in default_files]
+    custom_files = [get_without_suffix(f) for f in custom_files]
 
-        if def_cmd == cus_cmd:
-            # They have both
-            result.append(
-                get_without_suffix(def_cmd) +
-                ' ' +
-                FLAG_CUSTOM_AND_DEFAULT
-            )
-            ptr_default += 1
-            ptr_custom += 1
-        elif def_cmd < cus_cmd:
-            # Only default, as default comes first.
-            result.append(get_without_suffix(def_cmd))
-            ptr_default += 1
+    set_default_commands = set(default_files)
+    set_custom_commands = set(custom_files)
+
+    alias_dict = get_alias_dict(config)
+
+    both_defined = set_default_commands & set_custom_commands
+    only_default = set_default_commands - set_custom_commands
+    only_custom = set_custom_commands - set_default_commands
+
+    all_commands = both_defined | only_default | only_custom
+
+    command_to_rep = {}
+    for command in all_commands:
+        rep = None
+        if command in both_defined:
+            rep = command + ' ' + FLAG_CUSTOM_AND_DEFAULT
+        elif command in only_default:
+            rep = command
+        elif command in only_custom:
+            rep = command + ' ' + FLAG_ONLY_CUSTOM
         else:
-            # Only custom
-            result.append(get_without_suffix(cus_cmd) + ' ' + FLAG_ONLY_CUSTOM)
-            ptr_custom += 1
+            raise NameError('command not in known set: ' + str(command))
+        command_to_rep[command] = rep
 
-    # Now just append.
-    for i in range(ptr_default, len(default_files)):
-        def_cmd = default_files[i]
-        result.append(get_without_suffix(def_cmd))
+    result = []
+    all_commands_and_aliases = all_commands.union(alias_dict.keys())
+    for command in all_commands_and_aliases:
+        if command in alias_dict:
+            # aliases get precedence
+            target = alias_dict[command]
+            rep_of_target = command_to_rep[target]
+            result.append(command + ' -> ' + rep_of_target)
+        else:
+            rep = command_to_rep[command]
+            result.append(rep)
 
-    for i in range(ptr_custom, len(custom_files)):
-        cus_cmd = custom_files[i]
-        result.append(get_without_suffix(cus_cmd) + ' ' + FLAG_ONLY_CUSTOM)
-
+    result.sort()
     return result
 
 
@@ -330,6 +334,9 @@ def get_alias_dict(config_obj):
 
     If the aliases file does not exist, returns an empty dict.
     """
+    if not config_obj.examples_dir:
+        return {}
+
     alias_file_path = _get_alias_file_path(config_obj)
     if not os.path.isfile(alias_file_path):
         return {}
