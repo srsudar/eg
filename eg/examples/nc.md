@@ -5,7 +5,7 @@ receive input on port 1337
     nc -l 1337
 
 
-receit input on port 1337 on gnu nc implementation
+receive input on port 1337 on GNU nc implementation
 
     nc -l -p 1337
 
@@ -33,7 +33,7 @@ Send what is read from stdin to an address and a port:
     nc <address> <port>
 
 
-Send what is read from stdin to an address and a port on the gnu implementation
+Send what is read from stdin to an address and a port on the GNU implementation
 of `nc`:
 
     nc <address> -p <port>
@@ -44,7 +44,7 @@ Listen on a port and send it to stdout:
     nc -l <port>
 
 
-Listen on a port and send it to stdout on the gnu implementation of `nc`:
+Listen on a port and send it to stdout on the GNU implementation of `nc`:
 
     nc -l -p <port>
 
@@ -54,7 +54,7 @@ Listen on a port and send it to stdout on the gnu implementation of `nc`:
 
 Usage for `nc`, or `netcat`, varies highly depending on your system. Some
 implementations require both the `-l` and `-p` flags to listen on a port, for
-instance, whereas other explicitly list using the `-l` and `-p` flags together
+instance, whereas others explicitly list using the `-l` and `-p` flags together
 is an error. Use these examples as a starting point, but turn to `man` for the
 specifics of your implementation.
 
