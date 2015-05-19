@@ -136,7 +136,7 @@ Flags are ANDed by default, but can also achieve OR and NOT functionality.
 ## AND
 
 List files greater bigger than 500k (`+500k`) and named `bigFile.txt`
-(`-name bigfile.txt`). These two commands are equivalent:
+(`-name bigFile.txt`). These two commands are equivalent:
     
     $ find ./searchdir -size +500k -name bigFile.txt
     $ find ./searchdir -size +500k -and -name bigFile.txt
