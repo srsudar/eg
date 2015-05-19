@@ -101,7 +101,7 @@ Match all lines with lower case or capital letters a through z (`[a-zA-Z]`):
     baz omega
 
 
-Match all lines containg numbers (`[0-9]`):
+Match all lines containing numbers (`[0-9]`):
 
     $ grep -e "[0-9]" input.txt
     1 2 3
