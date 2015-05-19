@@ -53,8 +53,8 @@ Listen on a port and send it to stdout on the GNU implementation of `nc`:
 # Compatibility
 
 Usage for `nc`, or `netcat`, varies highly depending on your system. Some
-implementations require both the `-l` and `-p` flags to listen on a port for
-instance, whereas other explicitly list using the `-l` and `-p` flags together
+implementations require both the `-l` and `-p` flags to listen on a port, for
+instance, whereas others explicitly list using the `-l` and `-p` flags together
 is an error. Use these examples as a starting point, but turn to `man` for the
 specifics of your implementation.
 
