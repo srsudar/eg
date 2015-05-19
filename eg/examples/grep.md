@@ -48,7 +48,7 @@ Show only the file names that do NOT contain matches by using the `-L` flag:
 
 
 
-# Regular Expressions
+# Regular Expressions and `egrep`
 
 Regular expressions can be passed to `grep` using the `-e` flag. `egrep` is
 equivalent to using the `-e` flag.
@@ -116,5 +116,22 @@ Match all lines containing white space (`[[:space:]]`):
     alpha bar
     baz omega
     4 5 6
+
+
+# Fixed Expressions and `fgrep`
+
+`fgrep` is faster than `grep` and `egrep` but only accepts fixed expressions.
+This will match lines containing the exact sequence `.*` (`'.*'`). Quoting is
+used to prevent shell expansion of the wildcard `*` character:
+
+    fgrep '.*' input.txt
+
+
+
+# Searching Compressed Files
+
+`zgrep`, `zegrep`, and `zfgrep` act exactly like `grep`, `egrep`, and `fgrep`,
+but they operate on compressed and gzipped files. The same examples shown above
+will function with the `z*grep` utilities.
 
 
