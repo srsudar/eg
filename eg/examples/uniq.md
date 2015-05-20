@@ -22,7 +22,7 @@ output only the lines that are not repeated in unique.txt
 
 output unique lines ignoring case
 
-    unique -i case.txt
+    uniq -i case.txt
 
 
 
