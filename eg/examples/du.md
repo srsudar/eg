@@ -55,8 +55,8 @@ On OSX, the `coreutils` package will be necessary. Install it with:
 
     brew install coreutils
 
-After having it installed, sort by size on disk in human readable units:
+After having it installed, the `gsort` command will be available:
 
-    du -h <files> | sort -h
+    du -h <files> | gsort -h
 
 
