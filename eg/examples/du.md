@@ -30,6 +30,24 @@ Sort by size on disk in human readable units:
     du -h <files> | sort -h
 
 
+Using `-h` makes `sort` take size units into account:
+
+    $ du -h *
+    2.0M    a.log
+    512K    b.log
+    1.0G    c.log
+
+    $ du -h * | sort
+    1.0G    c.log
+    2.0M    a.log
+    512K    b.log
+
+    $ du -h * | sort -h
+    512K    b.log
+    2.0M    a.log
+    1.0G    c.log
+
+
 
 ### OSX
 
