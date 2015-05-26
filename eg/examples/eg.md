@@ -41,7 +41,8 @@ Show examples for a command:
 # Configuration File
 
 `eg` can be configured using an rc file. By convention, this is expected to be
-found at `~/.egrc`. The supported sections are `eg-config` and `color`.
+found at `~/.egrc`. The supported sections are `eg-config`, `color`, and
+`substitutions`.
 
 `examples-dir` is the directory where `eg` looks for default examples. Under
 normal circumstances this is provided by the installation and does not require
@@ -54,6 +55,13 @@ options are used to terminate a region of colorized output. Normal users will
 have no reason to change them from their default values of `\x1b[0m`, which
 removes all formatting.
 
+Regex-based substitutions can be specified in the `[substitutions]` section.
+They must be named and follow the a list-based syntax that will be applied
+using Python's `re` module: `[pattern, replacement, is_multiline]`.
+
+The three types of formatting are applied in the order: color, squeeze,
+substitutions.
+
 Below is a valid egrc with every option specified:
 
     [eg-config]
@@ -61,6 +69,7 @@ Below is a valid egrc with every option specified:
     examples-dir = /path/to/examples/dir
     custom-dir = /path/to/custom/dir
     color = true
+    squeeze = true
     pager-cmd = 'less -R'
 
     [color]
@@ -74,5 +83,9 @@ Below is a valid egrc with every option specified:
     code_reset = '\x1b[0m'
     prompt_reset = '\x1b[0m'
     backticks_reset = '\x1b[0m'
+
+    [substitutions]
+    # This will remove all four-space indents.
+    remove-indents = ['^    ', '', True]
 
 

@@ -6,6 +6,60 @@ from eg import config
 from eg import util
 
 
+def _show_version():
+    """Show the version string."""
+    print(util.VERSION)
+
+
+def _show_list_message(resolved_config):
+    """
+    Show the message for when a user has passed in --list.
+    """
+    # Show what's available.
+    supported_programs = util.get_list_of_all_supported_commands(
+        resolved_config
+    )
+    msg_line_1 = 'Legend: '
+    msg_line_2 = (
+        '    ' +
+        util.FLAG_ONLY_CUSTOM +
+        ' only custom files'
+    )
+    msg_line_3 = (
+        '    ' +
+        util.FLAG_CUSTOM_AND_DEFAULT +
+        ' custom and default files'
+    )
+    msg_line_4 = '    ' + '  only default files (no symbol)'
+    msg_line_5 = ''
+    msg_line_6 = 'Programs supported by eg: '
+
+    preamble = [
+        msg_line_1,
+        msg_line_2,
+        msg_line_3,
+        msg_line_4,
+        msg_line_5,
+        msg_line_6
+    ]
+
+    complete_message = '\n'.join(preamble)
+    complete_message += '\n' + '\n'.join(supported_programs)
+
+    pydoc.pager(complete_message)
+
+
+def _handle_insufficient_args():
+    """
+    Handles the case where the user has not specified an actionable set of
+    arguments to eg. I.e. if they haven't specified a program or
+    --version/--list.
+    """
+    print(
+        'you must specify a program or pass the --list or --version flags'
+    )
+
+
 def run_eg():
 
     parser = argparse.ArgumentParser(
@@ -59,6 +113,14 @@ def run_eg():
     )
 
     parser.add_argument(
+        '-s',
+        '--squeeze',
+        action='store_true',
+        default=None,
+        help='Show fewer blank lines in output.'
+    )
+
+    parser.add_argument(
         '--no-color',
         action='store_false',
         dest='use_color',
@@ -76,51 +138,21 @@ def run_eg():
     if len(sys.argv) < 2:
         parser.print_help()
     elif not args.version and not args.list and not args.program:
-        print(
-            'you must specify a program or pass the --list or --version flags'
-        )
+        _handle_insufficient_args()
     else:
         resolved_config = config.get_resolved_config_items(
             egrc_path=args.config_file,
             examples_dir=args.examples_dir,
             custom_dir=args.custom_dir,
             use_color=args.use_color,
-            pager_cmd=args.pager_cmd
+            pager_cmd=args.pager_cmd,
+            squeeze=args.squeeze
         )
 
         if args.list:
-            # Show what's available.
-            supported_programs = util.get_list_of_all_supported_commands(
-                resolved_config
-            )
-            msg_line_1 = 'Legend: '
-            msg_line_2 = ('    ' +
-                          util.FLAG_ONLY_CUSTOM +
-                          ' only custom files'
-                          )
-            msg_line_3 = ('    ' +
-                          util.FLAG_CUSTOM_AND_DEFAULT +
-                          ' custom and default files'
-                          )
-            msg_line_4 = '    ' + '  only default files (no symbol)'
-            msg_line_5 = ''
-            msg_line_6 = 'Programs supported by eg: '
-
-            preamble = [
-                msg_line_1,
-                msg_line_2,
-                msg_line_3,
-                msg_line_4,
-                msg_line_5,
-                msg_line_6
-            ]
-
-            complete_message = '\n'.join(preamble)
-            complete_message += '\n' + '\n'.join(supported_programs)
-
-            pydoc.pager(complete_message)
+            _show_list_message(resolved_config)
         elif args.version:
-            print(util.VERSION)
+            _show_version()
         else:
             util.handle_program(args.program, resolved_config)
 

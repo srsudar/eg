@@ -2,6 +2,7 @@
 examples-dir = test/example/dir/in/egrc_withdata
 custom-dir = test/custom/dir/in/egrc_withdata
 color = true
+squeeze = true
 pager-cmd = 'more egrc'
 
 [color]
@@ -15,3 +16,7 @@ heading_reset = 'heading_reset_val'
 code_reset = 'code_reset_val'
 backticks_reset = 'backticks_reset_val'
 prompt_reset = 'prompt_reset_val'
+
+[substitutions]
+beta_fewer_new_lines = ['\n\n\n', '\n\n', True]
+alpha_no_indent = [r'    ', r'', False]

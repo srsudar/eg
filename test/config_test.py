@@ -1,13 +1,42 @@
+import os
+
 from eg import config
+from eg import substitute
 from mock import patch
 from nose.tools import assert_equal
 from nose.tools import assert_false
+from nose.tools import assert_raises
 from nose.tools import assert_true
+
+# Support python 2 and 3
+try:
+    import ConfigParser
+except ImportError:
+    from configparser import ConfigParser
+
+
+PATH_EGRC_WITH_DATA = os.path.join(
+    'test',
+    'assets',
+    'egrc_withdata'
+)
+PATH_EGRC_NO_DATA = os.path.join(
+    'test',
+    'assets',
+    'egrc_nodata'
+)
+PATH_EGRC_SINGLE_SUB = os.path.join(
+    'test',
+    'assets',
+    'egrc_single_substitution'
+)
 
 
 def test_config_returns_defaults_if_all_none_and_no_egrc():
+    """No config file and no egrc should return default values."""
     with patch('os.path.isfile', return_value=False):
         resolved_config = config.get_resolved_config_items(
+            None,
             None,
             None,
             None,
@@ -23,6 +52,8 @@ def test_config_returns_defaults_if_all_none_and_no_egrc():
         assert_equal(resolved_config.color_config, default_color_config)
         assert_equal(resolved_config.use_color, config.DEFAULT_USE_COLOR)
         assert_equal(resolved_config.pager_cmd, config.DEFAULT_PAGER_CMD)
+        assert_equal(resolved_config.squeeze, config.DEFAULT_SQUEEZE)
+        assert_equal(resolved_config.subs, config.get_default_subs())
 
 
 def test_config_returns_egrc_values_if_present():
@@ -37,13 +68,17 @@ def test_config_returns_egrc_values_if_present():
         test_color_config = _get_color_config_from_egrc_withdata()
         test_use_color = True
         test_pager_cmd = 'more baby'
+        test_squeeze = True
+        test_subs = ['alpha', 'beta']
 
         def_config = config.Config(
             examples_dir=examples_dir,
             custom_dir=custom_dir,
             color_config=test_color_config,
             use_color=test_use_color,
-            pager_cmd=test_pager_cmd
+            pager_cmd=test_pager_cmd,
+            squeeze=test_squeeze,
+            subs=test_subs
         )
         with patch(
             'eg.config.get_config_tuple_from_egrc',
@@ -54,13 +89,16 @@ def test_config_returns_egrc_values_if_present():
                 None,
                 None,
                 None,
-                None
+                None,
+                None,
             )
             assert_equal(resolved_config.examples_dir, examples_dir)
             assert_equal(resolved_config.custom_dir, custom_dir)
             assert_equal(resolved_config.color_config, test_color_config)
             assert_equal(resolved_config.use_color, test_use_color)
             assert_equal(resolved_config.pager_cmd, test_pager_cmd)
+            assert_equal(resolved_config.squeeze, test_squeeze)
+            assert_equal(resolved_config.subs, test_subs)
 
 
 def test_config_uses_custom_egrc_path():
@@ -71,22 +109,25 @@ def test_config_uses_custom_egrc_path():
             custom_dir='custom_dir',
             color_config=config.get_empty_color_config(),
             use_color=False,
-            pager_cmd='less is more'
+            pager_cmd='less is more',
+            squeeze='squeeze from fake egrc',
+            subs=['foo', 'bar']
         )
         egrc_path = 'test/path/to/egrc'
         with patch(
             'eg.config.get_config_tuple_from_egrc',
             return_value=def_config
-        ) as mocked_method:
+        ) as mocked_get_config_from_egrc:
             config.get_resolved_config_items(
                 egrc_path,
                 None,
                 None,
                 None,
                 None,
+                None,
                 debug=False
             )
-            mocked_method.assert_called_once_with(egrc_path)
+            mocked_get_config_from_egrc.assert_called_once_with(egrc_path)
 
 
 def test_config_returns_values_passed_at_command_line():
@@ -98,16 +139,22 @@ def test_config_returns_values_passed_at_command_line():
         command_line_custom_dir = 'test_custom_dir_user_defined'
         command_line_use_color = 'we_should_use_color'
         command_line_pager_cmd = 'command_line_says_pager_with_cat'
+        command_line_squeeze = 'command_line_wants_to_squeeze'
+
         egrc_examples_dir = 'egrc_examples_dir'
         egrc_custom_dir = 'egrc_custom_dir'
         egrc_use_color = 'the_egrc_says_yes_color'
         egrc_pager_cmd = 'the_egrc_pages_with_more'
+        egrc_squeeze = 'egrc_says_squeeze'
+        egrc_subs = ['sub1', 'sub2']
         egrc_config = config.Config(
             examples_dir=egrc_examples_dir,
             custom_dir=egrc_custom_dir,
             color_config=config.get_default_color_config(),
             use_color=egrc_use_color,
-            pager_cmd=egrc_pager_cmd
+            pager_cmd=egrc_pager_cmd,
+            squeeze=egrc_squeeze,
+            subs=egrc_subs
         )
         with patch(
             'eg.config.get_config_tuple_from_egrc',
@@ -119,12 +166,14 @@ def test_config_returns_values_passed_at_command_line():
                 command_line_custom_dir,
                 command_line_use_color,
                 command_line_pager_cmd,
+                command_line_squeeze,
                 debug=False
             )
             assert_equal(actual.examples_dir, command_line_examples_dir)
             assert_equal(actual.custom_dir, command_line_custom_dir)
             assert_equal(actual.use_color, command_line_use_color)
             assert_equal(actual.pager_cmd, command_line_pager_cmd)
+            assert_equal(actual.squeeze, command_line_squeeze)
 
 
 def test_get_config_tuple_from_egrc_all_none_when_not_present():
@@ -134,7 +183,7 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
     We should return None for all values and an empty color_config if there is
     no data in the egrc.
     """
-    actual = config.get_config_tuple_from_egrc('test/assets/egrc_nodata')
+    actual = config.get_config_tuple_from_egrc(PATH_EGRC_NO_DATA)
 
     empty_color_config = config.get_empty_color_config()
 
@@ -143,7 +192,9 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
         custom_dir=None,
         color_config=empty_color_config,
         use_color=None,
-        pager_cmd=None
+        pager_cmd=None,
+        squeeze=None,
+        subs=None
     )
     assert_equal(actual, target)
 
@@ -156,6 +207,12 @@ def test_get_config_tuple_from_egrc_when_present():
     egrc_use_color = True
     egrc_pager_cmd = 'more egrc'
     color_config_from_file = _get_color_config_from_egrc_withdata()
+    egrc_squeeze = True
+    # Order matters--we apply substitutions alphabetically.
+    egrc_subs = [
+        substitute.Substitution(r'    ', r'', False),
+        substitute.Substitution('\n\n\n', '\n\n', True)
+    ]
 
     def return_expanded_path(*args, **kwargs):
         if args[0] == egrc_examples_dir:
@@ -176,18 +233,25 @@ def test_get_config_tuple_from_egrc_when_present():
         side_effect=return_expanded_path
     ) as mock_expand:
 
-        actual = config.get_config_tuple_from_egrc(
-            'test/assets/egrc_withdata'
-        )
+        actual = config.get_config_tuple_from_egrc(PATH_EGRC_WITH_DATA)
 
         target = config.Config(
             examples_dir=egrc_examples_dir,
             custom_dir=egrc_custom_dir,
             color_config=color_config_from_file,
             use_color=egrc_use_color,
-            pager_cmd=egrc_pager_cmd
+            pager_cmd=egrc_pager_cmd,
+            squeeze=egrc_squeeze,
+            subs=egrc_subs
         )
-        assert_equal(actual, target)
+
+        assert_equal(actual.examples_dir, target.examples_dir)
+        assert_equal(actual.custom_dir, target.custom_dir)
+        assert_equal(actual.color_config, target.color_config)
+        assert_equal(actual.use_color, target.use_color)
+        assert_equal(actual.pager_cmd, target.pager_cmd)
+        assert_equal(actual.squeeze, target.squeeze)
+        assert_equal(actual.subs, target.subs)
 
         mock_expand.assert_any_call(egrc_examples_dir)
         mock_expand.assert_any_call(egrc_custom_dir)
@@ -350,3 +414,98 @@ def test_get_priority_respect_false():
     target = False
     actual = config.get_priority(False, 'second', 'third')
     assert_equal(target, actual)
+
+
+def test_parse_substitution_from_list_without_is_multiline():
+    """
+    Make sure we can parse a list without the is_multiline option set, i.e.
+    just a two element list.
+    """
+    target = substitute.Substitution('foo', 'bar', False)
+    list_rep = ['foo', 'bar']
+    actual = config.parse_substitution_from_list(list_rep)
+    assert_equal(actual, target)
+
+
+def test_parse_substitution_from_list_with_is_multiline():
+    """
+    We should be able to parse a Subsitution if is_multiline is set.
+    """
+    target = substitute.Substitution('patt', 'repl', True)
+    list_rep = ['patt', 'repl', True]
+    actual = config.parse_substitution_from_list(list_rep)
+    assert_equal(actual, target)
+
+
+def test_parse_substitution_error_if_not_list():
+    """
+    Raise a SyntaxError if the value is not a list.
+    """
+    assert_raises(SyntaxError, config.parse_substitution_from_list, 'foo_str')
+
+
+def test_parse_substitution_error_if_wrong_length():
+    """
+    Raise a SyntaxError if the list is less than two long.
+    """
+    assert_raises(
+        SyntaxError,
+        config.parse_substitution_from_list,
+        ['foo']
+    )
+
+
+def test_parse_substitution_error_if_third_element_not_bool():
+    """
+    Raise a SyntaxError if the third element in the list is not a boolean.
+    """
+    assert_raises(
+        SyntaxError,
+        config.parse_substitution_from_list,
+        ['foo', 'bar', 'intentionally_not_a_bool']
+    )
+
+
+def test_get_substitution_from_config_finds_single_substitution():
+    """
+    Retrieve a single substitution from the config. Integration test--actually
+    pulls from a file.
+    """
+    # This is hardcoded matching the value in the file.
+    single_sub = substitute.Substitution('foo', 'bar', False)
+    target = [single_sub]
+
+    config_obj = _get_egrc_config(PATH_EGRC_SINGLE_SUB)
+
+    actual = config.get_substitutions_from_config(config_obj)
+    assert_equal(actual, target)
+
+
+def test_get_substitution_from_config_finds_multiple_substitutions():
+    """
+    Retrieve multiple substitutions from a config in the appropriate order.
+    Integration test--actually pulls from a file.
+    """
+    # These are hardcoded matching the value in the file. They will be sorted
+    # alphabetically by pattern name.
+    first_sub = substitute.Substitution(r'    ', r'', False)
+    second_sub = substitute.Substitution('\n\n\n', '\n\n', True)
+    target = [first_sub, second_sub]
+
+    config_obj = _get_egrc_config(PATH_EGRC_WITH_DATA)
+
+    actual = config.get_substitutions_from_config(config_obj)
+    assert_equal(actual, target)
+
+
+def _get_egrc_config(egrc_path):
+    """
+    Return a config object based on the config file at the given path.
+    """
+    with open(egrc_path, 'r') as egrc:
+        try:
+            config = ConfigParser.RawConfigParser()
+        except AttributeError:
+            config = ConfigParser()
+        config.readfp(egrc)
+    return config

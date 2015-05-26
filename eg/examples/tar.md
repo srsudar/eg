@@ -34,7 +34,7 @@ Untar a file:
 Create a tar file from a directory:
 
     tar vfc <name-of-tar-file> <directory-to-tar>
-    
+
 
 
 # Remembering the Flags
@@ -69,6 +69,11 @@ Compress directory (`c`) into b-zipped (`j`) directory:
     tar vfcj b_zipped_directory.tar.bz2 directory
 
 
+Compress directory (`c`) into xz-zipped (`J`) directory:
+
+    tar vfcJ xz_zipped_directory.tar.xz directory
+
+
 
 # Untarring
 
@@ -82,12 +87,17 @@ Untar (`x`) and unzip a b-zipped (`j`) file:
     tar vfxj b_zipped_archive.tar.bz2
 
 
+Untar (`x`) and unzip an xz-zipped (`J`) file:
+
+    tar vfxJ xz_zipped_archive.tar.xz
+
+
 
 ## Partial Untarring
 
 Extract only part of the contents (`directory/foo.txt`) from a .tar file:
 
-    tar vfx arhcived_directory.tar directory/foo.txt 
+    tar vfx archived_directory.tar directory/foo.txt
 
 
 
@@ -99,5 +109,3 @@ List (`t`) the contents of a tar file without untarring it:
     drwxr-xr-x  0 tyrion group       0 Feb  4 14:54 directory/
     -rw-r--r--  0 tyrion group       0 Feb  4 14:54 directory/bar.txt
     -rw-r--r--  0 tyrion group       0 Feb  4 14:54 directory/foo.txt
-
-
