@@ -15,6 +15,11 @@ delete e, f, and g characters
     tr -d efg
 
 
+replace lower case letters with upper case
+
+    tr '[a-z]' '[A-Z']
+
+
 
 # Basic Usage
 

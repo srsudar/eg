@@ -109,6 +109,42 @@ Find files less than 5k (`-size -5k`):
 
 
 
+# Time
+
+Files can also be filtered based on the last time they were changed, modified,
+and accessed.
+
+`-ctime` refers to the last time the inode or file was changed, which includes
+updating file attributes like owner or permissions as well as file
+modifications.
+
+`-mtime` refers to the last time a file was modified.
+
+`-atime` refers to the last time a file was accessed, including by other
+command line tools.
+
+Arguments to these flags can be in seconds (`s`), minutes (`m`), hours (`h`),
+days (`d`), or weeks (`w`). Preceding an argument with `+` will return files
+greater than the condition, while `-` will return files less than the
+condition.
+
+Find files modified (`-mtime`) less than 20 minutes (`-20m`) ago:
+
+    find /searchdir -mtime -20m
+
+
+Find files last accessed (`-atime`) more than 2 weeks (`+2w`) ago:
+
+    find /searchdir -atime -w2
+
+
+Alternatively, you can return files that have been modified more recently than
+another file with `-newer`:
+
+    find /searchdir -newer other.txt
+
+
+
 # Depth
 
 Find files and directories only two levels deep (`-depth 2` or `-d 2`):

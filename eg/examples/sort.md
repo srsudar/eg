@@ -10,6 +10,11 @@ sort the lines ignoring leading whitespace
     sort -b ignore_whitespace.txt
 
 
+sort the lines ignoring caes
+
+    sort -f ignore_case.txt
+
+
 reverse the sort order
 
     sort -r reverse.txt

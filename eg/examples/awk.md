@@ -57,7 +57,7 @@ default it splits on whitespace.
 Fields are referred to by a `$` and an index. `$2` means the second field in
 the line.
 
-Fields are 1-indexed--i.e. `$2` would refer to the second column in a file.
+Fields are 1-indexed--i.e. `$2` would refer to the second colum in a file.
 
 `thrones.txt`:
 
