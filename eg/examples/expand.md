@@ -1,5 +1,15 @@
 # expand
 
-change the tab to specifc number of space 
+replace tabs with four spaces:
 
-grep '^MANPATH' /etc/man.config | head -n 3 | exapnd -t 4
+    expand -t 4 removeTabs.txt
+
+
+
+# Basic Usage
+
+Replace tabs with a given number of spaces.
+
+    expand -t <num-spaces> <intput-file>
+
+

@@ -57,13 +57,13 @@ default it splits on whitespace.
 Fields are referred to by a `$` and an index. `$2` means the second field in
 the line.
 
-Fields are 1-indexed--i.e. `$2` would refer to the second column in a file.
+Fields are 1-indexed--i.e. `$2` would refer to the second colum in a file.
 
 `thrones.txt`:
 
     Tyrion   Lannister    555.360.1234
     Jamie    Lannister    555.360.9876
-    Jon      Snow         555.206.4545
+    Jon      Snow         555.206.4444
     Arya     Stark        555.206.1111
 
 
@@ -85,31 +85,4 @@ whitespace by default.
 
     awk '{ for (i = 1; i < NF; i++) print $i }' input.txt
 
-
-# For pipe 
-
-The combination of pipe and eg is very useful
-    
-    last -n 5 | awk '{print $1 "\t" $3}'
-
-    cat /etc/passwd | awk '{FS = ":"} $3<10 {print $1 "\t" $3}'
-
-    cat /etc/passwd | awk 'BEGIN {FS = ":"} $3<10 {print $1 "\t" $3}'
-
-    last -n 5 | awk '{print $1 "\t lines:" NR "\t columns:" NF}'
-
-    cat pay.txt | awk 'NR==1 {printf "%10s %10s", $1, $2} NR>=2 {total=$1 + $2 printf"%10s", total}'
-
-    cat pay.txt | awk '{ if(NR==1) printf "%10s %10s", $1, $2} NR>=2 {total=$1 + $2 printf"%10s", total}'
-    
-    $ cat pay.txt
-    Name     1st 2nd 3th
-    Mason    10  20  30
-    Jake     30  40  50
-    Shawn    3   5   10
-
-    $ cat pay.txt | \
-    awk 'NR == 1 {printf "%10s %10s %10s %10s %10s\n", $1, $2, $3, $4, "Total"}'\
-    NR>=2 {total = $2 +$3 +$4 \
-    printf "%10s %10d %10d %10.2f\n", $1, $2, $3, $4, total}'
 

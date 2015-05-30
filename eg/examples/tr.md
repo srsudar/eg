@@ -15,6 +15,11 @@ delete e, f, and g characters
     tr -d efg
 
 
+replace lower case letters with upper case
+
+    tr '[a-z]' '[A-Z']
+
+
 
 # Basic Usage
 
@@ -22,11 +27,6 @@ Transform characters in `<1st>` to the characters in `<2nd>`
 
     tr <1st> <2nd>
 
-Change the upperclass to the lowerclass
-
-    cat /etc/passwd | tr '[a-z]' '[A-Z]' 
-
-    cat /etc/passwd | tr -d ':' // to delete the column in the file
 
 
 # Translating or Replacing Characters

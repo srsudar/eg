@@ -1,9 +1,15 @@
 # zip
 
-Compress the file
+compress foo.txt, bar.txt and dir/ as compressed.zip
 
-    zip compressed.zip 0 1 2 3 4 5
+    zip compressed.zip foo.txt bar.txt dir/
 
-Uncompress the file
 
-    unzip compressed.zip -d /path/to/directory
+
+# Basic Usage
+
+Compress a number of files or diretories:
+
+    zip <output-file> <list-of-files>
+
+

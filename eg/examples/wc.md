@@ -32,9 +32,7 @@ Show the lines and words in a file:
 
     wc <file>
 
-Or use them in the pipe
 
-    cat /etc/man.config | wc
 
 # Counting Lines and Words
 

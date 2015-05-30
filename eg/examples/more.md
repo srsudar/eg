@@ -1,5 +1,4 @@
 # more
-# Don’t use more, use less instead
 
 page file to stdout
 
