@@ -19,6 +19,17 @@ check if file is sorted
 
     sort -c check_me.txt
 
+Use sort in the pipeline
+    
+    cat /etc/passwd | sort -t ':' -k 3 -n 
+
+Use the space to separate
+
+    sort -t ' ' -k 1
+
+Use the sort command to sort the English file
+
+    sort -f (which ignore the case)
 
 
 # Basic Usage

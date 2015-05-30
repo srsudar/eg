@@ -14,6 +14,9 @@ show 2nd character of every line
 
     cut -c2 characters.txt
     
+show a range of the characters
+
+    cut -c 1-10 characters.txt
 
 
 # Basic Usage
@@ -21,7 +24,8 @@ show 2nd character of every line
 Split on a delimiter and print certain fields:
 
     cut -d'<delimiter>' -f<fields> <file>
-    
+   
+    last | cut -d ' ' -f 1 | sort
 
 
 # Specifying the Delimiter and Fields
