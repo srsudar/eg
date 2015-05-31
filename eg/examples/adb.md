@@ -277,11 +277,17 @@ using the `adb backup` command.
 
 This sequence of commands will create a backup of all app data in protected
 storage as specified by the `org.package.app` package name and store it as
-`backup.ab`. We will then use `dd` and python to decompress the file and save
-it as a tar file. Finally we'll extract the contents of the file using `tar`,
-creating the app's directory as it existed on the phone. Note that the backup
-will have to be manually approved on the device after running `adb backup`, and
-that the `\` characters are line continuations for use in the shell.
+`backup.ab`. The backup file format begins with human-readable text to display
+the file type and the file version, followed by a compressed tar file. Assuming
+a version number of a single byte, the compressed backup content starts after
+24 bytes.
+
+We use `dd` to extract only the compressed part of the file and use python to
+decompress the content and save it as a tar file. Finally we'll extract the
+contents of the file using `tar`, creating the app's directory as it existed on
+the phone. Note that the backup will have to be manually approved on the device
+after running `adb backup`, and that the `\` characters are line continuations
+for use in the shell.
 
     $ adb backup -f ./backup.ab org.package.app
     $ dd if=./backup.ab bs=1 skip=24 \
