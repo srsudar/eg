@@ -7,7 +7,7 @@ show character with helpful names and offset in decimal
 
 show human readable 16 per line
 
-    od -Ad -w16 -tc human_readable.txt
+    od -Ad -tc human_readable.txt
 
 
 show escaped characters (\n new line, \t tab, etc)
