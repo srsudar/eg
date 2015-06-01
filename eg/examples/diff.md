@@ -31,7 +31,7 @@ Show the differences between two files:
 Output generated with unified context (`-u`) is simpler to understand for many
 users. It is also the output used by many version control systems. This will
 output changes with surrounding unchanged lines for context, as well as show
-additions with `+` and substractions with `-`:
+additions with `+` and subtractions with `-`:
 
     diff -u <original> <modified>
 

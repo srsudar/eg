@@ -8,7 +8,7 @@ compress foo.txt, bar.txt and dir/ as compressed.zip
 
 # Basic Usage
 
-Compress a number of files or diretories:
+Compress a number of files or directories:
 
     zip <output-file> <list-of-files>
 

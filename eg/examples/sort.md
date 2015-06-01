@@ -10,7 +10,7 @@ sort the lines ignoring leading whitespace
     sort -b ignore_whitespace.txt
 
 
-sort the lines ignoring caes
+sort the lines ignoring cases
 
     sort -f ignore_case.txt
 
