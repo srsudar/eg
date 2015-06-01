@@ -43,7 +43,7 @@ and line deletions that would transform one file into another.
 
 # Basic Output
 
-By default, output from the diff command consists of an action (either an
+By default, output from the `diff` command consists of an action (either an
 addition `a`, a change `c`, or a deletion `d`), the contents of the original
 file, and the contents of the modified file.
 
