@@ -31,7 +31,7 @@ Show the differences between two files:
 Output generated with unified context (`-u`) is simpler to understand for many
 users. It is also the output used by many version control systems. This will
 output changes with surrounding unchanged lines for context, as well as show
-additions with `+` and substractions with `-`:
+additions with `+` and subtractions with `-`:
 
     diff -u <original> <modified>
 
@@ -43,7 +43,7 @@ and line deletions that would transform one file into another.
 
 # Basic Output
 
-By default, output from the diff command consists of an action (either an
+By default, output from the `diff` command consists of an action (either an
 addition `a`, a change `c`, or a deletion `d`), the contents of the original
 file, and the contents of the modified file.
 
