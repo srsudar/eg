@@ -268,6 +268,20 @@ Print the complete `pm` help by passing no arguments:
 
 
 
+## Pull an apk Off a Device
+
+The `path` command can be used with `pm` to get the path to the package's apk
+file. This can be used with `adb pull` to pull a package's apk off of the
+device. This sequence of commands discovers the apk path for the
+`com.google.android.calendar` package and pulls the apk to the current
+directory:
+
+    $ adb shell pm path com.google.android.calendar
+    /data/app/com.google.android.calendar-1/base.apk
+    $ adb pull /data/app/com.google.android.calendar-1/base.apk
+
+
+
 # Inspecting Protected Storage
 
 By default, most apps store their data in protected storage that cannot be
