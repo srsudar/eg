@@ -17,7 +17,7 @@ give execute permission to the owning user
 
 remove all permissions from non-owning user and non-group members
 
-    chmod o-rwx file.xt
+    chmod o-rwx file.txt
 
 
 

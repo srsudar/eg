@@ -5,14 +5,24 @@ create an empty file
     touch empty_file.txt
 
 
-update the access time of a file to the current instant
+update the modified and access time of a file to the current instant
 
     touch old_file.txt
 
 
-update the access time of the file to Dec 25, 1999, 2:25:33pm
+update the modified and access time of the file to August 5 at 13:00
 
-    touch -t 199912251425.33 file.txt
+    touch -t 08051200 file.txt
+
+
+update only the modified time to the current instant
+
+    touch -m file.txt
+
+
+update only the access time to the current instant
+
+    touch -a file.txt
 
 
 
@@ -38,5 +48,12 @@ following command sets the access time of `foo.txt` to Dec 25, 1999, at
     $ ls -lT
     total 0
     -rw-r--r--  1 tyrion  group  0 Dec 25 14:25:33 1999 foo.txt
+
+
+The year and seconds are optional. If not specified, the year will be the
+current year and the seconds will be 0. This command updates the access and
+modification times to August 5 of the current year at 1pm (`-t 08051300`):
+
+    touch -t 08051300 file.txt
 
 

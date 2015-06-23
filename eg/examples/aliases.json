@@ -1,0 +1,12 @@
+{
+  "link": "ln",
+  "netcat": "nc",
+  "g++": "gcc",
+  "clang": "gcc",
+  "clang++": "gcc",
+  "egrep": "grep",
+  "fgrep": "grep",
+  "zgrep": "grep",
+  "zegrep": "grep",
+  "zfgrep": "grep"
+}

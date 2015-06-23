@@ -1,0 +1,2 @@
+[substitutions]
+fancy_sub = ['foo', 'bar']
