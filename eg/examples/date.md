@@ -29,9 +29,9 @@ Set the system clock
 
 
 
-## Date string 
+## Date string
 
-Date string argument is a human readable date string. 
+Date string argument is a human readable date string.
 
 
 
@@ -75,7 +75,7 @@ Print the local time for 9PM next Friday on the west coast of the US
     date --date='TZ="America/Los_Angeles" 09:00 PM next Friday'
 
 
-Convert a date string into timestamp :
+Convert a date string into timestamp
 
     date --date='Tue, 23 Jun 2015 11:21:42 +0200' +%s
 
@@ -96,6 +96,6 @@ Set the system clock forward by two minutes
 
 
 
-A very complete documentation with a lot of examples is avaible at http://www.gnu.org/software/coreutils/date or with the command `info coreutils 'date invocation'`
-    
+A very complete documentation with a lot of examples is available at http://www.gnu.org/software/coreutils/date or with the command `info coreutils 'date invocation'`
+
 
