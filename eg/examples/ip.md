@@ -44,7 +44,7 @@ Delete Routes from the Routing table
 # Basic Usage
 Display info about all network interfaces
     
-    ip addrl
+    ip addr
 
 Use `ip` command to display and configure the network parameters for host interfaces.
 
