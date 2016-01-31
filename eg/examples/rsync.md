@@ -5,6 +5,11 @@ copy the contents of source_dir into destination_dir
     rsync -av source_dir/ destination_dir
 
 
+move the contents of source_dir into destination_dir
+
+    rsync -av --remove-source-files source_dir/ destination_dir
+
+
 update the contents of destination_dir to be the same as source_dir
 
     rsync -av --delete source_dir/ destination_dir
@@ -13,6 +18,16 @@ update the contents of destination_dir to be the same as source_dir
 copy the contents of source_dir to a remote machine
 
     rsync -av source_dir/ user@remote_machine:/path/to/destination_dir
+
+
+copy the contents of source_dir to a remote machine with non-default ssh port
+
+    rsync -av -e "ssh -p port_number" source_dir/ user@remote_machine:/path/to/destination_dir
+
+
+move the contents from remote machine to local machine
+
+    rsync -av --remove-source-files user@remote_machine:source_dir/ destination_dir
 
 
 see what actions would be performed without changing any files
