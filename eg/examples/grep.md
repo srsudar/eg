@@ -30,7 +30,7 @@ matching lines:
 Print lines that do NOT match a pattern by using the `-v` flag. This will
 print all lines that do NOT contain a z (`-v "z"`):
 
-    grep -v "z" input.xt
+    grep -v "z" input.txt
 
 
 
