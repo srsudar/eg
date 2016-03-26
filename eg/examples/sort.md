@@ -15,7 +15,7 @@ sort the lines ignoring case
     sort -f ignore_case.txt
 
 
-reverse the sort order
+reverse the sort order (see `eg tail` to reverse without sorting)
 
     sort -r reverse.txt
 
