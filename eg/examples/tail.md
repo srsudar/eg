@@ -25,6 +25,11 @@ print and monitor the last lines of a file as it grows
     tail -f file.txt
 
 
+reverse the lines of a file
+
+    tail -r file.txt
+
+
 
 # Basic Usage
 
