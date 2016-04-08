@@ -1,6 +1,12 @@
 # rsync
 
-copy the contents of source_dir into destination_dir
+
+copy the folder source_dir and its content into destination_dir
+
+    rsync -av source_dir destination_dir
+
+
+copy the contents of source_dir (trailing slash) into destination_dir
 
     rsync -av source_dir/ destination_dir
 
