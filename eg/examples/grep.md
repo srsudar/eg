@@ -15,6 +15,16 @@ print all lines containing bar by recursively searching a directory
     grep -r "bar" directory
 
 
+print all lines containing bar ignoring case
+
+    grep -i "bAr" input.txt
+
+
+print 3 lines of context before and after each line matching "foo"
+
+    grep -C 3 "foo" input.txt
+
+
 
 # Basic Usage
 
