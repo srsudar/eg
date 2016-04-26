@@ -2,7 +2,7 @@
 
 print the last 10 lines of a file to stdout
 
-    tail files.txt
+    tail file.txt
 
 
 print the last 20 lines of file1.txt and file2.txt
