@@ -30,8 +30,8 @@ Use `scp` to copy a file (`original.txt`) as user `tyrion` on machine
 `casterly_rock.com` (`tyrion@casterly_rock.com`). The file will be copied to
 `~/directory` as `copy.txt`:
 
-    $ scp original.txt tyrion@castery_rock.com:~/directory/copy.txt
-    tyrion@caster_rock.com's password:
+    $ scp original.txt tyrion@casterly_rock.com:~/directory/copy.txt
+    tyrion@casterly_rock.com's password:
     original.txt
 
 
