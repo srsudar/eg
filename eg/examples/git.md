@@ -4,6 +4,7 @@ pull changes into the local repository from the master branch at origin:
 
     git pull origin master
 
+
 change the previous commit
 
     git commit --amend
@@ -126,6 +127,19 @@ Rename or move (`-m`) the branch `oldname` to be named `newname`:
     git branch -m oldname newname
 
 
+## Remote Tracking Branches
+
+Tracking branches are those that are associated with a remote branch.
+Differences between remote and local branches are shown with commands similar
+to `git status` if the branch is tracking. A branch can be made to track a
+particular remote using the `-u` or equivalent `--set-upstream-to` flag.
+
+This command will cause the current branch to track the branch named `trackme`
+at the remote named `origin`:
+
+    git branch -u origin/trackme
+
+
 
 # checkout
 
@@ -157,12 +171,21 @@ following:
 
 # clean
 
-`clean` is used to delete or purge untracked files from your repository.
+`clean` is used to delete or purge untracked files and directories from your
+repository.
 
 Show but do not delete (`--dry-run`) files that would be deleted with by
 calling the `clean` command:
 
-    git clean --dry-run
+    git clean -fd --dry-run
+
+
+The force (`-f`) flag is used to force files to be deleted, while `-d`
+indicates that directories should also be deleted. Note that this is
+irreversible and should be used carefully, generally after seeing what would
+happen by using the `--dry-run` flag:
+
+    git clean -f -d
 
 
 
@@ -292,10 +315,19 @@ Delete the remote branch `oldbranch` at the `origin`:
     git push --delete oldbranch
 
 
+Push a local branch named `feature` to `origin` for the first time, setting up
+tracking (`-u`) to ensure that differenes are displayed with commands such as
+`git status`:
+
+    git push -u origin feature
+
+
 
 # reset
 
-`reset` moves the `HEAD` to a different commit.
+`reset` moves the `HEAD` to a different commit, effectively reverting or
+undoing commits. The commits themselves are left intact and can still be seen
+with `git reflog`.
 
 Restore the `HEAD` to the third most recent commit (`HEAD~2`), updating the
 working tree to be identical to that commit (`--hard`):
@@ -307,6 +339,69 @@ Restore the `HEAD` to the third most recent commit (`HEAD~2`), leaving all
 changes until that point staged and in the working tree (`--soft`):
 
     git reset --soft HEAD~2
+
+
+
+# stash
+
+`stash` is used to remove but save changes to the working directory. Stashes
+are referred to using a `stash@{0}` syntax, where `stash@{0}` is the most
+recent stash. Note that some shells, including zsh, require that the stash be
+escaped to something like `stash\@\{0\}`.
+
+Show all stashes:
+
+    git stash list
+
+
+Apply the most recent stash:
+
+    git stash apply
+
+
+Apply the second to most recent stash (`stash@{1}`):
+
+    git stash apply stash@{1}
+
+
+Delete (`drop`) the third most recent stash (`stash@{2}`):
+
+    git stash drop stash@{2}
+
+
+
+# submodule
+
+Submodules are git repositories within a repository. They are frequently used
+if you need to include code from another git repository within your own
+repository.
+
+Adding a submodule for the first time is simple using the `git submodule add`.
+This example adds the `eg` repository as submodule in the current directory:
+
+    git submodule add git@github.com:srsudar/eg.git
+
+
+If you are cloning a repository that contains submodules you will need to issue
+two commands to ensure that the submodules are up to date (`update`) and
+initialized (`--init`). The `--recursive` flag is also used to ensure that
+submodules at all leves are also initialized:
+
+    git submodule update --init --recursive
+
+
+Deleting submodules is not so simple. Recent versions of git have a `deinit`
+command that can be passed to `submodule`, but unfortunately it leaves
+references to the submodule in git config files. To completely delete a
+submodule, run this sequence of commands to remove the submodule from most of
+the config files (`deinit`), delete the local directory (`git rm`), and remove
+the last references to the submodule (`rm -rf`). This assumes that a submodule
+named `eg` is at the top level of the repository and that the current working
+directory contains the `.git` directory:
+
+    git submodule deinit eg
+    git rm eg
+    rm -rf .git/submodules/eg
 
 
 
@@ -466,6 +561,24 @@ Simply calling `reset` without a flag will keep the changes in the working tree
 without staging them:
 
     git reset HEAD~1
+
+
+
+# Discarding Unstaged Changes
+
+If you have staged changes that you want to keep and want only to discard
+unstaged changes, you can't use `reset`. Instead you need two commands. The
+first will delete untracked files (`git clean -f`) and directories (`-d`). The
+second will checkout the current branch's version of all files in the current
+directory (`.`):
+
+    git clean -d -f
+    git checkout -- .
+
+
+Keep in mind that you should consider running `git clean` with the `--dry-run`
+flag first to make sure you don't irreversibly delete something you don't mean
+to.
 
 
 
