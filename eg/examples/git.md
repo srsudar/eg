@@ -76,7 +76,7 @@ specific scenarios.
 
 # add
 
-`git add` is used to make files and changes known to git.
+`add` is used to make files and changes known to git.
 
 Add `foo.py`:
 
@@ -228,9 +228,9 @@ the previous commit:
 
 # config
 
-The `config` command is used to display and set configuration variables. The
-`--global` command is used to refer to global variables, while `--local` refers
-to repository-specific versions. Without a final argument the variable is
+`config` is used to display and set configuration variables. The `--global`
+command is used to refer to global variables, while `--local` refers to
+repository-specific versions. Without a final argument the variable is
 displayed. Adding a final argument sets the value to that variable.
 
 Display the global (`--global`) name of the user (`user.name`):
@@ -289,7 +289,7 @@ branch:
 
 # push
 
-`push` is used to send changes to a remote location. In these exmaples the name
+`push` is used to send changes to a remote location. In these examples the name
 of the remote is always `origin`. This will push changes from the local
 `master` branch to the `master` branch at `origin`:
 
@@ -319,7 +319,7 @@ Delete the remote branch `oldbranch` at the `origin`:
 
 
 Push a local branch named `feature` to `origin` for the first time, setting up
-tracking (`-u`) to ensure that differenes are displayed with commands such as
+tracking (`-u`) to ensure that differences are displayed with commands such as
 `git status`:
 
     git push -u origin feature
@@ -388,7 +388,7 @@ This example adds the `eg` repository as submodule in the current directory:
 If you are cloning a repository that contains submodules you will need to issue
 two commands to ensure that the submodules are up to date (`update`) and
 initialized (`--init`). The `--recursive` flag is also used to ensure that
-submodules at all leves are also initialized:
+submodules at all levels are also initialized:
 
     git submodule update --init --recursive
 
@@ -410,10 +410,10 @@ directory contains the `.git` directory:
 
 # tag
 
-`git tag` is used to mark a specific commit. Unlike branches, tags do not move
-as additional commits are made. Tags come in two flavors, annotated or basic.
-In general annotated tags should be used, as they behave as full objects and
-can contain useful information like a message and the name of the committer.
+`tag` is used to mark a specific commit. Unlike branches, tags do not move as
+additional commits are made. Tags come in two flavors, annotated or basic. In
+general annotated tags should be used, as they behave as full objects and can
+contain useful information like a message and the name of the committer.
 
 List (`--list`) all tags:
 
@@ -592,7 +592,7 @@ to.
 
 `git init` is used to create a repository. This sequence of commands is common
 when initializing a repository for the first time. It initializes the
-repository (`git init`), adds an existing file (`git add`), commits thsi change
+repository (`git init`), adds an existing file (`git add`), commits this change
 (`git commit`), adds a remote repository (`git remote`), and pushes the
 `master` branch to this repository (`git push`):
 
