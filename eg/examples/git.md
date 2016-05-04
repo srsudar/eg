@@ -1,5 +1,9 @@
 # git
 
+pull changes into the local repository from the master branch at origin:
+
+    git pull origin master
+
 change the previous commit
 
     git commit --amend
@@ -87,9 +91,14 @@ necessary:
 
 # branch
 
-Display all branches with the current branch indicated by `*`:
+Display all local branches with the current branch indicated by `*`:
 
     git branch
+
+
+Display all remote (`-r`) branches:
+
+    git branch -r
 
 
 Display all (`-a`) branches, including remote branches:
@@ -100,6 +109,21 @@ Display all (`-a`) branches, including remote branches:
 Delete (`-d`) the branch `dead`:
 
     git branch -d dead
+
+
+Display verbose (`-v`) information local branches:
+
+    git branch -v
+
+
+Rename or move (`-m`) the current branch to be named `newname`:
+
+    git branch -m newname
+
+
+Rename or move (`-m`) the branch `oldname` to be named `newname`:
+
+    git branch -m oldname newname
 
 
 
@@ -115,6 +139,31 @@ Switch to the `master` branch:
 Create a new branch (`-b`) called `bugfix` and switch to it:
 
     git checkout -b bugfix
+
+
+## Checking Out a Remote Branch
+
+Checking out a remote branch is somewhat more complicated. First you must make
+sure your local repository has downloaded the remote branch using `git fetch`.
+At that point you can refer to the branch using `remote-name/branch-name`
+syntax. A full sequence of commands to create a new branch named `rem-feature`
+starting at a branch named `feature` from a remote named `origin` would be the
+following:
+
+    git fetch
+    git checkout -b rem-feature origin/feature
+
+
+
+# clean
+
+`clean` is used to delete or purge untracked files from your repository.
+
+Show but do not delete (`--dry-run`) files that would be deleted with by
+calling the `clean` command:
+
+    git clean --dry-run
+
 
 
 # clone
@@ -198,6 +247,18 @@ commit `af8cea`:
 
     git diff 6d680:path/to/foo.txt af8cea:path/to/bar.txt
 
+
+
+# pull
+
+`pull` is used to get and merge changes from a remote repository into a local
+repository. It is roughly equivalent to running `git fetch` to get changes
+followed by a `git merge` to merge those changes into the local commit history.
+
+Get and merge changes from the `mybranch` branch at `origin` into the current
+branch:
+
+    git pull origin mybranch
 
 
 # push
@@ -374,6 +435,37 @@ to be merged into the first commit. Note that the first command is a `pick`:
     squash hash2
     squash hash3
     squash hash4
+
+
+
+# Undoing a Commit
+
+As with almost everything in git, there are several ways to undo a commit.
+
+If you need to make a change to only the commit message, you can use the commit
+command with the `--amend` flag:
+
+    git commit --amend
+
+
+If you want to completely throw away a commit, reverting to the state of the
+previous commit, use `reset` with the `--hard` flag, which updates the working
+tree to the state at the target commit. In this case we use `HEAD~1` to
+indicate the second to last commit:
+
+    git reset --hard HEAD~1
+
+
+If you want to keep most of the changes in the last commit and just make a few
+changes, use `reset` with the `--soft` flag, which keeps the changes staged:
+
+    git reset --soft HEAD~1
+
+
+Simply calling `reset` without a flag will keep the changes in the working tree
+without staging them:
+
+    git reset HEAD~1
 
 
 
