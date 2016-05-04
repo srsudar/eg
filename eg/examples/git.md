@@ -127,6 +127,7 @@ Rename or move (`-m`) the branch `oldname` to be named `newname`:
     git branch -m oldname newname
 
 
+
 ## Remote Tracking Branches
 
 Tracking branches are those that are associated with a remote branch.
@@ -153,6 +154,7 @@ Switch to the `master` branch:
 Create a new branch (`-b`) called `bugfix` and switch to it:
 
     git checkout -b bugfix
+
 
 
 ## Checking Out a Remote Branch
@@ -282,6 +284,7 @@ Get and merge changes from the `mybranch` branch at `origin` into the current
 branch:
 
     git pull origin mybranch
+
 
 
 # push
@@ -481,6 +484,7 @@ that `HEAD~3` refers to the fourth most recent commit, as `HEAD` is equivalent
 to `HEAD~0`.
 
 
+
 ## Using reset
 
 You can combine commits them simply by using `reset`. The first command will
@@ -491,6 +495,7 @@ they had been made at one time. `git commit` will commit these changes:
 
     git reset --soft HEAD~3
     git commit
+
 
 
 ## Using merge
@@ -504,6 +509,7 @@ changes will be committed. Every change will be staged and ready to commit:
 
 At this point, calling `git commit` will prepare a detailed commit message with
 the hashes and messages of the previous commits.
+
 
 
 ## Using rebase
