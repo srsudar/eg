@@ -10,6 +10,11 @@ show all branches with the current indicated by an asterisk:
     git branch
 
 
+discard all changes and return to the last commit
+
+    git reset --hard HEAD
+
+
 unstage changes to foo.py that have been added
 
     git reset path/to/foo.py
@@ -112,6 +117,21 @@ Create a new branch (`-b`) called `bugfix` and switch to it:
     git checkout -b bugfix
 
 
+# clone
+
+`clone` is used to copy a repository, especially from remote locations.
+
+Clone the `eg` repository into the current directory:
+
+    git clone git@github.com:srsudar/eg.git
+
+
+Clone the `eg` repository into a new directory called `mydir`
+
+    git clone https://github.com/srsudar/eg.git mydir
+
+
+
 # commit
 
 Commit staged changes:
@@ -209,6 +229,24 @@ branch at `origin`:
 Delete the remote branch `oldbranch` at the `origin`:
 
     git push --delete oldbranch
+
+
+
+# reset
+
+`reset` moves the `HEAD` to a different commit.
+
+Restore the `HEAD` to the third most recent commit (`HEAD~2`), updating the
+working tree to be identical to that commit (`--hard`):
+
+    git reset --hard HEAD~2
+
+
+Restore the `HEAD` to the third most recent commit (`HEAD~2`), leaving all
+changes until that point staged and in the working tree (`--soft`):
+
+    git reset --soft HEAD~2
+
 
 
 # tag
@@ -352,27 +390,5 @@ repository (`git init`), adds an existing file (`git add`), commits thsi change
     git commit -m "first commit"
     git remote add origin https://github.com/me/myrepo.git
     git push -u origin master
-
-
-
-
-
-
-
-Checkout a repository
-
-    git clone /path/to/repository
-    git clone username@host:/path/to/repository
-
-
-
-# Undo
-Go back to the last commit
-
-    git reset --hard HEAD
-
-Cancel the last commit
-
-    git reset --soft "HEAD^"
 
 
