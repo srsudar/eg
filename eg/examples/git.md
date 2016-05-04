@@ -5,6 +5,11 @@ change the previous commit
     git commit --amend
 
 
+show all branches with the current indicated by an asterisk:
+
+    git branch
+
+
 unstage changes to foo.py that have been added
 
     git reset path/to/foo.py
@@ -25,6 +30,21 @@ push all branches to the origin
     git push origin --all
 
 
+show all remotes
+
+    git remote -v
+
+
+switch to the branch named bugfix
+
+    git checkout bugfix
+
+
+view the commit history
+
+    git log
+
+
 
 # Basic Usage
 
@@ -38,9 +58,9 @@ View the manpages for a command:
     git help <command>
 
 
-`git` is a complex command. It takes a number of verb-like commands that
-control `git` repositories and files. Examples for some commonly used commands
-are shown in their own sections.
+`git` is complex. It takes a number of verb-like commands that control `git`
+repositories and files. Examples are shown in sections for commands and for
+specific scenarios.
 
 
 
@@ -57,6 +77,81 @@ Add all changes in the repository (`-A`), adding, modifying, and removing as
 necessary:
 
     git add -A
+
+
+
+# branch
+
+Display all branches with the current branch indicated by `*`:
+
+    git branch
+
+
+Display all (`-a`) branches, including remote branches:
+
+    git branch -a
+
+
+Delete (`-d`) the branch `dead`:
+
+    git branch -d dead
+
+
+
+# checkout
+
+`checkout` is used to switch between branches.
+
+Switch to the `master` branch:
+
+    git checkout master
+
+
+Create a new branch (`-b`) called `bugfix` and switch to it:
+
+    git checkout -b bugfix
+
+
+# commit
+
+Commit staged changes:
+
+    git commit
+
+
+Commit staged changes with the message "Update readme" (`-m "Update readme"`):
+
+    git commit -m "Update readme"
+
+
+Update the last commit (`--amend`). An editor will open giving you a chance to
+edit the commit message. Staged changes will be combined with the changes of
+the previous commit:
+
+    git commit --amend
+
+
+
+# config
+
+The `config` command is used to display and set configuration variables. The
+`--global` command is used to refer to global variables, while `--local` refers
+to repository-specific versions. Without a final argument the variable is
+displayed. Adding a final argument sets the value to that variable.
+
+Display the global (`--global`) name of the user (`user.name`):
+
+    git config --global user.name
+
+
+Set the global (`--global`) name of the user (`user.name`) to Tyrion Lannister:
+
+    git config --global user.name "Tyrion Lannister"
+
+
+List (`--list`) all the global (`--global`) variables:
+
+    git config --list --global
 
 
 
@@ -78,24 +173,105 @@ show diff of baz.go between commits affbc and 6d680
     git diff affbc 6d680 -- path/to/baz.go
 
 
+Show the differences between `foo.txt` on commit `6d680` and `bar.txt` on
+commit `af8cea`:
 
-# commit
-
-Commit staged changes:
-
-    git commit
+    git diff 6d680:path/to/foo.txt af8cea:path/to/bar.txt
 
 
-Commit staged changes with the message "Update readme" (`-m "Update readme"`):
 
-    git commit -m "Update readme"
+# push
+
+`push` is used to send changes to a remote location. In these exmaples the name
+of the remote is always `origin`. This will push changes from the local
+`master` branch to the `master` branch at `origin`:
+
+    git push origin master
 
 
-Update the last commit (`--amend`). An editor will open giving you a chance to
-edit the commit message. Staged changes will be combined with the changes of
-the previous commit:
+All branches can be pushed using the `--all` flag:
 
-    git commit --amend
+    git push --all origin
+
+
+All tags can be pushed with the `--tags` flag:
+
+    git push --tags origin
+
+
+Changes can also be pushed from one branch to a branch with a different name.
+This will push changes from the local `pushme` branch onto the remote `accept`
+branch at `origin`:
+
+    git push origin pushme:accept
+
+
+Delete the remote branch `oldbranch` at the `origin`:
+
+    git push --delete oldbranch
+
+
+# tag
+
+`git tag` is used to mark a specific commit. Unlike branches, tags do not move
+as additional commits are made. Tags come in two flavors, annotated or basic.
+In general annotated tags should be used, as they behave as full objects and
+can contain useful information like a message and the name of the committer.
+
+List (`--list`) all tags:
+
+    git tag --list
+
+
+When an annotated tag is created an editor opens to compose a tag message. This
+command creates an annotated (`-a`) tag named `v1.0` pointing at the current
+commit:
+
+    git tag -a v1.0
+
+
+Create an annotated (`-a`) tag named `v2.0` pointing at the commit with the
+hash `u76a7s`:
+
+    git tag -a v2.0 u76a6s
+
+
+Delete (`-d`) the tag `badtag`:
+
+    git tag -d badtag
+
+
+Tags must be pushed separately, using the `--tags` flag to `push`:
+
+    git push origin --tags
+
+
+
+# Restoring Deleted Files
+
+Files that have been committed can be restored even if they are later deleted.
+This will restore a file that has been deleted locally but that was still
+present on the `HEAD` commit:
+
+    git checkout HEAD path/to/file.txt
+
+
+This will checkout a file that was deleted an arbitrary number of commits
+previously but that was present at the commit with the hash `ef8bca`:
+
+    git checkout ef8bca path/to/file.txt
+
+
+If the file was deleted at an unknown time, the commit when it was deleted must
+first be found. The first command (`git rev-list`) will output the hash of a
+single commit (`-n 1`), starting at the `HEAD`, that affected the file
+`path/to/file.txt`. In this example the hash is `af8abe`. Since this commit
+deleted the file, the parent comment (`af8abe^`) is the last commit where the
+file was intact. `checkout` is used to restore the file at that revision:
+
+    $ git rev-list -n 1 HEAD -- path/to/file.txt
+    af8abe
+    $ git checkout af8abe^ -- path/to/file.txt
 
 
 
@@ -163,38 +339,14 @@ to be merged into the first commit. Note that the first command is a `pick`:
 
 
 
-# config
+# Initializing a Repository
 
-Tell Git who you are
+`git init` is used to create a repository. This sequence of commands is common
+when initializing a repository for the first time. It initializes the
+repository (`git init`), adds an existing file (`git add`), commits thsi change
+(`git commit`), adds a remote repository (`git remote`), and pushes the
+`master` branch to this repository (`git push`):
 
-    git config --global user.name "Sam Smith"
-    git config --global user.email sam@example.com
-    git config --list
-
-
-Create a new local repository
-
-    git init
-
-
-Checkout a repository
-
-    git clone /path/to/repository
-    git clone username@host:/path/to/repository
-
-
-Push
-
-    git push origin master
-
-
-
-# Basic Usage
-
-    git <command>
-    git log
-
-Initialize a repository
     git init
     git add README.md
     git commit -m "first commit"
@@ -203,50 +355,14 @@ Initialize a repository
 
 
 
-# Branches
-Create a new branch and switch to it
-
-    git checkout -b <branchname>
-
-Switch from one branch to another
-
-    git checkout <branchname>
-
-List all the branches in your repo
-
-    git branch
-
-List all branch in the remote repo
-
-    git branch -a
-
-Delete a branch
-
-    git branch -d <branchname>
-
-Push the branch to your remote repository
-
-    git push origin <branchname>
-
-Delete a branch on your remote repository:
-
-    git push origin :<branchname>
-
-Delete branch from remote repository
-
-    git push origin --delete <branchname>
 
 
 
-# Tags
-Create a tag on the last commit
 
-    git tag -a v1.1 -m "Version 1.1 is waiting for review"
-    git push --tags
+Checkout a repository
 
-Create a tag on a on a specific commit
-
-    git tag 1.0.0 <commitID>
+    git clone /path/to/repository
+    git clone username@host:/path/to/repository
 
 
 
@@ -259,16 +375,4 @@ Cancel the last commit
 
     git reset --soft "HEAD^"
 
-
-# COMPLETED
-
-Add files
-
-    git add <filename>
-    git add *
-    git add -A
-
-Commit
-
-    git commit -m "Commit message"
 
