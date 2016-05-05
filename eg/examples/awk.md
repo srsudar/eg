@@ -18,7 +18,7 @@ use `:` as the field delimiter
 
 # Basic Usage
 
-Print a subset of lines from a file. 
+Print a subset of lines from a file:
 
     awk '/<pattern>/' <inputfile>
 
@@ -81,7 +81,7 @@ whitespace):
 For loops can be used to do things like print all the fields in a line. Here 
 `NF` is the number of fields on every line in the file `input.txt`. We match
 all lines (by not giving a pattern) and print all fields, splitting on
-whitespace by default.
+whitespace by default:
 
     awk '{ for (i = 1; i < NF; i++) print $i }' input.txt
 

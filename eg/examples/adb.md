@@ -301,7 +301,7 @@ decompress the content and save it as a tar file. Finally we'll extract the
 contents of the file using `tar`, creating the app's directory as it existed on
 the phone. Note that the backup will have to be manually approved on the device
 after running `adb backup`, and that the `\` characters are line continuations
-for use in the shell.
+for use in the shell:
 
     $ adb backup -f ./backup.ab org.package.app
     $ dd if=./backup.ab bs=1 skip=24 \

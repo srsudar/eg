@@ -18,7 +18,7 @@ Switch to a new user:
     su <username>
 
 
-Switch to root
+Switch to root:
 
     sudo su
 

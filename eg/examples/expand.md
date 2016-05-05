@@ -1,6 +1,6 @@
 # expand
 
-replace tabs with four spaces:
+replace tabs with four spaces
 
     expand -t 4 removeTabs.txt
 
@@ -8,7 +8,7 @@ replace tabs with four spaces:
 
 # Basic Usage
 
-Replace tabs with a given number of spaces.
+Replace tabs with a given number of spaces:
 
     expand -t <num-spaces> <intput-file>
 

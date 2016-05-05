@@ -18,7 +18,7 @@ show more info
 
 # Basic Usage
 
-Find files and directories matching a given name.
+Find files and directories matching a given name:
 
     find <searchdir> -name <name>
 
@@ -34,7 +34,7 @@ Search `/searchdir` for files and directories named `file.txt`:
 
 ## Case Insensitive
 
-Use `-iname` for case insensitive name searching.
+Use `-iname` for case insensitive name searching:
 
     $ find ./searchdir -iname file.txt
     ./searchdir/file.txt
@@ -66,7 +66,7 @@ Will find files (`-type f`) but not directories named `foo`:
 
 ## Directories and Folders
 
-List only directories by specifying `-type d`.
+List only directories by specifying `-type d`:
 
     $ find ./searchdir -type d -name 'directory'
     ./searchdir/directory
@@ -155,7 +155,7 @@ Find files and directories only two levels deep (`-depth 2` or `-d 2`):
 
 
 Find only files (`-type f`) >= two levels (`-mindepth 2`) and <= three levels
-(`-maxdepth 3`) deep.
+(`-maxdepth 3`) deep:
 
     $ find ./one -type f -mindepth 2 -maxdepth 3
     ./one/twoLevels.txt

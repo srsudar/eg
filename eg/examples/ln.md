@@ -8,7 +8,7 @@ make a symlink to `foo.txt`
 
 # Basic Usage
 
-Make anchor a link to target.
+Make anchor a link to target:
 
     ln -s <target> <anchor>
 
@@ -28,7 +28,7 @@ Make it symbolic with the `-s` flag:
 
 # Hard Links
 
-Omit the `-s` flag.
+Omit the `-s` flag:
 
     $ ln foo.txt hard-link-to-foo.txt
     $ ls -lF

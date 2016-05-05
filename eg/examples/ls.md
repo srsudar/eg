@@ -28,7 +28,7 @@ show with color and indicators of file type
 
 # Basic Usage
 
-Display the contents of a directory
+Display the contents of a directory:
 
     ls <directory>
 
@@ -48,7 +48,7 @@ directory:
 # Showing More Information
 
 The `-l` flag will show extended information, including permissions, the number
-of hard links to the file, owner, group, size in bytes, and date modified.
+of hard links to the file, owner, group, size in bytes, and date modified:
 
     $ ls -l
     total 16
@@ -88,7 +88,7 @@ Extended time format can be shown with the `-T` flag:
 # Useful Aliases
 
 `ls` is often aliased to make the defaults a bit more useful. Here are three
-basic aliases. The second two can be remembered by "list long" and "list all".
+basic aliases. The second two can be remembered by "list long" and "list all":
 
     $ alias ls='ls -FG'
     $ alias ll='ls -lhF'

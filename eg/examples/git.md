@@ -1,6 +1,6 @@
 # git
 
-pull changes into the local repository from the master branch at origin:
+pull changes into the local repository from the master branch at origin
 
     git pull origin master
 
@@ -10,7 +10,7 @@ change the previous commit
     git commit --amend
 
 
-show all branches with the current indicated by an asterisk:
+show all branches with the current indicated by an asterisk
 
     git branch
 
@@ -200,7 +200,7 @@ Clone the `eg` repository into the current directory:
     git clone git@github.com:srsudar/eg.git
 
 
-Clone the `eg` repository into a new directory called `mydir`
+Clone the `eg` repository into a new directory called `mydir`:
 
     git clone https://github.com/srsudar/eg.git mydir
 

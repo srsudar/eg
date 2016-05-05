@@ -53,7 +53,7 @@ Interrogate a DNS server for a particular type of record about a domain:
     dig <domain> <record-type>
 
 
-Interrogate a specific DNS server about a domain
+Interrogate a specific DNS server about a domain:
 
     dig @<DNS-address> <domain>
 
