@@ -1,4 +1,4 @@
-# eg 
+# eg
 
 > Useful examples at the command line.
 
@@ -101,7 +101,7 @@ directory and a custom directory. If it finds them, it pipes them through
 `less`, with the custom file at the top. Easy.
 
 The default and custom directories can be specified at the command line like
-so: 
+so:
 
 ```shell
 eg --examples-dir='the/default/dir' --custom-dir='my/fancy/dir' find
@@ -117,7 +117,7 @@ Here is an example of a valid config file:
     custom-dir = ~/my/fancy/custom/dir
 
 Although by default the file is looked for at `~/.egrc`, you can also specify a
-different location at the command line like so: 
+different location at the command line like so:
 
 ```shell
 eg --config-file=myfile find
