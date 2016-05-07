@@ -22,7 +22,7 @@ Print a subset of lines from a file.
 
     awk '/<pattern>/' <inputfile>
 
-    
+
 The forward slashes around `<pattern>` are required for POSIX-style regular
 expressions.
 
@@ -34,7 +34,7 @@ example, this command will print each line that matches foo:
 
     awk '/foo/ { print }' input.txt
 
-    
+
 
 # Print Matching Lines
 
@@ -78,7 +78,7 @@ whitespace):
 
 # For Loops
 
-For loops can be used to do things like print all the fields in a line. Here 
+For loops can be used to do things like print all the fields in a line. Here
 `NF` is the number of fields on every line in the file `input.txt`. We match
 all lines (by not giving a pattern) and print all fields, splitting on
 whitespace by default.

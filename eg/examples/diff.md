@@ -49,7 +49,7 @@ file, and the contents of the modified file.
 
 The action is shown as the line number in the original file followed by an `a`,
 `c`, or `d`, and followed by the line number in the modified file. Output of
-the two files is separated by `---`. 
+the two files is separated by `---`.
 
 For example, this output means that line five was `line five` in the original
 file, and has been changed to `line five modified` in the modified file:

@@ -22,7 +22,7 @@ Show the file on `stdout`, paging the input:
 
     more <file>
 
-    
+
 Once in `more` use `j` to scroll down, `k` to scroll up, and `q` to quit.
 
 

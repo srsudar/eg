@@ -3,17 +3,17 @@
 copy a file
 
     cp original.txt copy.txt
-    
+
 
 copy a directory
 
     cp -R directory directory_copy
-    
+
 
 prompt if will overwrite existing file
 
     cp -i foo.txt directoryWithFoo/
-    
+
 
 
 # Basic Usage
@@ -21,12 +21,12 @@ prompt if will overwrite existing file
 Copy a file:
 
     cp <original_file> <copied_file>
-    
+
 
 Copy a directory using the recursive (`-R`) flag:
 
     cp -R <original_directory> <copied_directory>
-    
+
 
 
 # Directories

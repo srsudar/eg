@@ -50,7 +50,7 @@ On OSX, the `coreutils` package will be necessary. Install it with:
 
 
 After having it installed, the `gsort` command will be available, which can
-sort by human readable units (`-h`): 
+sort by human readable units (`-h`):
 
     du -h <files> | gsort -h
 

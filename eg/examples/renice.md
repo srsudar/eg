@@ -16,7 +16,7 @@ change priorities of all the process owned by user foo
 Alter priority of a running process:
 
     renice -n <priority> -p <processID>
-    
+
 
 Niceness values range from -20 (highest priority) to 19 (lowest priority).
 
