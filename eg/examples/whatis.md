@@ -8,7 +8,7 @@ search for entries containing a command
 
 # Basic Usage
 
-Search a database for entries matching the word or command
+Search a database for entries matching the word or command:
 
     whatis <command>
 

@@ -13,11 +13,11 @@ set process priority to 15 (low)
 
 # Basic Usage
 
-set priority to a process at launching
+Set priority to a process at launching:
 
     nice -n <priority> <command>
     
 
-niceness values range from -20 (highest priority) to 19 (lowest priority)
+Niceness values range from -20 (highest priority) to 19 (lowest priority).
 
 

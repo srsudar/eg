@@ -5,7 +5,7 @@ copy original.txt to copy.txt
     dd if=./original.txt of=copy.txt
 
 
-skip the first five bytes of original.txt and print the rest to stdout:
+skip the first five bytes of original.txt and print the rest to stdout
 
     dd bs=1 skip=5 if=./original.txt
 

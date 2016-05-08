@@ -47,7 +47,7 @@ all lines that do NOT contain a z (`-v "z"`):
 # Print File Names
 
 Show only the file names containing matches, rather than the matching lines
-themselves, by using the `-l` flag.
+themselves, by using the `-l` flag:
 
     grep -r -l "target_pattern" directory
 

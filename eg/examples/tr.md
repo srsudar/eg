@@ -23,7 +23,7 @@ replace lower case letters with upper case
 
 # Basic Usage
 
-Transform characters in `<1st>` to the characters in `<2nd>`
+Transform characters in `<1st>` to the characters in `<2nd>`:
 
     tr <1st> <2nd>
 

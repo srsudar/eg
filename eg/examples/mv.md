@@ -18,7 +18,7 @@ move a file but prompt before overwriting
 
 # Basic Usage
 
-`mv` lets you rename and move files.
+`mv` lets you rename and move files:
 
     mv <old_location> <new_location>
 

@@ -25,7 +25,7 @@ issue a GET request with a header Key paired to Value
 
 Issue an HTTP request of a particular method type to a URL. By default `curl`
 issues a GET request. The `-X` flag lets you specify other methods, like PUT
-and POST.
+and POST:
 
     curl -X <method> <url>
 
