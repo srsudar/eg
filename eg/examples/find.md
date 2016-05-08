@@ -1,5 +1,5 @@
 # find
-    
+
 files in searchdir named file.txt
 
     find ./searchdir -name file.txt
@@ -168,12 +168,11 @@ Find only files (`-type f`) >= two levels (`-mindepth 2`) and <= three levels
 Flags are ANDed by default, but can also achieve OR and NOT functionality.
 
 
-
 ## AND
 
 List files greater bigger than 500k (`+500k`) and named `bigFile.txt`
 (`-name bigFile.txt`). These two commands are equivalent:
-    
+
     $ find ./searchdir -size +500k -name bigFile.txt
     $ find ./searchdir -size +500k -and -name bigFile.txt
 

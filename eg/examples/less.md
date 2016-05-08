@@ -22,7 +22,7 @@ Show the file on `stdout`, paging the input:
 
     less <file>
 
-    
+
 Once in `less` use `j` to scroll down, `k` to scroll up, and `q` to quit.
 
 `gg` goes to the top of the file and `G` goes to the bottom.

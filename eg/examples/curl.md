@@ -60,6 +60,6 @@ example.com:
 You can also specify a step. This will query letters of the alphabet (`a-z`),
 but only every second letter (`:2`):
 
-    curl http://www.example.com?letter=[a-z:2]    
+    curl http://www.example.com?letter=[a-z:2]
 
 

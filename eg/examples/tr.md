@@ -31,7 +31,7 @@ Transform characters in `<1st>` to the characters in `<2nd>`:
 
 # Translating or Replacing Characters
 
-Replace g with y and p with o: 
+Replace g with y and p with o:
 
     $ echo "tgripn" | tr gp yo
     tyrion

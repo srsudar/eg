@@ -23,7 +23,7 @@ show extended time information
 show with color and indicators of file type
 
     ls -FG
-    
+
 
 
 # Basic Usage
@@ -92,6 +92,6 @@ basic aliases. The second two can be remembered by "list long" and "list all":
 
     $ alias ls='ls -FG'
     $ alias ll='ls -lhF'
-    $ alias la='ll -A' 
+    $ alias la='ll -A'
 
 

@@ -262,7 +262,6 @@ Show the differences that have been added to the index via `git add`:
 
 
 Show the differences in the file `baz.go` between commits `affbc` and `6d680`:
-show diff of baz.go between commits affbc and 6d680
 
     git diff affbc 6d680 -- path/to/baz.go
 

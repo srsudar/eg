@@ -44,7 +44,7 @@ it links to. It converts pages to html from dynamically generated pages like
 .asp or .php (`-E`), allows the request to access multiple hosts to satisfy
 resource requirements (`-H`), converts resource links to paths appropriate for
 local viewing (`-k`), creates files with .orig suffixes if conversions were
-performed (`-K`), and gets embedded resources (`-p`): 
+performed (`-K`), and gets embedded resources (`-p`):
 
     wget -EHkKp http://www.example.com
 

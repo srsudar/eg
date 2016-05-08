@@ -265,7 +265,7 @@ a particular package:
 
 A list of additional optional formulae that can be used to extend Homebrew's
 default list.
-    
+
 
 
 ## Cask
