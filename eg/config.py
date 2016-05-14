@@ -22,8 +22,12 @@ DEFAULT_EGRC_PATH = os.path.join('~', '.egrc')
 DEFAULT_USE_COLOR = True
 
 # We're using less -R to support color on Unix machines, which by default don't
-# let their output from less be colorized.
-DEFAULT_PAGER_CMD = 'less -R'
+# let their output from less be colorized. Other options:
+# -M: show line number information in the bottom of screen (current/pages X%)
+# -F: automatically quit less if the entire example fits on the first screen
+# -X: do not use init/deinit strings; in other words: do not clear the screen
+# -K: exit less in response to Ctrl-C
+DEFAULT_PAGER_CMD = 'less -RMFXK'
 
 DEFAULT_SQUEEZE = False
 
