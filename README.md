@@ -79,8 +79,8 @@ Files full of examples live in `examples/`. A naming convention is followed
 such that the file is the name of the tool with `.md`. E.g. the examples for
 `find` are in `find.md`.
 
-`eg find` will pipe the contents of `find.md` through the `less` (although it
-tries to respect the `PAGER` environment variable.
+`eg find` will pipe the contents of `find.md` through `less` (although it tries
+to respect the `PAGER` environment variable).
 
 
 ## Configuration and Extension
