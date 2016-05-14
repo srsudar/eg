@@ -2,7 +2,7 @@
 
 compress foo.txt, bar.txt and dir/ as compressed.zip
 
-    zip compressed.zip foo.txt bar.txt dir/
+    zip -r compressed.zip foo.txt bar.txt dir/
 
 
 
@@ -10,6 +10,6 @@ compress foo.txt, bar.txt and dir/ as compressed.zip
 
 Compress a number of files or directories:
 
-    zip <output-file> <list-of-files>
+    zip -r <output-file> <list-of-files>
 
 
