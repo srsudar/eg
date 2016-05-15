@@ -795,6 +795,30 @@ def _helper_assert_file_contents(
         assert_equal(actual, target_contents)
 
 
+@patch('eg.util.pydoc.pipepager', side_effect=KeyboardInterrupt)
+def test_page_string_excepts_keyboard_interrupt_if_not_less(pipepager_mock):
+    """
+    Do not fail when user hits ctrl-c while in pager.
+    """
+    try:
+        util.page_string('page me plz', 'cat')
+    except KeyboardInterrupt:
+        raise AssertionError('Should not have got this far')
+    pipepager_mock.assert_called_once_with('page me plz', cmd='cat')
+
+
+@patch('eg.util.pydoc.pager', side_effect=KeyboardInterrupt)
+def test_page_string_excepts_keyboard_interrupt_if_none(pager_mock):
+    """
+    Do not fail when user hits ctrl-c while in pipepager.
+    """
+    try:
+        util.page_string('page me plz', None)
+    except KeyboardInterrupt:
+        raise AssertionError('Should not have got this far')
+    pager_mock.assert_called_once_with('page me plz')
+
+
 def test_get_contents_from_files_only_default():
     """
     Retrieve the correct file contents when only a default file is present.
