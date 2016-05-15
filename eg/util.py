@@ -141,11 +141,14 @@ def page_string(str_to_page, pager_cmd):
     elif pager_cmd == FLAG_FALLBACK:
         use_fallback_page_function = True
 
-    if use_fallback_page_function:
-        pydoc.pager(str_to_page)
-    else:
-        # Otherwise, obey the user.
-        pydoc.pipepager(str_to_page, cmd=pager_cmd)
+    try:
+        if use_fallback_page_function:
+            pydoc.pager(str_to_page)
+        else:
+            # Otherwise, obey the user.
+            pydoc.pipepager(str_to_page, cmd=pager_cmd)
+    except KeyboardInterrupt:
+        pass
 
 
 def _get_contents_of_file(path):
