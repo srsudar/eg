@@ -10,6 +10,11 @@ receive input on port 1337 on GNU nc implementation
     nc -l -p 1337
 
 
+receive input on port 1337 without hanging up after a connection
+
+    nc -k -l 1337
+
+
 send a file to the address 192.168.1.42 on port 1337
 
     cat file | nc 192.168.1.42 1337
