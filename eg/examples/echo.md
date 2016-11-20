@@ -54,7 +54,7 @@ but otherwise ignore control characters:
 
 
 
-# Note on Referring to Variables
+# Note on Referencing Variables
 
 In these examples, when the environment variable `EDITOR` is referenced it is
 surrounded by curly braces: `${EDITOR}`. In the examples shown above, `$EDITOR`
