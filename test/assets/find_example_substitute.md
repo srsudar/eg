@@ -17,5 +17,6 @@ and more text
 
     {PROMPT}${PROMPT_RESET}{CODE} ls dirs "quotes"{CODE_RESET}
     {PROMPT}{PROMPT_RESET}{CODE}output{CODE_RESET}
+    {PROMPT}${PROMPT_RESET}{CODE} no backticks in indents `pwd`{CODE_RESET}
 
 
