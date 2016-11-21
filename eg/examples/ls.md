@@ -12,7 +12,7 @@ show contents of directory
 
 show contents, hidden files, and stats in human readable form
 
-    $ ls -alh
+    ls -alh
 
 
 show extended time information
