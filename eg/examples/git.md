@@ -40,11 +40,6 @@ push all branches to the origin
     git push origin --all
 
 
-show all remotes
-
-    git remote -v
-
-
 switch to the branch named bugfix
 
     git checkout bugfix
@@ -144,7 +139,9 @@ Rename or move (`-m`) the branch `oldname` to be named `newname`:
 
 
 
-## Remote Tracking Branches
+# Remote Tracking Branches
+
+## Track a remote branch
 
 Tracking branches are those that are associated with a remote branch.
 Differences between remote and local branches are shown with commands similar
@@ -154,7 +151,33 @@ particular remote using the `-u` or equivalent `--set-upstream-to` flag.
 This command will cause the current branch to track the branch named `trackme`
 at the remote named `origin`:
 
-    git branch -u origin/trackme
+    git branch -u origin trackme
+
+
+## See remote repository
+
+Remote branch are necessarily on distant repository. The current
+configured repositories are visible with the command :
+
+    git remote -v
+
+
+## Add a remote repository
+
+add a new distant repository `<repo>` to your project (very useful when
+you want to follow the main code-base while you are a working on a
+fork):
+
+    git remote add <repo> <uri-to-repo>
+
+You can use the name you want for `<repo>`. Some convention exists
+though. The repository you own is often referred to by `origin`, while
+the official one you fork should be named `upstream`.
+
+After having forked *eg* on github, you may want to add the main
+repository as a new remote:
+
+    git remote add upstream git@github.com:srsudar/eg.git
 
 
 
