@@ -74,6 +74,22 @@ specific scenarios.
 
 
 
+# Initializing a Repository
+
+`git init` is used to create a repository. This sequence of commands is common
+when initializing a repository for the first time. It initializes the
+repository (`git init`), adds an existing file (`git add`), commits this change
+(`git commit`), adds a remote repository (`git remote`), and pushes the
+`master` branch to this repository (`git push`):
+
+    git init
+    git add README.md
+    git commit -m "first commit"
+    git remote add origin https://github.com/me/myrepo.git
+    git push -u origin master
+
+
+
 # add
 
 `add` is used to make files and changes known to git.
@@ -584,21 +600,3 @@ directory (`.`):
 Keep in mind that you should consider running `git clean` with the `--dry-run`
 flag first to make sure you don't irreversibly delete something you don't mean
 to.
-
-
-
-# Initializing a Repository
-
-`git init` is used to create a repository. This sequence of commands is common
-when initializing a repository for the first time. It initializes the
-repository (`git init`), adds an existing file (`git add`), commits this change
-(`git commit`), adds a remote repository (`git remote`), and pushes the
-`master` branch to this repository (`git push`):
-
-    git init
-    git add README.md
-    git commit -m "first commit"
-    git remote add origin https://github.com/me/myrepo.git
-    git push -u origin master
-
-
