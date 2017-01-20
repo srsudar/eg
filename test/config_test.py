@@ -32,148 +32,335 @@ PATH_EGRC_SINGLE_SUB = os.path.join(
 )
 
 
-def test_config_returns_defaults_if_all_none_and_no_egrc():
-    """No config file and no egrc should return default values."""
-    with patch('os.path.isfile', return_value=False):
-        resolved_config = config.get_resolved_config_items(
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            debug=False
-        )
+def _create_dummy_egrc_config():
+    """
+    Return a dummy Config object as if constructed from an egrc.
+    """
+    egrc_examples_dir = 'egrc_examples_dir'
+    egrc_custom_dir = 'egrc_custom_dir'
+    egrc_use_color = 'the_egrc_says_yes_color'
+    egrc_pager_cmd = 'the_egrc_pages_with_more'
+    egrc_squeeze = 'egrc_says_squeeze'
+    egrc_subs = ['sub1', 'sub2']
+    egrc_editor_cmd = 'vim from egrc'
 
-        default_color_config = config.get_default_color_config()
+    result = config.Config(
+        examples_dir=egrc_examples_dir,
+        custom_dir=egrc_custom_dir,
+        color_config=config.get_default_color_config(),
+        use_color=egrc_use_color,
+        pager_cmd=egrc_pager_cmd,
+        squeeze=egrc_squeeze,
+        subs=egrc_subs,
+        editor_cmd=egrc_editor_cmd,
+    )
+    return result
 
-        assert_equal(resolved_config.examples_dir, config.DEFAULT_EXAMPLES_DIR)
-        assert_equal(resolved_config.custom_dir, None)
-        assert_equal(resolved_config.color_config, default_color_config)
-        assert_equal(resolved_config.use_color, config.DEFAULT_USE_COLOR)
-        assert_equal(resolved_config.pager_cmd, config.DEFAULT_PAGER_CMD)
-        assert_equal(resolved_config.squeeze, config.DEFAULT_SQUEEZE)
-        assert_equal(resolved_config.subs, config.get_default_subs())
 
-
-def test_config_returns_egrc_values_if_present():
+@patch('os.path.isfile', return_value=True)
+@patch('eg.config.get_config_tuple_from_egrc')
+def test_config_returns_egrc_values_if_present(mock_get_config, mock_isfile):
     """
     If values are present from an egrc, make sure we take them.
 
     Doesn't make sure they are extracted correctly from an egrc file.
     """
-    with patch('os.path.isfile', return_value=True):
-        examples_dir = 'test_eg_dir_from_egrc'
-        custom_dir = 'test_custom_dir_from_egrc'
-        test_color_config = _get_color_config_from_egrc_withdata()
-        test_use_color = True
-        test_pager_cmd = 'more baby'
-        test_squeeze = True
-        test_subs = ['alpha', 'beta']
+    examples_dir = 'test_eg_dir_from_egrc'
+    custom_dir = 'test_custom_dir_from_egrc'
+    test_color_config = _get_color_config_from_egrc_withdata()
+    test_use_color = True
+    test_pager_cmd = 'more baby'
+    test_editor_cmd = 'vim is the best'
+    test_squeeze = True
+    test_subs = ['alpha', 'beta']
 
-        def_config = config.Config(
-            examples_dir=examples_dir,
-            custom_dir=custom_dir,
-            color_config=test_color_config,
-            use_color=test_use_color,
-            pager_cmd=test_pager_cmd,
-            squeeze=test_squeeze,
-            subs=test_subs
-        )
-        with patch(
-            'eg.config.get_config_tuple_from_egrc',
-            return_value=def_config
-        ):
-            resolved_config = config.get_resolved_config_items(
-                None,
-                None,
-                None,
-                None,
-                None,
-                None,
-            )
-            assert_equal(resolved_config.examples_dir, examples_dir)
-            assert_equal(resolved_config.custom_dir, custom_dir)
-            assert_equal(resolved_config.color_config, test_color_config)
-            assert_equal(resolved_config.use_color, test_use_color)
-            assert_equal(resolved_config.pager_cmd, test_pager_cmd)
-            assert_equal(resolved_config.squeeze, test_squeeze)
-            assert_equal(resolved_config.subs, test_subs)
+    def_config = config.Config(
+        examples_dir=examples_dir,
+        custom_dir=custom_dir,
+        color_config=test_color_config,
+        use_color=test_use_color,
+        pager_cmd=test_pager_cmd,
+        editor_cmd=test_editor_cmd,
+        squeeze=test_squeeze,
+        subs=test_subs,
+    )
+
+    mock_get_config.return_value = def_config
+
+    resolved_config = config.get_resolved_config(
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+    )
+
+    assert_equal(resolved_config.examples_dir, examples_dir)
+    assert_equal(resolved_config.custom_dir, custom_dir)
+    assert_equal(resolved_config.color_config, test_color_config)
+    assert_equal(resolved_config.use_color, test_use_color)
+    assert_equal(resolved_config.pager_cmd, test_pager_cmd)
+    assert_equal(resolved_config.editor_cmd, test_editor_cmd)
+    assert_equal(resolved_config.squeeze, test_squeeze)
+    assert_equal(resolved_config.subs, test_subs)
 
 
-def test_config_uses_custom_egrc_path():
+def _call_get_resolved_config_with_defaults(
+    egrc_path=None,
+    examples_dir=None,
+    custom_dir=None,
+    use_color=None,
+    pager_cmd=None,
+    squeeze=None,
+    debug=False,
+):
+    """
+    Wraps config.get_resolved_config_items with default values to allow callers
+    to set fewer variables.
+    """
+    config.get_resolved_config(
+        egrc_path=egrc_path,
+        examples_dir=examples_dir,
+        custom_dir=custom_dir,
+        use_color=use_color,
+        pager_cmd=pager_cmd,
+        squeeze=squeeze,
+        debug=debug,
+    )
+
+
+@patch('eg.config._inform_if_path_does_not_exist')
+def test_inform_if_paths_invalid_selectively_informs(mock_inform):
+    """
+    We should only inform the user if the values are truthy.
+    """
+    config.inform_if_paths_invalid(None, None, None)
+
+    assert_equal(mock_inform.call_count, 0)
+
+    egrc_path = 'egrc'
+    ex_dir = 'ex dir'
+    cu_dir = 'custom'
+
+    config.inform_if_paths_invalid(egrc_path, ex_dir, cu_dir)
+
+    assert_equal(mock_inform.call_count, 3)
+    mock_inform.assert_any_call(egrc_path)
+    mock_inform.assert_any_call(ex_dir)
+    mock_inform.assert_any_call(cu_dir)
+
+
+@patch('os.path.isfile', return_value=True)
+@patch('eg.config.inform_if_paths_invalid')
+@patch('eg.config.get_config_tuple_from_egrc')
+@patch('eg.config.get_expanded_path')
+def test_get_resolved_config_uses_custom_egrc_path(
+    mock_expand, mock_get_config, mock_inform, mock_isfile
+):
     """Make sure we use the passed in egrc path rather than the default."""
-    with patch('os.path.isfile', return_value=True):
-        def_config = config.Config(
-            examples_dir='eg_dir',
-            custom_dir='custom_dir',
-            color_config=config.get_empty_color_config(),
-            use_color=False,
-            pager_cmd='less is more',
-            squeeze='squeeze from fake egrc',
-            subs=['foo', 'bar']
-        )
-        egrc_path = 'test/path/to/egrc'
-        with patch(
-            'eg.config.get_config_tuple_from_egrc',
-            return_value=def_config
-        ) as mocked_get_config_from_egrc:
-            config.get_resolved_config_items(
-                egrc_path,
-                None,
-                None,
-                None,
-                None,
-                None,
-                debug=False
-            )
-            mocked_get_config_from_egrc.assert_called_once_with(egrc_path)
+    egrc_path = 'test/path/to/egrc'
+    expanded_path = egrc_path + '/expanded'
+    mock_expand.return_value = expanded_path
+    _call_get_resolved_config_with_defaults(egrc_path=egrc_path)
+    # We should have expanded the path as well as tried to retrieve the tuple
+    # with the path.
+    mock_expand.return_value = expanded_path
+    mock_get_config.assert_called_once_with(expanded_path)
 
 
-def test_config_returns_values_passed_at_command_line():
+def test_get_egrc_config_reads_from_command_line():
+    """
+    get_egrc_config should use the command line path if it is provided.
+    """
+    cli_path = 'path/from/command/line'
+    expected = 'mock config from egrc'
+
+    _assert_about_get_egrc_config(
+        cli_path=cli_path, path_to_expand=cli_path, expected_config=expected
+    )
+
+
+def test_get_egrc_config_uses_default():
+    """
+    get_egrc_config should use the default path if not provided on the command
+    line.
+    """
+    expected = 'mock config from default position'
+
+    _assert_about_get_egrc_config(
+        cli_path=None,
+        path_to_expand=config.DEFAULT_EGRC_PATH,
+        expected_config=expected,
+    )
+
+
+def test_get_egrc_returns_empty_if_no_egrc():
+    """
+    We should return an empty config if no file is given.
+    """
+    expected = config.get_empty_config()
+
+    _assert_about_get_egrc_config(
+        cli_path=None,
+        path_to_expand=config.DEFAULT_EGRC_PATH,
+        expected_config=expected,
+        is_file=False,
+    )
+
+
+@patch('eg.config.get_config_tuple_from_egrc')
+@patch('eg.config.get_expanded_path')
+@patch('os.path.isfile')
+def _assert_about_get_egrc_config(
+    mock_isfile,
+    mock_expand,
+    mock_get_config,
+    cli_path=None,
+    path_to_expand=None,
+    is_file=True,
+    expected_config=None
+):
+    expanded_path = path_to_expand + 'expanded'
+
+    mock_isfile.return_value = is_file
+    mock_expand.return_value = expanded_path
+    mock_get_config.return_value = expected_config
+
+    actual = config.get_egrc_config(cli_path)
+
+    assert_equal(actual, expected_config)
+
+    mock_expand.assert_called_once_with(path_to_expand)
+    mock_isfile.assert_called_once_with(expanded_path)
+
+    if (is_file):
+        mock_get_config.assert_called_once_with(expanded_path)
+
+
+@patch('eg.config.get_editor_cmd_from_environment')
+@patch('eg.config.inform_if_paths_invalid')
+@patch('eg.config.get_egrc_config')
+def _assert_about_get_resolved_config(
+    mock_get_egrc_config,
+    mock_inform,
+    mock_get_editor,
+    cli_egrc_path=None,
+    cli_examples_dir=None,
+    cli_custom_dir=None,
+    cli_use_color=None,
+    cli_pager_cmd=None,
+    cli_squeeze=None,
+    egrc_config=None,
+    environment_editor_cmd=None,
+    expected_config=None,
+):
+    """
+    Helper for assertions surrounding get_resolved_config.
+    """
+    mock_get_egrc_config.return_value = expected_config
+    mock_get_editor.return_value = environment_editor_cmd
+
+    actual = config.get_resolved_config(
+        cli_egrc_path,
+        cli_examples_dir,
+        cli_custom_dir,
+        cli_use_color,
+        cli_pager_cmd,
+        cli_squeeze,
+        debug=False
+    )
+
+    assert_equal(actual.examples_dir, expected_config.examples_dir)
+    assert_equal(actual.custom_dir, expected_config.custom_dir)
+    assert_equal(actual.use_color, expected_config.use_color)
+    assert_equal(actual.color_config, expected_config.color_config)
+    assert_equal(actual.pager_cmd, expected_config.pager_cmd)
+    assert_equal(actual.squeeze, expected_config.squeeze)
+    assert_equal(actual.subs, expected_config.subs)
+    assert_equal(actual.editor_cmd, expected_config.editor_cmd)
+
+    mock_get_egrc_config.assert_called_once_with(cli_egrc_path)
+    mock_get_editor.assert_called_once_with()
+
+
+def test_get_resolved_config_prioritizes_cli():
     """
     Options passed in at the command line should override those in the egrc.
     """
-    with patch('os.path.isfile', return_value=True):
-        command_line_examples_dir = 'test_eg_dir_user_defined'
-        command_line_custom_dir = 'test_custom_dir_user_defined'
-        command_line_use_color = 'we_should_use_color'
-        command_line_pager_cmd = 'command_line_says_pager_with_cat'
-        command_line_squeeze = 'command_line_wants_to_squeeze'
+    cli_examples_dir = 'test_eg_dir_user_defined'
+    cli_custom_dir = 'test_custom_dir_user_defined'
+    cli_use_color = 'we_should_use_color'
+    cli_pager_cmd = 'command_line_says_pager_with_cat'
+    cli_squeeze = 'command_line_wants_to_squeeze'
 
-        egrc_examples_dir = 'egrc_examples_dir'
-        egrc_custom_dir = 'egrc_custom_dir'
-        egrc_use_color = 'the_egrc_says_yes_color'
-        egrc_pager_cmd = 'the_egrc_pages_with_more'
-        egrc_squeeze = 'egrc_says_squeeze'
-        egrc_subs = ['sub1', 'sub2']
-        egrc_config = config.Config(
-            examples_dir=egrc_examples_dir,
-            custom_dir=egrc_custom_dir,
-            color_config=config.get_default_color_config(),
-            use_color=egrc_use_color,
-            pager_cmd=egrc_pager_cmd,
-            squeeze=egrc_squeeze,
-            subs=egrc_subs
-        )
-        with patch(
-            'eg.config.get_config_tuple_from_egrc',
-            return_value=egrc_config
-        ):
-            actual = config.get_resolved_config_items(
-                None,
-                command_line_examples_dir,
-                command_line_custom_dir,
-                command_line_use_color,
-                command_line_pager_cmd,
-                command_line_squeeze,
-                debug=False
-            )
-            assert_equal(actual.examples_dir, command_line_examples_dir)
-            assert_equal(actual.custom_dir, command_line_custom_dir)
-            assert_equal(actual.use_color, command_line_use_color)
-            assert_equal(actual.pager_cmd, command_line_pager_cmd)
-            assert_equal(actual.squeeze, command_line_squeeze)
+    egrc_config = _create_dummy_egrc_config()
+
+    expected = config.Config(
+        examples_dir=cli_examples_dir,
+        custom_dir=cli_custom_dir,
+        use_color=cli_use_color,
+        color_config=egrc_config.color_config,
+        pager_cmd=cli_pager_cmd,
+        squeeze=cli_squeeze,
+        subs=egrc_config.subs,
+        editor_cmd=egrc_config.editor_cmd,
+    )
+
+    _assert_about_get_resolved_config(
+        cli_egrc_path=None,
+        cli_examples_dir=cli_examples_dir,
+        cli_custom_dir=cli_custom_dir,
+        cli_use_color=cli_use_color,
+        cli_pager_cmd=cli_pager_cmd,
+        cli_squeeze=cli_squeeze,
+        egrc_config=egrc_config,
+        environment_editor_cmd=None,
+        expected_config=expected,
+    )
+
+
+def test_get_resolved_config_defaults_to_egrc():
+    """
+    When no command line options are passed, we should prefer those in the
+    egrc.
+    """
+    egrc_config = _create_dummy_egrc_config()
+
+    # The second level of priority for editor_cmd is the environment variable,
+    # so we include that here rather than from the egrc. Slightly hacky.
+    editor_cmd = 'value from env'
+
+    _assert_about_get_resolved_config(
+        egrc_config=egrc_config,
+        environment_editor_cmd=editor_cmd,
+        expected_config=egrc_config,
+    )
+
+
+def test_get_resolved_config_falls_back_to_defaults():
+    """
+    When no cli arguments or egrc arguments are present, we should use the raw
+    defaults.
+    """
+    empty_config = config.get_empty_config()
+
+    expected = config.Config(
+        examples_dir=config.DEFAULT_EXAMPLES_DIR,
+        custom_dir=config.DEFAULT_CUSTOM_DIR,
+        use_color=config.DEFAULT_USE_COLOR,
+        color_config=config.get_default_color_config(),
+        pager_cmd=config.DEFAULT_PAGER_CMD,
+        squeeze=config.DEFAULT_SQUEEZE,
+        subs=config.get_default_subs(),
+        editor_cmd=config.DEFAULT_EDITOR_CMD,
+    )
+
+    _assert_about_get_resolved_config(
+        egrc_config=empty_config,
+        environment_editor_cmd=None,
+        expected_config=expected
+    )
 
 
 def test_get_config_tuple_from_egrc_all_none_when_not_present():
@@ -194,18 +381,22 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
         use_color=None,
         pager_cmd=None,
         squeeze=None,
-        subs=None
+        subs=None,
+        editor_cmd=None,
     )
     assert_equal(actual, target)
 
 
 def test_get_config_tuple_from_egrc_when_present():
-    """Make sure we extract values correctly from the egrc."""
+    """
+    Make sure we extract values correctly from the egrc.
+    """
     # These are the values hardcoded into the files.
     egrc_examples_dir = 'test/example/dir/in/egrc_withdata'
     egrc_custom_dir = 'test/custom/dir/in/egrc_withdata'
     egrc_use_color = True
     egrc_pager_cmd = 'more egrc'
+    egrc_editor_cmd = 'vim egrc'
     color_config_from_file = _get_color_config_from_egrc_withdata()
     egrc_squeeze = True
     # Order matters--we apply substitutions alphabetically.
@@ -235,23 +426,18 @@ def test_get_config_tuple_from_egrc_when_present():
 
         actual = config.get_config_tuple_from_egrc(PATH_EGRC_WITH_DATA)
 
-        target = config.Config(
+        expected = config.Config(
             examples_dir=egrc_examples_dir,
             custom_dir=egrc_custom_dir,
             color_config=color_config_from_file,
             use_color=egrc_use_color,
             pager_cmd=egrc_pager_cmd,
             squeeze=egrc_squeeze,
-            subs=egrc_subs
+            subs=egrc_subs,
+            editor_cmd=egrc_editor_cmd,
         )
 
-        assert_equal(actual.examples_dir, target.examples_dir)
-        assert_equal(actual.custom_dir, target.custom_dir)
-        assert_equal(actual.color_config, target.color_config)
-        assert_equal(actual.use_color, target.use_color)
-        assert_equal(actual.pager_cmd, target.pager_cmd)
-        assert_equal(actual.squeeze, target.squeeze)
-        assert_equal(actual.subs, target.subs)
+        assert_equal(actual, expected)
 
         mock_expand.assert_any_call(egrc_examples_dir)
         mock_expand.assert_any_call(egrc_custom_dir)

@@ -11,6 +11,10 @@ except:
     from configparser import ConfigParser
 
 
+# Environment variables to try for accessing an editor.
+ENV_VISUAL = 'VISUAL'
+ENV_EDITOR = 'EDITOR'
+
 # The directory containing example files, relative to the eg executable. The
 # directory structure is assumed to be:
 # eg.py*
@@ -18,6 +22,7 @@ except:
 # examples/
 #    |- cp.md, etc
 DEFAULT_EXAMPLES_DIR = os.path.join(os.path.dirname(__file__), 'examples')
+DEFAULT_CUSTOM_DIR = None
 DEFAULT_EGRC_PATH = os.path.join('~', '.egrc')
 DEFAULT_USE_COLOR = True
 
@@ -30,6 +35,7 @@ DEFAULT_USE_COLOR = True
 DEFAULT_PAGER_CMD = 'less -RMFXK'
 
 DEFAULT_SQUEEZE = False
+DEFAULT_EDITOR_CMD = None
 
 # We need this just because the ConfigParser library requires it.
 DEFAULT_SECTION = 'eg-config'
@@ -40,6 +46,7 @@ CUSTOM_EXAMPLES_DIR = 'custom-dir'
 USE_COLOR = 'color'
 PAGER_CMD = 'pager-cmd'
 SQUEEZE = 'squeeze'
+EDITOR_CMD = 'editor-cmd'
 
 # A basic struct containing configuration values.
 #    examples_dir: path to the directory of examples that ship with eg
@@ -59,6 +66,7 @@ Config = namedtuple(
         'pager_cmd',
         'squeeze',
         'subs',
+        'editor_cmd',
     ]
 )
 
@@ -120,51 +128,71 @@ COLOR_SECTION = 'color'
 SUBSTITUTION_SECTION = 'substitutions'
 
 
-def get_resolved_config_items(
+def inform_if_paths_invalid(egrc_path, examples_dir, custom_dir, debug=True):
+    """
+    If egrc_path, examples_dir, or custom_dir is truthy and debug is True,
+    informs the user that a path is not set.
+
+    This should be used to verify input arguments from the command line.
+    """
+    if (not debug):
+        return
+
+    if (egrc_path):
+        _inform_if_path_does_not_exist(egrc_path)
+
+    if (examples_dir):
+        _inform_if_path_does_not_exist(examples_dir)
+
+    if (custom_dir):
+        _inform_if_path_does_not_exist(custom_dir)
+
+
+def get_egrc_config(cli_egrc_path):
+    """
+    Return a Config namedtuple based on the contents of the egrc.
+
+    If the egrc is not present, it returns an empty default Config.
+
+    This method tries to use the egrc at cli_egrc_path, then the default path.
+
+    cli_egrc_path: the path to the egrc as given on the command line via
+        --config-file
+    """
+    resolved_path = get_priority(cli_egrc_path, DEFAULT_EGRC_PATH, None)
+    expanded_path = get_expanded_path(resolved_path)
+
+    # Start as if nothing was defined in the egrc.
+    egrc_config = get_empty_config()
+
+    if os.path.isfile(expanded_path):
+        egrc_config = get_config_tuple_from_egrc(expanded_path)
+
+    return egrc_config
+
+
+def get_resolved_config(
     egrc_path,
     examples_dir,
     custom_dir,
     use_color,
     pager_cmd,
     squeeze,
-    debug=True
+    debug=True,
 ):
     """
     Create a Config namedtuple. Passed in values will override defaults.
     """
+    inform_if_paths_invalid(egrc_path, examples_dir, custom_dir)
+
     # Expand the paths so we can use them with impunity later.
-    egrc_path = get_expanded_path(egrc_path)
     examples_dir = get_expanded_path(examples_dir)
     custom_dir = get_expanded_path(custom_dir)
 
-    # Print helpful failures.
-    if egrc_path and debug:
-        _inform_if_path_does_not_exist(egrc_path)
-    if examples_dir and debug:
-        _inform_if_path_does_not_exist(examples_dir)
-    if custom_dir and debug:
-        _inform_if_path_does_not_exist(custom_dir)
+    # The general rule is: caller-defined, egrc-defined, defaults. We'll try
+    # and get all three then use get_priority to choose the right one.
 
-    # The general rule is: caller-defined, egrc-defined, defaults. We'll try and
-    # get all three then use get_priority to choose the right one.
-
-    resolved_egrc_path = get_priority(egrc_path, DEFAULT_EGRC_PATH, None)
-    resolved_egrc_path = get_expanded_path(resolved_egrc_path)
-
-    # Start as if nothing was defined in the egrc.
-    empty_color_config = get_empty_color_config()
-    egrc_config = Config(
-        examples_dir=None,
-        custom_dir=None,
-        color_config=empty_color_config,
-        use_color=None,
-        pager_cmd=None,
-        squeeze=None,
-        subs=None
-    )
-
-    if os.path.isfile(resolved_egrc_path):
-        egrc_config = get_config_tuple_from_egrc(resolved_egrc_path)
+    egrc_config = get_egrc_config(egrc_path)
 
     resolved_examples_dir = get_priority(
         examples_dir,
@@ -174,7 +202,7 @@ def get_resolved_config_items(
     resolved_custom_dir = get_priority(
         custom_dir,
         egrc_config.custom_dir,
-        None
+        DEFAULT_CUSTOM_DIR
     )
 
     resolved_use_color = get_priority(
@@ -187,6 +215,15 @@ def get_resolved_config_items(
         pager_cmd,
         egrc_config.pager_cmd,
         DEFAULT_PAGER_CMD
+    )
+
+    # There is no command line option for this, so in this case we will use the
+    # priority: egrc, environment, DEFAULT.
+    environment_editor_cmd = get_editor_cmd_from_environment()
+    resolved_editor_cmd = get_priority(
+        egrc_config.editor_cmd,
+        environment_editor_cmd,
+        DEFAULT_EDITOR_CMD
     )
 
     color_config = None
@@ -216,8 +253,9 @@ def get_resolved_config_items(
         color_config=color_config,
         use_color=resolved_use_color,
         pager_cmd=resolved_pager_cmd,
+        editor_cmd=resolved_editor_cmd,
         squeeze=resolved_squeeze,
-        subs=resolved_subs
+        subs=resolved_subs,
     )
 
     return result
@@ -246,6 +284,7 @@ def get_config_tuple_from_egrc(egrc_path):
         pager_cmd = None
         squeeze = None
         subs = None
+        editor_cmd = None
 
         if config.has_option(DEFAULT_SECTION, EG_EXAMPLES_DIR):
             examples_dir = config.get(DEFAULT_SECTION, EG_EXAMPLES_DIR)
@@ -263,6 +302,10 @@ def get_config_tuple_from_egrc(egrc_path):
             pager_cmd_raw = config.get(DEFAULT_SECTION, PAGER_CMD)
             pager_cmd = ast.literal_eval(pager_cmd_raw)
 
+        if config.has_option(DEFAULT_SECTION, EDITOR_CMD):
+            editor_cmd_raw = config.get(DEFAULT_SECTION, EDITOR_CMD)
+            editor_cmd = ast.literal_eval(editor_cmd_raw)
+
         color_config = get_custom_color_config_from_egrc(config)
 
         if config.has_option(DEFAULT_SECTION, SQUEEZE):
@@ -278,8 +321,9 @@ def get_config_tuple_from_egrc(egrc_path):
             color_config=color_config,
             use_color=use_color,
             pager_cmd=pager_cmd,
+            editor_cmd=editor_cmd,
             squeeze=squeeze,
-            subs=subs
+            subs=subs,
         )
 
 
@@ -292,6 +336,19 @@ def get_expanded_path(path):
         return result
     else:
         return None
+
+
+def get_editor_cmd_from_environment():
+    """
+    Gets and editor command from environment variables.
+
+    It first tries $VISUAL, then $EDITOR, following the same order git uses
+    when it looks up edits. If neither is available, it returns None.
+    """
+    result = os.getenv(ENV_VISUAL)
+    if (not result):
+        result = os.getenv(ENV_EDITOR)
+    return result
 
 
 def get_priority(first, second, third):
@@ -361,8 +418,8 @@ def _get_color_from_config(config, option):
     Helper method to uet an option from the COLOR_SECTION of the config.
 
     Returns None if the value is not present. If the value is present, it tries
-    to parse the value as a raw string literal, allowing escape sequences in the
-    egrc.
+    to parse the value as a raw string literal, allowing escape sequences in
+    the egrc.
     """
     if not config.has_option(COLOR_SECTION, option):
         return None
@@ -396,10 +453,10 @@ def parse_substitution_from_list(list_rep):
 
 def get_substitutions_from_config(config):
     """
-    Return a list of Substitution objects from the config, sorted alphabetically
-    by pattern name. Returns an empty list if no Substitutions are specified. If
-    there are problems parsing the values, a help message will be printed and an
-    error will be thrown.
+    Return a list of Substitution objects from the config, sorted
+    alphabetically by pattern name. Returns an empty list if no Substitutions
+    are specified. If there are problems parsing the values, a help message
+    will be printed and an error will be thrown.
     """
     result = []
     pattern_names = config.options(SUBSTITUTION_SECTION)
@@ -425,6 +482,24 @@ def get_default_color_config():
         code_reset=DEFAULT_COLOR_CODE_RESET,
         backticks_reset=DEFAULT_COLOR_BACKTICKS_RESET,
         prompt_reset=DEFAULT_COLOR_PROMPT_RESET
+    )
+    return result
+
+
+def get_empty_config():
+    """
+    Return an empty Config object with no options set.
+    """
+    empty_color_config = get_empty_color_config()
+    result = Config(
+        examples_dir=None,
+        custom_dir=None,
+        color_config=empty_color_config,
+        use_color=None,
+        pager_cmd=None,
+        editor_cmd=None,
+        squeeze=None,
+        subs=None
     )
     return result
 
@@ -513,7 +588,7 @@ def get_default_subs():
     """
     Get the list of default substitutions. We're not storing this as a module
     level object like the other DEFAULT values, as lists are mutable, and we
-    could get into trouble by modifying that list and not having it remain empty
-    as might be expected.
+    could get into trouble by modifying that list and not having it remain
+    empty as might be expected.
     """
     return []

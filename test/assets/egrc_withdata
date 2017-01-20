@@ -4,6 +4,7 @@ custom-dir = test/custom/dir/in/egrc_withdata
 color = true
 squeeze = true
 pager-cmd = 'more egrc'
+editor-cmd = 'vim egrc'
 
 [color]
 pound = '\x1b[32m'
