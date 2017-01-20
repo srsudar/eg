@@ -144,7 +144,7 @@ def _parse_arguments():
 def run_eg():
     args = _parse_arguments()
 
-    resolved_config = config.get_resolved_config_items(
+    resolved_config = config.get_resolved_config(
         egrc_path=args.config_file,
         examples_dir=args.examples_dir,
         custom_dir=args.custom_dir,

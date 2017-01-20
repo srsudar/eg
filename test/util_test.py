@@ -20,6 +20,32 @@ PATH_SQUEEZED_FILE = os.path.join(
 )
 
 
+def _create_config(
+    examples_dir=None,
+    custom_dir=None,
+    color_config=None,
+    use_color=True,
+    pager_cmd=None,
+    editor_cmd=None,
+    squeeze=False,
+    subs=None
+):
+    """
+    Create a config.Config object with default values for expediency in
+    testing.
+    """
+    return config.Config(
+        examples_dir=examples_dir,
+        custom_dir=custom_dir,
+        color_config=color_config,
+        use_color=use_color,
+        pager_cmd=pager_cmd,
+        editor_cmd=editor_cmd,
+        squeeze=squeeze,
+        subs=subs
+    )
+
+
 def test_get_file_path_for_program_correct():
     program = 'cp'
     examples_dir = '/Users/tyrion/test/eg_dir'
@@ -32,14 +58,9 @@ def test_get_file_path_for_program_correct():
 
 
 def test_has_default_entry_for_program_no_examples_dir():
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir=None,
         custom_dir='customdir',
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
     )
 
     program = 'cp'
@@ -50,14 +71,9 @@ def test_has_default_entry_for_program_no_examples_dir():
 
 
 def test_has_custom_entry_for_program_no_custom_dir():
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir='examplesdir',
         custom_dir=None,
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
     )
 
     program = 'find'
@@ -68,14 +84,8 @@ def test_has_custom_entry_for_program_no_custom_dir():
 
 
 def test_has_default_entry_when_present():
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir='examplesdir',
-        custom_dir=None,
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
     )
     program = 'mv'
 
@@ -92,14 +102,8 @@ def test_has_default_entry_when_present():
 
 
 def test_has_default_entry_when_not_present():
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir='examplesdir',
-        custom_dir=None,
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
     )
     program = 'cp'
 
@@ -116,7 +120,7 @@ def test_has_default_entry_when_not_present():
 
 
 def test_has_custom_entry_when_present():
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir=None,
         custom_dir='customdir',
         color_config=None,
@@ -140,8 +144,7 @@ def test_has_custom_entry_when_present():
 
 
 def test_has_custom_entry_when_not_present():
-    test_config = config.Config(
-        examples_dir=None,
+    test_config = _create_config(
         custom_dir='customdir',
         color_config=None,
         use_color=False,
@@ -208,15 +211,7 @@ def test_handle_program_no_entries():
     We should do the right thing if there are no entries for a given program.
     """
     program = 'cp'
-    test_config = config.Config(
-        examples_dir=None,
-        custom_dir=None,
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
-    )
+    test_config = _create_config()
 
     with patch(
         'eg.util.get_resolved_program',
@@ -281,7 +276,7 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias():
     file_contents = 'I am the contents of mv.md.'
     formatted_contents = 'and I am the formatted contents of mv.md.'
 
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
         color_config=color_config,
@@ -400,7 +395,7 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias():
     file_contents = 'I am the contents of ln.md.'
     formatted_contents = 'and I am the formatted contents of ln.md.'
 
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
         color_config=color_config,
@@ -542,15 +537,11 @@ def test_list_supported_programs_only_default():
     example_dir = 'example/dir'
     custom_dir = 'custom/dir'
 
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir=example_dir,
         custom_dir=custom_dir,
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
     )
+
     examples_list = ['aliases', 'cp.md', 'find.md', 'xargs.md']
     custom_list = []
     target = ['cp', 'find', 'xargs']
@@ -567,14 +558,9 @@ def test_list_supported_programs_only_custom():
     example_dir = 'example/dir'
     custom_dir = 'custom/dir'
 
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir=example_dir,
         custom_dir=custom_dir,
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
     )
     target = ['awk +', 'bar +', 'xor +']
     _helper_assert_list_supported_programs(
@@ -590,14 +576,9 @@ def test_list_supported_programs_both():
     examples_dir = 'example/dir'
     custom_dir = 'custom/dir'
 
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
     )
     examples_list = ['alpha.md', 'bar.md', 'both.md', 'examples.md']
     custom_list = ['azy.md', 'both.md', 'examples.md', 'zeta.md']
@@ -622,14 +603,9 @@ def test_list_supported_commands_includes_aliases():
     examples_dir = 'examples/dir/for/aliases'
     custom_dir = 'custom/dir/for/aliases'
 
-    test_config = config.Config(
+    test_config = _create_config(
         examples_dir=examples_dir,
         custom_dir=custom_dir,
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
     )
     # Things we want to cover:
     #   normal alias
@@ -681,7 +657,7 @@ def test_list_supported_commands_includes_aliases():
 
 
 def test_list_supported_programs_fails_gracefully_if_no_dirs():
-    test_config = config.Config(None, None, None, None, None, None, None)
+    test_config = _create_config()
 
     actual = util.get_list_of_all_supported_commands(test_config)
     target = []
@@ -1172,14 +1148,8 @@ def test_get_alias_dict_returns_contents_of_correct_file():
         'link': 'ln',
         'nc': 'netcat'
     }
-    config_obj = config.Config(
+    config_obj = _create_config(
         examples_dir='path/to/examples/dir',
-        custom_dir='path/to/custom/dir',
-        use_color=True,
-        color_config='a color config',
-        pager_cmd='less -ismore',
-        squeeze=True,
-        subs=['alpha_sub', 'beta_sub']
     )
 
     alias_file_path = 'path/to/alias/file'
@@ -1199,14 +1169,8 @@ def test_get_alias_dict_fails_gracefully_if_not_file():
     aliases file, we want to fail gracefully if the file doesn't exist.
     """
     contents_of_alias_dict_file = 'should never be reached'
-    config_obj = config.Config(
+    config_obj = _create_config(
         examples_dir='path/to/examples/dir',
-        custom_dir='path/to/custom/dir',
-        use_color=True,
-        color_config='a color config',
-        pager_cmd='less -ismore',
-        squeeze=True,
-        subs=['alpha_sub', 'beta_sub']
     )
     alias_file_path = 'path/to/the/alias/file'
     _helper_assert_get_alias_dict(
@@ -1263,15 +1227,10 @@ def test_get_alias_file_path():
     _get_alias_file_path should just join the example dir and the alias file
     name, to make sure we look in the right place for the file.
     """
-    config_obj = config.Config(
+    config_obj = _create_config(
         examples_dir='handy/dandy/examples/dir',
-        custom_dir='path/to/custom/dir',
-        use_color=True,
-        color_config='a color config',
-        pager_cmd='less -ismore',
-        squeeze=True,
-        subs=['alpha_sub', 'beta_sub']
     )
+
     join_result = 'joined path'
     with patch('os.path.join', return_value=join_result) as mock_join:
         actual = util._get_alias_file_path(config_obj)

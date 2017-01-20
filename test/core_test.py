@@ -260,7 +260,7 @@ def test_parses_all_valid_options_simultaneously():
 @patch('eg.util.handle_program')
 @patch('eg.core._show_version')
 @patch('eg.core._show_list_message')
-@patch('eg.config.get_resolved_config_items')
+@patch('eg.config.get_resolved_config')
 def _helper_run_eg_responds_to_args_correctly(
     args,
     mock_resolved_config,
