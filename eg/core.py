@@ -6,6 +6,9 @@ from eg import config
 from eg import util
 
 
+_MSG_BAD_ARGS = 'specify a program or pass the --list or --version flags'
+
+
 def _show_version():
     """Show the version string."""
     print(util.VERSION)
@@ -49,19 +52,11 @@ def _show_list_message(resolved_config):
     pydoc.pager(complete_message)
 
 
-def _handle_insufficient_args():
+def _parse_arguments():
     """
-    Handles the case where the user has not specified an actionable set of
-    arguments to eg. I.e. if they haven't specified a program or
-    --version/--list.
+    Constructs and parses the command line arguments for eg. Returns an args
+    object as returned by parser.parse_args().
     """
-    print(
-        'you must specify a program or pass the --list or --version flags'
-    )
-
-
-def run_eg():
-
     parser = argparse.ArgumentParser(
         description='eg provides examples of common command usage.'
     )
@@ -136,25 +131,34 @@ def run_eg():
     args = parser.parse_args()
 
     if len(sys.argv) < 2:
+        # Too few arguments. We can't specify this using argparse alone, so we
+        # have to manually check.
         parser.print_help()
+        parser.exit()
     elif not args.version and not args.list and not args.program:
-        _handle_insufficient_args()
+        parser.error(_MSG_BAD_ARGS)
     else:
-        resolved_config = config.get_resolved_config_items(
-            egrc_path=args.config_file,
-            examples_dir=args.examples_dir,
-            custom_dir=args.custom_dir,
-            use_color=args.use_color,
-            pager_cmd=args.pager_cmd,
-            squeeze=args.squeeze
-        )
+        return args
 
-        if args.list:
-            _show_list_message(resolved_config)
-        elif args.version:
-            _show_version()
-        else:
-            util.handle_program(args.program, resolved_config)
+
+def run_eg():
+    args = _parse_arguments()
+
+    resolved_config = config.get_resolved_config_items(
+        egrc_path=args.config_file,
+        examples_dir=args.examples_dir,
+        custom_dir=args.custom_dir,
+        use_color=args.use_color,
+        pager_cmd=args.pager_cmd,
+        squeeze=args.squeeze
+    )
+
+    if args.list:
+        _show_list_message(resolved_config)
+    elif args.version:
+        _show_version()
+    else:
+        util.handle_program(args.program, resolved_config)
 
 
 # We want people to be able to use eg without pip, by so we'll allow this to be
