@@ -45,7 +45,7 @@ def handle_program(program, config):
 
     # Handle the case where we have nothing for them.
     if default_file_path is None and custom_file_path is None:
-        print (
+        print(
             'No entry found for ' +
             program +
             '. Run `eg --list` to see all available entries.'
@@ -257,7 +257,9 @@ def get_squeezed_contents(contents):
         True
     )
     lines_between_examples = substitute.Substitution('\n\n\n', '\n\n', True)
-    lines_between_sections = substitute.Substitution('\n\n\n\n', '\n\n\n', True)
+    lines_between_sections = substitute.Substitution(
+        '\n\n\n\n', '\n\n\n', True
+    )
 
     result = contents
     result = line_between_example_code.apply_and_get_result(result)
