@@ -3,6 +3,7 @@ from mock import patch
 from nose.tools import assert_equal
 
 from eg import core
+from test.util_test import _create_config
 
 
 # ArgumentParser.parse_args() returns an object with fields we can access via
@@ -18,7 +19,8 @@ MockArgs = namedtuple(
         'squeeze',
         'list',
         'version',
-        'program'
+        'program',
+        'edit',
     ]
 )
 
@@ -32,7 +34,8 @@ def _create_mock_args(
     version=False,
     list=False,
     squeeze=None,
-    program=None
+    program=None,
+    edit=False,
 ):
     """Helper to create an argument named tuple."""
     return MockArgs(
@@ -45,6 +48,7 @@ def _create_mock_args(
         list=list,
         squeeze=squeeze,
         program=program,
+        edit=edit,
     )
 
 
@@ -113,6 +117,7 @@ def _helper_parses_correctly(
         assert_equal(actual_args.use_color, expected_args.use_color)
         assert_equal(actual_args.squeeze, expected_args.squeeze)
         assert_equal(actual_args.version, expected_args.version)
+        assert_equal(actual_args.edit, expected_args.edit)
         # Note that here we use the default, as described above.
         assert_equal(actual_args.program, default_program)
 
@@ -158,7 +163,6 @@ def test_parses_examples_dir_correctly():
     examples_dir = 'path/to/examples'
     expected_args = _create_mock_args(examples_dir=examples_dir)
 
-    _helper_parses_correctly(['-e', examples_dir], expected_args)
     _helper_parses_correctly(['--examples-dir', examples_dir], expected_args)
 
 
@@ -182,6 +186,16 @@ def test_parses_pager_cmd_correctly():
 
     _helper_parses_correctly(['-p', pager_cmd], expected_args)
     _helper_parses_correctly(['--pager-cmd', pager_cmd], expected_args)
+
+
+def test_parses_edit_correctly():
+    """
+    Parses the long and short edit flags.
+    """
+    expected_args = _create_mock_args(edit=True)
+
+    _helper_parses_correctly(['-e'], expected_args)
+    _helper_parses_correctly(['--edit'], expected_args)
 
 
 def test_parses_list_correctly():
@@ -256,6 +270,8 @@ def test_parses_all_valid_options_simultaneously():
     _helper_parses_correctly(argv, expected_args)
 
 
+@patch('eg.util.edit_custom_examples')
+@patch('eg.core._handle_no_editor')
 @patch('eg.core._parse_arguments')
 @patch('eg.util.handle_program')
 @patch('eg.core._show_version')
@@ -268,10 +284,14 @@ def _helper_run_eg_responds_to_args_correctly(
     mock_show_version,
     mock_handle_program,
     mock_parse_args,
+    mock_no_editor,
+    mock_edit_custom,
     resolved_config='stand-in-config',
     call_show_list=False,
     call_show_version=False,
     call_handle_program=False,
+    call_no_editor=False,
+    call_edit_custom=False,
 ):
     """
     Helper method for verifying the results of calls to run_eg.
@@ -290,6 +310,16 @@ def _helper_run_eg_responds_to_args_correctly(
         mock_show_version.assert_called_once_with()
     else:
         assert_equal(mock_show_version.call_args_list, [])
+
+    if (call_no_editor):
+        mock_no_editor.assert_called_once_with()
+    else:
+        assert_equal(mock_no_editor.call_args_list, [])
+
+    if (call_edit_custom):
+        mock_edit_custom.assert_called_once_with(args.program, resolved_config)
+    else:
+        assert_equal(mock_edit_custom.call_args_list, [])
 
     if (call_handle_program):
         mock_handle_program.assert_called_once_with(
@@ -321,3 +351,26 @@ def test_calls_handle_program():
     """
     args = _create_mock_args(program='awk')
     _helper_run_eg_responds_to_args_correctly(args, call_handle_program=True)
+
+
+def test_run_eg_informs_if_no_editor():
+    """
+    Inform the user if they've requested to use an editor but we can't find
+    one.
+    """
+    args = _create_mock_args(program='awk', edit=True)
+    config_no_editor = _create_config(editor_cmd=None)
+    _helper_run_eg_responds_to_args_correctly(
+        args, call_no_editor=True, resolved_config=config_no_editor
+    )
+
+
+def test_run_eg_opens_editor():
+    """
+    If the user requests an edit we should open the editor.
+    """
+    args = _create_mock_args(program='awk', edit=True)
+    config_with_editor = _create_config(editor_cmd='vi -e')
+    _helper_run_eg_responds_to_args_correctly(
+        args, call_edit_custom=True, resolved_config=config_with_editor
+    )

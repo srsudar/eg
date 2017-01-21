@@ -1,6 +1,7 @@
 import json
 import os
 import pydoc
+import subprocess
 
 from eg import color
 from eg import substitute
@@ -22,6 +23,20 @@ FLAG_FALLBACK = 'pydoc.pager'
 
 # The name of the file storing mappings of aliases to programs with entries.
 ALIAS_FILE_NAME = 'aliases.json'
+
+
+def edit_custom_examples(program, config):
+    """
+    Edit custom examples for the given program, creating the file if it does
+    not exist.
+    """
+    # resolve aliases
+    resolved_program = get_resolved_program(program, config)
+    custom_file_path = get_file_path_for_program(
+        resolved_program,
+        config.custom_dir
+    )
+    subprocess.call([config.editor_cmd, custom_file_path])
 
 
 def handle_program(program, config):

@@ -1274,3 +1274,29 @@ def test_can_parse_alias_file():
     alias_dict = json.loads(alias_file_contents)
     # We'll check that link goes to ln, as we know that one will be present.
     assert_equal(alias_dict['link'], 'ln')
+
+
+@patch('eg.util.get_resolved_program')
+@patch('eg.util.get_file_path_for_program')
+@patch('subprocess.call')
+def test_edit_custom_examples_correct(
+    mock_call,
+    mock_get_path,
+    mock_get_program,
+):
+    """
+    We should resolve aliases, get the custom file path, and call subprocess.
+    """
+    program = 'du'
+    resolved_program = 'alias for du'
+    config = _create_config(custom_dir='path/to/custom', editor_cmd='nano')
+    path = 'path/to/custom/du.md'
+
+    mock_get_program.return_value = resolved_program
+    mock_get_path.return_value = path
+
+    util.edit_custom_examples(program, config)
+
+    mock_get_program.assert_called_once_with(program, config)
+    mock_get_path.assert_called_once_with(resolved_program, config.custom_dir)
+    mock_call.assert_called_once_with([config.editor_cmd, path])

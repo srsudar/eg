@@ -52,6 +52,17 @@ def _show_list_message(resolved_config):
     pydoc.pager(complete_message)
 
 
+def _handle_no_editor():
+    """
+    Handles the case where a user has requested to edit a file the custom
+    examples for a command but we haven't been able to resolve a command to
+    open an editor.
+    """
+    print(
+        'could not find editor: set $VISUAL, $EDITOR, or specify in .egrc'
+    )
+
+
 def _parse_arguments():
     """
     Constructs and parses the command line arguments for eg. Returns an args
@@ -76,6 +87,14 @@ def _parse_arguments():
 
     parser.add_argument(
         '-e',
+        '--edit',
+        action='store_true',
+        help="""Edit the custom examples for the given command. If editor-cmd
+        is not set in your .egrc and $VISUAL and $EDITOR are not set, prints a
+        message and does nothing."""
+    )
+
+    parser.add_argument(
         '--examples-dir',
         help='The location to the examples/ dir that ships with eg'
     )
@@ -157,6 +176,11 @@ def run_eg():
         _show_list_message(resolved_config)
     elif args.version:
         _show_version()
+    elif args.edit:
+        if not resolved_config.editor_cmd:
+            _handle_no_editor()
+        else:
+            util.edit_custom_examples(args.program, resolved_config)
     else:
         util.handle_program(args.program, resolved_config)
 
