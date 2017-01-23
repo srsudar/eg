@@ -182,7 +182,19 @@ def get_resolved_config(
 ):
     """
     Create a Config namedtuple. Passed in values will override defaults.
+
+    This function is responsible for producing a Config that is correct for the
+    passed in arguments. In general, it prefers first command line options,
+    then values from the egrc, and finally defaults.
+
+    examples_dir and custom_dir when returned from this function are fully
+    expanded.
     """
+    # Call this with the passed in values, NOT the resolved values. We are
+    # informing the caller only if values passed in at the command line are
+    # invalid. If you pass a path to a nonexistent egrc, for example, it's
+    # helpful to know. If you don't have an egrc, and thus one isn't found
+    # later at the default location, we don't want to notify them.
     inform_if_paths_invalid(egrc_path, examples_dir, custom_dir)
 
     # Expand the paths so we can use them with impunity later.
@@ -199,11 +211,14 @@ def get_resolved_config(
         egrc_config.examples_dir,
         DEFAULT_EXAMPLES_DIR
     )
+    resolved_examples_dir = get_expanded_path(resolved_examples_dir)
+
     resolved_custom_dir = get_priority(
         custom_dir,
         egrc_config.custom_dir,
         DEFAULT_CUSTOM_DIR
     )
+    resolved_custom_dir = get_expanded_path(resolved_custom_dir)
 
     resolved_use_color = get_priority(
         use_color,

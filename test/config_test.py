@@ -119,7 +119,7 @@ def _call_get_resolved_config_with_defaults(
     Wraps config.get_resolved_config_items with default values to allow callers
     to set fewer variables.
     """
-    config.get_resolved_config(
+    return config.get_resolved_config(
         egrc_path=egrc_path,
         examples_dir=examples_dir,
         custom_dir=custom_dir,
@@ -236,6 +236,35 @@ def _assert_about_get_egrc_config(
 
     if (is_file):
         mock_get_config.assert_called_once_with(expanded_path)
+
+
+@patch('eg.config.get_expanded_path')
+@patch('eg.config.get_egrc_config')
+def test_get_resolved_config_calls_expand_paths(
+    mock_get_egrc_config, mock_expand
+):
+    """
+    We expect the examples_dir and custom_dir to be expanded.
+    """
+    def pretend_to_expand(path):
+        if (path):
+            return path + '/expanded'
+        else:
+            return None
+
+    mock_get_egrc_config.return_value = config.get_empty_config()
+    mock_expand.side_effect = pretend_to_expand
+
+    # We are going to check against the default values, as the other paths have
+    # an opportunity to already be expanded at this point. The function that
+    # parses from the egrc returns the values expanded, eg.
+    expected_examples_dir = pretend_to_expand(config.DEFAULT_EXAMPLES_DIR)
+    expected_custom_dir = pretend_to_expand(config.DEFAULT_CUSTOM_DIR)
+
+    actual = _call_get_resolved_config_with_defaults()
+
+    assert_equal(actual.examples_dir, expected_examples_dir)
+    assert_equal(actual.custom_dir, expected_custom_dir)
 
 
 @patch('eg.config.get_editor_cmd_from_environment')
