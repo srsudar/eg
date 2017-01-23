@@ -25,11 +25,36 @@ FLAG_FALLBACK = 'pydoc.pager'
 ALIAS_FILE_NAME = 'aliases.json'
 
 
+def _inform_cannot_edit_no_custom_dir():
+    """
+    Inform the user that a custom dir has not be specified, and thus an edit
+    cannot be performed.
+    """
+    msg = """
+    You've requested to edit custom examples for a command, but no custom
+    directory has been found. The value must be set and the directory must
+    exist.
+
+    Custom examples are shown before the default examples and are under your
+    control. You must specify where to save them before editing them. This can
+    be done at the command line (with the `-c` or `--custom-dir` flags) or via
+    the `custom-dir` option in your egrc. A minimal egrc might look like:
+
+    [eg-config]
+    custom-dir = ~/.eg/
+    """
+    print(msg)
+
+
 def edit_custom_examples(program, config):
     """
     Edit custom examples for the given program, creating the file if it does
     not exist.
     """
+    if (not config.custom_dir) or (not os.path.exists(config.custom_dir)):
+        _inform_cannot_edit_no_custom_dir()
+        return
+
     # resolve aliases
     resolved_program = get_resolved_program(program, config)
     custom_file_path = get_file_path_for_program(

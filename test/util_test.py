@@ -260,8 +260,9 @@ def test_handle_program_no_entries():
 
 def test_handle_program_finds_paths_and_calls_open_pager_no_alias():
     """
-    If there are entries for the program, handle_program needs to get the paths,
-    get the contents, format the contents, and page the resulting string.
+    If there are entries for the program, handle_program needs to get the
+    paths, get the contents, format the contents, and page the resulting
+    string.
     """
     program = 'mv'
 
@@ -378,8 +379,9 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias():
 
 def test_handle_program_finds_paths_and_calls_open_pager_with_alias():
     """
-    If there are entries for the program, handle_program needs to get the paths,
-    get the contents, format the contents, and page the resulting string.
+    If there are entries for the program, handle_program needs to get the
+    paths, get the contents, format the contents, and page the resulting
+    string.
     """
     alias_for_program = 'link'
     resolved_program = 'ln'
@@ -853,8 +855,8 @@ def _helper_assert_formatted_contents(
     formatted_result
 ):
     """
-    Helper method to assist in asserting things about the get_formatted_contents
-    method.
+    Helper method to assist in asserting things about the
+    get_formatted_contents method.
 
     starting_contents: the starting string that we are working with
     use_color: True if we should use color
@@ -1276,13 +1278,17 @@ def test_can_parse_alias_file():
     assert_equal(alias_dict['link'], 'ln')
 
 
+@patch('os.path.exists')
+@patch('eg.util._inform_cannot_edit_no_custom_dir')
 @patch('eg.util.get_resolved_program')
 @patch('eg.util.get_file_path_for_program')
 @patch('subprocess.call')
-def test_edit_custom_examples_correct(
+def test_edit_custom_examples_correct_with_custom_dir(
     mock_call,
     mock_get_path,
     mock_get_program,
+    mock_inform,
+    mock_exists,
 ):
     """
     We should resolve aliases, get the custom file path, and call subprocess.
@@ -1294,9 +1300,47 @@ def test_edit_custom_examples_correct(
 
     mock_get_program.return_value = resolved_program
     mock_get_path.return_value = path
+    mock_exists.return_value = True
 
     util.edit_custom_examples(program, config)
 
     mock_get_program.assert_called_once_with(program, config)
     mock_get_path.assert_called_once_with(resolved_program, config.custom_dir)
     mock_call.assert_called_once_with([config.editor_cmd, path])
+    assert_equal(mock_inform.call_count, 0)
+
+
+@patch('os.path.exists')
+@patch('eg.util._inform_cannot_edit_no_custom_dir')
+@patch('eg.util.get_resolved_program')
+@patch('eg.util.get_file_path_for_program')
+@patch('subprocess.call')
+def test_edit_custom_examples_informs_if_no_custom_dir(
+    mock_call,
+    mock_get_path,
+    mock_get_program,
+    mock_inform,
+    mock_exists,
+):
+    """
+    We should inform the user if they are trying to edit with no custom dir.
+
+    This should be true if it is not set and if the path does not exist.
+    """
+    program = 'awk'
+
+    # First with no custom dir set.
+    config = _create_config(editor_cmd='vi -e')
+    mock_exists.return_value = True
+    util.edit_custom_examples(program, config)
+    assert_equal(mock_inform.call_count, 1)
+
+    # And now with it set but a nonexistent path.
+    config = _create_config(custom_dir='/path/to/custom', editor_cmd='vi -e')
+    mock_exists.return_value = False
+    util.edit_custom_examples(program, config)
+    assert_equal(mock_inform.call_count, 2)
+
+    assert_equal(mock_call.call_count, 0)
+    assert_equal(mock_get_path.call_count, 0)
+    assert_equal(mock_get_program.call_count, 0)
