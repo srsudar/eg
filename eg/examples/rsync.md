@@ -11,6 +11,11 @@ copy the contents of source_dir (trailing slash) into destination_dir
     rsync -av source_dir/ destination_dir
 
 
+copy source_dir into destination_dir converting symlinks to real files
+
+    rsync -avL source_dir destination_dir
+
+
 move the contents of source_dir into destination_dir
 
     rsync -av --remove-source-files source_dir/ destination_dir
