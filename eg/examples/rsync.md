@@ -16,6 +16,16 @@ copy source_dir into destination_dir converting symlinks to real files
     rsync -avL source_dir destination_dir
 
 
+copy multiple sources into destination_dir
+
+    rsync -av source1 source2 source3 destination_dir
+
+
+copy multiple sources from a specific folder into destination_dir
+
+    rsync -av source_dir/{source1,source2,source3} destination_dir
+
+
 move the contents of source_dir into destination_dir
 
     rsync -av --remove-source-files source_dir/ destination_dir
