@@ -38,4 +38,4 @@ Setup ageing of MAC addresses in bridge `br1` to 0 seconds. This will cause brid
 
 Show details about bridge `br1`:
 
-    brctl showstp `br1`
+    brctl showstp br1
