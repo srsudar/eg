@@ -5,6 +5,11 @@ compress foo.txt, bar.txt and dir/ as compressed.zip
     zip -r compressed.zip foo.txt bar.txt dir/
 
 
+compress dir/ as compressed.zip, ignoring the .git directory
+
+    zip -r compressed.zip -x '*.git*'
+
+
 
 # Basic Usage
 
