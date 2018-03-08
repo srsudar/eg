@@ -7,7 +7,7 @@ compress foo.txt, bar.txt and dir/ as compressed.zip
 
 compress dir/ as compressed.zip, ignoring the .git directory
 
-    zip -r compressed.zip -x '*.git*'
+    zip -r compressed.zip dir/ -x '*.git*'
 
 
 
