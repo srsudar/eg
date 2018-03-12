@@ -167,13 +167,17 @@ def test_has_custom_entry_when_not_present():
     )
 
 
+@patch('os.path.isfile')
+@patch('eg.util.get_file_path_for_program')
 def _helper_assert_path_isfile_not_present(
-        config,
-        program,
-        file_path_for_program,
-        defaultOrCustom,
-        isfile,
-        has_entry
+    config,
+    program,
+    file_path_for_program,
+    defaultOrCustom,
+    isfile,
+    has_entry,
+    mock_get_path,
+    mock_isfile,
 ):
     """
     Helper for asserting whether or not a default file is present. Pass in the
@@ -184,81 +188,90 @@ def _helper_assert_path_isfile_not_present(
         raise TypeError(
             'defaultOrCustom must be default or custom, not ' + defaultOrCustom
         )
-    with patch(
-        'eg.util.get_file_path_for_program',
-        return_value=file_path_for_program
-    ) as mock_get_path:
-        with patch('os.path.isfile', return_value=isfile) as mock_isfile:
 
-            actual = None
-            correct_dir = None
+    mock_get_path.return_value = file_path_for_program
+    mock_isfile.return_value = isfile
 
-            if (defaultOrCustom == 'default'):
-                correct_dir = config.examples_dir
-                actual = util.has_default_entry_for_program(program, config)
-            else:
-                correct_dir = config.custom_dir
-                actual = util.has_custom_entry_for_program(program, config)
+    actual = None
+    correct_dir = None
 
-            mock_get_path.assert_called_once_with(program, correct_dir)
-            mock_isfile.assert_called_once_with(file_path_for_program)
+    if (defaultOrCustom == 'default'):
+        correct_dir = config.examples_dir
+        actual = util.has_default_entry_for_program(program, config)
+    else:
+        correct_dir = config.custom_dir
+        actual = util.has_custom_entry_for_program(program, config)
 
-            assert_equal(actual, has_entry)
+    mock_get_path.assert_called_once_with(program, correct_dir)
+    mock_isfile.assert_called_once_with(file_path_for_program)
+
+    assert_equal(actual, has_entry)
 
 
-def test_handle_program_no_entries():
+@patch('eg.util.page_string')
+@patch('eg.util.get_formatted_contents')
+@patch('eg.util.get_contents_from_files')
+@patch('eg.util.has_custom_entry_for_program')
+@patch('eg.util.has_default_entry_for_program')
+@patch('eg.util.get_resolved_program')
+def test_handle_program_no_entries(
+    mock_resolve_program,
+    mock_has_default,
+    mock_has_custom,
+    mock_get_contents,
+    mock_format,
+    mock_page_string,
+):
     """
     We should do the right thing if there are no entries for a given program.
     """
     program = 'cp'
     test_config = _create_config()
 
-    with patch(
-        'eg.util.get_resolved_program',
-        return_value=program
-    ) as mock_resolve_program:
-        with patch(
-            'eg.util.has_default_entry_for_program',
-            return_value=False
-        ) as mock_has_default:
-            with patch(
-                'eg.util.has_custom_entry_for_program',
-                return_value=False
-            ) as mock_has_custom:
-                with patch(
-                    'eg.util.get_contents_from_files'
-                ) as mock_get_contents:
-                    with patch(
-                        'eg.util.get_formatted_contents'
-                    ) as mock_format:
-                        with patch(
-                            'eg.util.page_string'
-                        ) as mock_page_string:
-                            util.handle_program(program, test_config)
+    mock_resolve_program.return_value = program
+    mock_has_default.return_value = False
+    mock_has_custom.return_value = False
 
-                            mock_resolve_program.assert_called_once_with(
-                                program,
-                                test_config
-                            )
+    util.handle_program(program, test_config)
 
-                            mock_has_default.assert_called_once_with(
-                                program,
-                                test_config
-                            )
+    mock_resolve_program.assert_called_once_with(
+        program,
+        test_config
+    )
 
-                            mock_has_custom.assert_called_once_with(
-                                program,
-                                test_config
-                            )
+    mock_has_default.assert_called_once_with(
+        program,
+        test_config
+    )
 
-                            # We should have aborted and not called any of the
-                            # other methods.
-                            assert_equal(mock_get_contents.call_count, 0)
-                            assert_equal(mock_format.call_count, 0)
-                            assert_equal(mock_page_string.call_count, 0)
+    mock_has_custom.assert_called_once_with(
+        program,
+        test_config
+    )
+
+    # We should have aborted and not called any of the
+    # other methods.
+    assert_equal(mock_get_contents.call_count, 0)
+    assert_equal(mock_format.call_count, 0)
+    assert_equal(mock_page_string.call_count, 0)
 
 
-def test_handle_program_finds_paths_and_calls_open_pager_no_alias():
+@patch('eg.util.get_resolved_program')
+@patch('eg.util.has_default_entry_for_program', return_value=True)
+@patch('eg.util.has_custom_entry_for_program', return_value=True)
+@patch('eg.util.get_contents_from_files')
+@patch('eg.util.get_file_path_for_program')
+@patch('eg.util.get_formatted_contents')
+@patch('eg.util.page_string')
+def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
+    mock_page,
+    mock_format,
+    mock_get_file,
+    mock_get_contents,
+    mock_has_custom,
+    mock_has_default,
+    mock_resolve,
+):
     """
     If there are entries for the program, handle_program needs to get the
     paths, get the contents, format the contents, and page the resulting
@@ -308,76 +321,71 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias():
                 ' or ' +
                 custom_dir)
 
-    with patch(
-        'eg.util.get_resolved_program',
-        return_value=program
-    ) as mock_resolve:
-        with patch(
-            'eg.util.has_default_entry_for_program',
-            return_value=True
-        ) as mock_has_default:
-            with patch(
-                'eg.util.has_custom_entry_for_program',
-                return_value=True
-            ) as mock_has_custom:
-                with patch(
-                    'eg.util.get_contents_from_files',
-                    return_value=file_contents
-                ) as mock_get_contents:
-                    with patch(
-                        'eg.util.get_file_path_for_program',
-                        side_effect=return_correct_path
-                    ) as mock_get_file:
-                        with patch(
-                            'eg.util.get_formatted_contents',
-                            return_value=formatted_contents
-                        ) as mock_format:
-                            with patch('eg.util.page_string') as mock_page:
-                                util.handle_program(program, test_config)
+    mock_format.return_value = formatted_contents
+    mock_get_file.side_effect=return_correct_path
+    mock_get_contents.return_value = file_contents
+    mock_resolve.return_value = program
 
-                                mock_resolve.assert_called_once_with(
-                                    program,
-                                    test_config
-                                )
+    util.handle_program(program, test_config)
 
-                                mock_has_default.assert_called_once_with(
-                                    program,
-                                    test_config
-                                )
-                                mock_has_custom.assert_called_once_with(
-                                    program,
-                                    test_config
-                                )
+    mock_resolve.assert_called_once_with(
+        program,
+        test_config
+    )
 
-                                mock_get_file.assert_any_call(
-                                    program,
-                                    examples_dir
-                                )
-                                mock_get_file.assert_any_call(
-                                    program,
-                                    custom_dir,
-                                )
+    mock_has_default.assert_called_once_with(
+        program,
+        test_config
+    )
+    mock_has_custom.assert_called_once_with(
+        program,
+        test_config
+    )
 
-                                mock_get_contents.assert_called_once_with(
-                                    default_path,
-                                    custom_path
-                                )
+    mock_get_file.assert_any_call(
+        program,
+        examples_dir
+    )
+    mock_get_file.assert_any_call(
+        program,
+        custom_dir,
+    )
 
-                                mock_format.assert_called_once_with(
-                                    file_contents,
-                                    use_color=test_config.use_color,
-                                    color_config=test_config.color_config,
-                                    squeeze=test_config.squeeze,
-                                    subs=test_config.subs
-                                )
+    mock_get_contents.assert_called_once_with(
+        default_path,
+        custom_path
+    )
 
-                                mock_page.assert_called_once_with(
-                                    formatted_contents,
-                                    test_config.pager_cmd
-                                )
+    mock_format.assert_called_once_with(
+        file_contents,
+        use_color=test_config.use_color,
+        color_config=test_config.color_config,
+        squeeze=test_config.squeeze,
+        subs=test_config.subs
+    )
+
+    mock_page.assert_called_once_with(
+        formatted_contents,
+        test_config.pager_cmd
+    )
 
 
-def test_handle_program_finds_paths_and_calls_open_pager_with_alias():
+@patch('eg.util.get_resolved_program')
+@patch('eg.util.has_default_entry_for_program', return_value=True)
+@patch('eg.util.has_custom_entry_for_program', return_value=True)
+@patch('eg.util.get_contents_from_files')
+@patch('eg.util.get_file_path_for_program')
+@patch('eg.util.get_formatted_contents')
+@patch('eg.util.page_string')
+def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
+    mock_page,
+    mock_format,
+    mock_get_file,
+    mock_get_contents,
+    mock_has_custom,
+    mock_has_default,
+    mock_resolve,
+):
     """
     If there are entries for the program, handle_program needs to get the
     paths, get the contents, format the contents, and page the resulting
@@ -433,84 +441,70 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias():
                 ' or ' +
                 custom_dir)
 
-    with patch(
-        'eg.util.get_resolved_program',
-        return_value=resolved_program
-    ) as mock_resolve:
-        with patch(
-            'eg.util.has_default_entry_for_program',
-            return_value=True
-        ) as mock_has_default:
-            with patch(
-                'eg.util.has_custom_entry_for_program',
-                return_value=True
-            ) as mock_has_custom:
-                with patch(
-                    'eg.util.get_contents_from_files',
-                    return_value=file_contents
-                ) as mock_get_contents:
-                    with patch(
-                        'eg.util.get_file_path_for_program',
-                        side_effect=return_correct_path
-                    ) as mock_get_file:
-                        with patch(
-                            'eg.util.get_formatted_contents',
-                            return_value=formatted_contents
-                        ) as mock_format:
-                            with patch('eg.util.page_string') as mock_page:
-                                util.handle_program(
-                                    alias_for_program,
-                                    test_config
-                                )
+    mock_format.return_value = formatted_contents
+    mock_get_file.side_effect = return_correct_path
+    mock_get_contents.return_value = file_contents
+    mock_resolve.return_value = resolved_program
 
-                                mock_resolve.assert_called_once_with(
-                                    alias_for_program,
-                                    test_config
-                                )
+    util.handle_program(
+        alias_for_program,
+        test_config
+    )
 
-                                mock_has_default.assert_called_once_with(
-                                    resolved_program,
-                                    test_config
-                                )
-                                mock_has_custom.assert_called_once_with(
-                                    resolved_program,
-                                    test_config
-                                )
+    mock_resolve.assert_called_once_with(
+        alias_for_program,
+        test_config
+    )
 
-                                mock_get_file.assert_any_call(
-                                    resolved_program,
-                                    examples_dir
-                                )
-                                mock_get_file.assert_any_call(
-                                    resolved_program,
-                                    custom_dir,
-                                )
+    mock_has_default.assert_called_once_with(
+        resolved_program,
+        test_config
+    )
+    mock_has_custom.assert_called_once_with(
+        resolved_program,
+        test_config
+    )
 
-                                mock_get_contents.assert_called_once_with(
-                                    default_path,
-                                    custom_path
-                                )
+    mock_get_file.assert_any_call(
+        resolved_program,
+        examples_dir
+    )
+    mock_get_file.assert_any_call(
+        resolved_program,
+        custom_dir,
+    )
 
-                                mock_format.assert_called_once_with(
-                                    file_contents,
-                                    use_color=test_config.use_color,
-                                    color_config=test_config.color_config,
-                                    squeeze=test_config.squeeze,
-                                    subs=test_config.subs
-                                )
+    mock_get_contents.assert_called_once_with(
+        default_path,
+        custom_path
+    )
 
-                                mock_page.assert_called_once_with(
-                                    formatted_contents,
-                                    test_config.pager_cmd
-                                )
+    mock_format.assert_called_once_with(
+        file_contents,
+        use_color=test_config.use_color,
+        color_config=test_config.color_config,
+        squeeze=test_config.squeeze,
+        subs=test_config.subs
+    )
+
+    mock_page.assert_called_once_with(
+        formatted_contents,
+        test_config.pager_cmd
+    )
 
 
+@patch('os.path.isdir', return_value=True)
+@patch('os.listdir')
+@patch('eg.util.get_alias_dict')
 def _helper_assert_list_supported_programs(
     config_obj,
     default_list,
     custom_list,
     alias_dict,
-    target_list
+    target_list,
+    get_dict_mock,
+    listdir_mock,
+    isdir_mock,
 ):
     """
     config_obj: Config object to be passed to get_list function
@@ -528,11 +522,11 @@ def _helper_assert_list_supported_programs(
         else:
             raise NameError('Not the default or custom dir: ' + dir_name)
 
-    with patch('os.path.isdir', return_value=True):
-        with patch('os.listdir', side_effect=give_list):
-            with patch('eg.util.get_alias_dict', return_value=alias_dict):
-                actual = util.get_list_of_all_supported_commands(config_obj)
-                assert_equal(actual, target_list)
+    get_dict_mock.return_value = alias_dict
+    listdir_mock.side_effect = give_list
+
+    actual = util.get_list_of_all_supported_commands(config_obj)
+    assert_equal(actual, target_list)
 
 
 def test_list_supported_programs_only_default():
@@ -702,10 +696,14 @@ def test_calls_fallback_if_cmd_is_flag_string():
     )
 
 
+@patch('pydoc.pager')
+@patch('pydoc.pipepager')
 def _helper_assert_about_pager(
     str_to_page,
     pager_cmd,
-    use_fallback
+    use_fallback,
+    pipepager,
+    default_pager,
 ):
     """
     Help with asserting about pager.
@@ -715,27 +713,27 @@ def _helper_assert_about_pager(
     use_default: false if we should actually use pydoc.pipepager, true if we
         instead are going to fallback to pydoc.pager
     """
-    with patch('pydoc.pager') as default_pager:
-        with patch('pydoc.pipepager') as pipepager:
-            util.page_string(str_to_page, pager_cmd)
+    util.page_string(str_to_page, pager_cmd)
 
-            if use_fallback:
-                default_pager.assert_called_once_with(str_to_page)
-                assert_equal(pipepager.call_count, 0)
-            else:
-                assert_equal(default_pager.call_count, 0)
-                pipepager.assert_called_once_with(
-                    str_to_page,
-                    cmd=pager_cmd
-                )
+    if use_fallback:
+        default_pager.assert_called_once_with(str_to_page)
+        assert_equal(pipepager.call_count, 0)
+    else:
+        assert_equal(default_pager.call_count, 0)
+        pipepager.assert_called_once_with(
+            str_to_page,
+            cmd=pager_cmd
+        )
 
 
+@patch('eg.util._get_contents_of_file')
 def _helper_assert_file_contents(
     default_path,
     default_contents,
     custom_path,
     custom_contents,
-    target_contents
+    target_contents,
+    get_contents_mock,
 ):
     """
     Helper method to assert things about the get_contents_from_files method.
@@ -765,12 +763,10 @@ def _helper_assert_file_contents(
                 custom_path
             )
 
-    with patch(
-        'eg.util._get_contents_of_file',
-        side_effect=return_file_contents
-    ):
-        actual = util.get_contents_from_files(default_path, custom_path)
-        assert_equal(actual, target_contents)
+    get_contents_mock.side_effect = return_file_contents
+
+    actual = util.get_contents_from_files(default_path, custom_path)
+    assert_equal(actual, target_contents)
 
 
 @patch('eg.util.pydoc.pipepager', side_effect=KeyboardInterrupt)
@@ -842,7 +838,9 @@ def test_get_contents_from_file_both_default_and_custom():
         combined_contents
     )
 
-
+@patch('eg.util.get_colorized_contents')
+@patch('eg.util.get_squeezed_contents')
+@patch('eg.util.get_substituted_contents')
 def _helper_assert_formatted_contents(
     starting_contents,
     use_color,
@@ -852,7 +850,10 @@ def _helper_assert_formatted_contents(
     colorized_contents,
     squeezed_contents,
     subbed_contents,
-    formatted_result
+    formatted_result,
+    sub_method,
+    squeeze_method,
+    color_method,
 ):
     """
     Helper method to assist in asserting things about the
@@ -869,55 +870,47 @@ def _helper_assert_formatted_contents(
     subbed_contents: the result of subbed_contents
     formatted_result: the final, formatted string that should be returned
     """
-    with patch(
-        'eg.util.get_colorized_contents',
-        return_value=colorized_contents
-    ) as color_method:
-        with patch(
-            'eg.util.get_squeezed_contents',
-            return_value=squeezed_contents
-        ) as squeeze_method:
-            with patch(
-                'eg.util.get_substituted_contents',
-                return_value=subbed_contents
-            ) as sub_method:
-                actual = util.get_formatted_contents(
-                    starting_contents,
-                    use_color,
-                    color_config,
-                    squeeze,
-                    subs
-                )
+    sub_method.return_value = subbed_contents
+    squeeze_method.return_value = squeezed_contents
+    color_method.return_value = colorized_contents
 
-                # We'll update the contents as they get formatted to make sure
-                # we pass the right thing to the various methods.
-                contents_thus_far = starting_contents
+    actual = util.get_formatted_contents(
+        starting_contents,
+        use_color,
+        color_config,
+        squeeze,
+        subs
+    )
 
-                if use_color:
-                    color_method.assert_called_once_with(
-                        contents_thus_far,
-                        color_config
-                    )
-                    contents_thus_far = colorized_contents
-                else:
-                    assert_equal(color_method.call_count, 0)
+    # We'll update the contents as they get formatted to make sure
+    # we pass the right thing to the various methods.
+    contents_thus_far = starting_contents
 
-                if squeeze:
-                    squeeze_method.assert_called_once_with(contents_thus_far)
-                    contents_thus_far = squeezed_contents
-                else:
-                    assert_equal(squeeze_method.call_count, 0)
+    if use_color:
+        color_method.assert_called_once_with(
+            contents_thus_far,
+            color_config
+        )
+        contents_thus_far = colorized_contents
+    else:
+        assert_equal(color_method.call_count, 0)
 
-                if subs:
-                    sub_method.assert_called_once_with(
-                        contents_thus_far,
-                        subs
-                    )
-                    contents_thus_far = subbed_contents
-                else:
-                    assert_equal(sub_method.call_count, 0)
+    if squeeze:
+        squeeze_method.assert_called_once_with(contents_thus_far)
+        contents_thus_far = squeezed_contents
+    else:
+        assert_equal(squeeze_method.call_count, 0)
 
-                assert_equal(actual, formatted_result)
+    if subs:
+        sub_method.assert_called_once_with(
+            contents_thus_far,
+            subs
+        )
+        contents_thus_far = subbed_contents
+    else:
+        assert_equal(sub_method.call_count, 0)
+
+    assert_equal(actual, formatted_result)
 
 
 def test_get_formatted_contents_does_not_format_methods_if_all_falsey():
@@ -927,15 +920,15 @@ def test_get_formatted_contents_does_not_format_methods_if_all_falsey():
     """
     starting_contents = 'this is where we start'
     _helper_assert_formatted_contents(
-        starting_contents=starting_contents,
-        use_color=False,
-        color_config='some color config',
-        squeeze=False,
-        subs=None,
-        colorized_contents='this was colored',
-        squeezed_contents='this was squeezed',
-        subbed_contents='these contents were subbed',
-        formatted_result=starting_contents
+        starting_contents,
+        False,
+        'some color config',
+        False,
+        None,
+        'this was colored',
+        'this was squeezed',
+        'these contents were subbed',
+        starting_contents
     )
 
 
@@ -946,15 +939,15 @@ def test_get_formatted_contents_calls_colorize_if_use_color():
     starting_contents = 'this is where we start'
     colorized_contents = 'COLORIZED: this is where we start'
     _helper_assert_formatted_contents(
-        starting_contents=starting_contents,
-        use_color=True,
-        color_config='some color config',
-        squeeze=False,
-        subs=None,
-        colorized_contents=colorized_contents,
-        squeezed_contents='this was squeezed',
-        subbed_contents='these contents were subbed',
-        formatted_result=colorized_contents
+        starting_contents,
+        True,
+        'some color config',
+        False,
+        None,
+        colorized_contents,
+        'this was squeezed',
+        'these contents were subbed',
+        colorized_contents
     )
 
 
@@ -963,15 +956,15 @@ def test_get_formatted_contents_squeezes():
     starting_contents = 'this is where we start'
     squeezed_contents = 'this is the result of a squeezing'
     _helper_assert_formatted_contents(
-        starting_contents=starting_contents,
-        use_color=False,
-        color_config='some color config',
-        squeeze=True,
-        subs=None,
-        colorized_contents='this was colored',
-        squeezed_contents=squeezed_contents,
-        subbed_contents='these contents were subbed',
-        formatted_result=squeezed_contents
+        starting_contents,
+        False,
+        'some color config',
+        True,
+        None,
+        'this was colored',
+        squeezed_contents,
+        'these contents were subbed',
+        squeezed_contents
     )
 
 
@@ -980,15 +973,15 @@ def test_get_formatted_contents_subsitutes():
     starting_contents = 'this is where we start'
     subbed_contents = 'substituted like a teacher'
     _helper_assert_formatted_contents(
-        starting_contents=starting_contents,
-        use_color=False,
-        color_config='some color config',
-        squeeze=False,
-        subs=['truthy', 'list'],
-        colorized_contents='this was colored',
-        squeezed_contents='this was squeezed',
-        subbed_contents=subbed_contents,
-        formatted_result=subbed_contents
+        starting_contents,
+        False,
+        'some color config',
+        False,
+        ['truthy', 'list'],
+        'this was colored',
+        'this was squeezed',
+        subbed_contents,
+        subbed_contents
     )
 
 
@@ -1000,15 +993,15 @@ def test_perform_all_formatting():
     starting_contents = 'the starting point for grand formatting'
     subbed_contents = 'subbed is the last thing called so should be the result'
     _helper_assert_formatted_contents(
-        starting_contents=starting_contents,
-        use_color=True,
-        color_config='some color config',
-        squeeze=True,
-        subs=['truthy', 'list'],
-        colorized_contents='this was colored',
-        squeezed_contents='this was squeezed',
-        subbed_contents=subbed_contents,
-        formatted_result=subbed_contents
+        starting_contents,
+        True,
+        'some color config',
+        True,
+        ['truthy', 'list'],
+        'this was colored',
+        'this was squeezed',
+        subbed_contents,
+        subbed_contents
     )
 
 
@@ -1081,7 +1074,8 @@ def test_get_substituted_contents_substitutes_correctly():
     assert_equal(actual, target)
 
 
-def test_get_colorized_contents_calls_methods():
+@patch('eg.color.EgColorizer')
+def test_get_colorized_contents_calls_methods(patched_colorizer_class):
     """
     We should call the correct methods on the EgColorizer objects when we color
     a file.
@@ -1089,22 +1083,24 @@ def test_get_colorized_contents_calls_methods():
     raw_contents = 'these are uncolored contents'
     colored_contents = 'COLORED: ' + raw_contents
     color_config = 'some color config'
-    with patch('eg.color.EgColorizer') as patched_colorizer_class:
-        # The actual instance created by these calls is stored at return_value.
-        colorizer_instance = patched_colorizer_class.return_value
-        colorizer_instance.colorize_text.return_value = colored_contents
 
-        actual = util.get_colorized_contents(raw_contents, color_config)
+    # The actual instance created by these calls is stored at return_value.
+    colorizer_instance = patched_colorizer_class.return_value
+    colorizer_instance.colorize_text.return_value = colored_contents
 
-        assert_equal(actual, colored_contents)
-        colorizer_instance.colorize_text.assert_called_once_with(raw_contents)
+    actual = util.get_colorized_contents(raw_contents, color_config)
+
+    assert_equal(actual, colored_contents)
+    colorizer_instance.colorize_text.assert_called_once_with(raw_contents)
 
 
+@patch('eg.util.get_alias_dict')
 def _helper_assert_get_resolved_program(
     program,
     resolved_program,
     config_obj,
-    alias_dict
+    alias_dict,
+    mock_dict,
 ):
     """
     program: the program to resolved for as an alias
@@ -1112,10 +1108,11 @@ def _helper_assert_get_resolved_program(
     config_obj: the config_obj to use toe resolve the alias path
     alias_dict: the dict of aliases to be returned
     """
-    with patch('eg.util.get_alias_dict', return_value=alias_dict) as mock_dict:
-        actual = util.get_resolved_program(program, config_obj)
-        assert_equal(actual, resolved_program)
-        mock_dict.assert_called_once_with(config_obj)
+    mock_dict.return_value = alias_dict
+
+    actual = util.get_resolved_program(program, config_obj)
+    assert_equal(actual, resolved_program)
+    mock_dict.assert_called_once_with(config_obj)
 
 
 def test_get_resolved_program_no_alias():
@@ -1184,12 +1181,18 @@ def test_get_alias_dict_fails_gracefully_if_not_file():
     )
 
 
+@patch('eg.util._get_contents_of_file')
+@patch('eg.util._get_alias_file_path')
+@patch('os.path.isfile')
 def _helper_assert_get_alias_dict(
     contents_of_alias_dict_file,
     target_alias_dict,
     config_obj,
     alias_file_path,
-    alias_file_path_is_file
+    alias_file_path_is_file,
+    mock_is_file,
+    mock_get_alias_file_path,
+    mock_get_contents,
 ):
     """
     contents_of_alias_dict_file: the string contents of the file storing the
@@ -1199,32 +1202,25 @@ def _helper_assert_get_alias_dict(
     alias_file_path: the path to be returned by _get_alias_file_path
     alias_file_path_is_file: True if the alias path is a file, else False
     """
-    with patch(
-        'eg.util._get_contents_of_file',
-        return_value=contents_of_alias_dict_file
-    ) as mock_get_contents:
-        with patch(
-            'eg.util._get_alias_file_path',
-            return_value=alias_file_path
-        ) as mock_get_alias_file_path:
-            with patch(
-                'os.path.isfile',
-                return_value=alias_file_path_is_file
-            ) as mock_is_file:
-                actual = util.get_alias_dict(config_obj)
+    mock_is_file.return_value = alias_file_path_is_file
+    mock_get_alias_file_path.return_value = alias_file_path
+    mock_get_contents.return_value = contents_of_alias_dict_file
 
-                assert_equal(actual, target_alias_dict)
+    actual = util.get_alias_dict(config_obj)
 
-                mock_get_alias_file_path.assert_called_once_with(config_obj)
-                mock_is_file.assert_called_once_with(alias_file_path)
+    assert_equal(actual, target_alias_dict)
 
-                if alias_file_path_is_file:
-                    mock_get_contents.assert_called_once_with(alias_file_path)
-                else:
-                    assert_equal(mock_get_contents.call_count, 0)
+    mock_get_alias_file_path.assert_called_once_with(config_obj)
+    mock_is_file.assert_called_once_with(alias_file_path)
+
+    if alias_file_path_is_file:
+        mock_get_contents.assert_called_once_with(alias_file_path)
+    else:
+        assert_equal(mock_get_contents.call_count, 0)
 
 
-def test_get_alias_file_path():
+@patch('os.path.join')
+def test_get_alias_file_path(mock_join):
     """
     _get_alias_file_path should just join the example dir and the alias file
     name, to make sure we look in the right place for the file.
@@ -1234,13 +1230,14 @@ def test_get_alias_file_path():
     )
 
     join_result = 'joined path'
-    with patch('os.path.join', return_value=join_result) as mock_join:
-        actual = util._get_alias_file_path(config_obj)
-        assert_equal(actual, join_result)
-        mock_join.assert_called_once_with(
-            config_obj.examples_dir,
-            util.ALIAS_FILE_NAME
-        )
+    mock_join.return_value = join_result
+
+    actual = util._get_alias_file_path(config_obj)
+    assert_equal(actual, join_result)
+    mock_join.assert_called_once_with(
+        config_obj.examples_dir,
+        util.ALIAS_FILE_NAME
+    )
 
 
 def test_is_example_file_true_if_has_suffix():

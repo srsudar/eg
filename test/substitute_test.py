@@ -60,8 +60,12 @@ def test_calls_correct_re_methods_without_multiline():
     _helper_assert_about_apply_and_get_result(False)
 
 
+@patch('re.sub')
+@patch('re.compile')
 def _helper_assert_about_apply_and_get_result(
-    is_multiline
+    is_multiline,
+    compile_method,
+    sub_method
 ):
     """
     Helper method to assert about the correct results of calls to
@@ -72,22 +76,24 @@ def _helper_assert_about_apply_and_get_result(
     compiled_pattern = 'whoopty compiled'
     subbed_result = 'substituted'
     starting_string = 'the start'
-    with patch('re.compile', return_value=compiled_pattern) as compile_method:
-        with patch('re.sub', return_value=subbed_result) as sub_method:
-            if is_multiline:
-                sub = substitute.Substitution(pattern, repl, True)
-            else:
-                sub = substitute.Substitution(pattern, repl, False)
-            actual = sub.apply_and_get_result(starting_string)
 
-            if is_multiline:
-                compile_method.assert_called_once_with(pattern, re.MULTILINE)
-            else:
-                compile_method.assert_called_once_with(pattern)
+    compile_method.return_value = compiled_pattern
+    sub_method.return_value = subbed_result
 
-            sub_method.assert_called_once_with(
-                compiled_pattern,
-                repl,
-                starting_string
-            )
-            assert_equal(actual, subbed_result)
+    if is_multiline:
+        sub = substitute.Substitution(pattern, repl, True)
+    else:
+        sub = substitute.Substitution(pattern, repl, False)
+    actual = sub.apply_and_get_result(starting_string)
+
+    if is_multiline:
+        compile_method.assert_called_once_with(pattern, re.MULTILINE)
+    else:
+        compile_method.assert_called_once_with(pattern)
+
+    sub_method.assert_called_once_with(
+        compiled_pattern,
+        repl,
+        starting_string
+    )
+    assert_equal(actual, subbed_result)

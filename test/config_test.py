@@ -416,7 +416,8 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
     assert_equal(actual, target)
 
 
-def test_get_config_tuple_from_egrc_when_present():
+@patch('eg.config.get_expanded_path')
+def test_get_config_tuple_from_egrc_when_present(mock_expand):
     """
     Make sure we extract values correctly from the egrc.
     """
@@ -448,28 +449,25 @@ def test_get_config_tuple_from_egrc_when_present():
                 egrc_custom_dir
             )
 
-    with patch(
-        'eg.config.get_expanded_path',
-        side_effect=return_expanded_path
-    ) as mock_expand:
+    mock_expand.side_effect = return_expanded_path
 
-        actual = config.get_config_tuple_from_egrc(PATH_EGRC_WITH_DATA)
+    actual = config.get_config_tuple_from_egrc(PATH_EGRC_WITH_DATA)
 
-        expected = config.Config(
-            examples_dir=egrc_examples_dir,
-            custom_dir=egrc_custom_dir,
-            color_config=color_config_from_file,
-            use_color=egrc_use_color,
-            pager_cmd=egrc_pager_cmd,
-            squeeze=egrc_squeeze,
-            subs=egrc_subs,
-            editor_cmd=egrc_editor_cmd,
-        )
+    expected = config.Config(
+        examples_dir=egrc_examples_dir,
+        custom_dir=egrc_custom_dir,
+        color_config=color_config_from_file,
+        use_color=egrc_use_color,
+        pager_cmd=egrc_pager_cmd,
+        squeeze=egrc_squeeze,
+        subs=egrc_subs,
+        editor_cmd=egrc_editor_cmd,
+    )
 
-        assert_equal(actual, expected)
+    assert_equal(actual, expected)
 
-        mock_expand.assert_any_call(egrc_examples_dir)
-        mock_expand.assert_any_call(egrc_custom_dir)
+    mock_expand.assert_any_call(egrc_examples_dir)
+    mock_expand.assert_any_call(egrc_custom_dir)
 
 
 def _get_color_config_from_egrc_withdata():

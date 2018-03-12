@@ -205,25 +205,17 @@ def test_colorize_backticks():
 
     assert_equal(actual, target)
 
-
-def test_colorize_text_calls_all_sub_methods():
+@patch('eg.color.EgColorizer.colorize_backticks',
+       return_value='text-heading-indent-backticks')
+@patch('eg.color.EgColorizer.colorize_block_indent',
+       return_value='text-heading-indent')
+@patch('eg.color.EgColorizer.colorize_heading', return_value='text-heading')
+def test_colorize_text_calls_all_sub_methods(heading, indent, backticks):
     """colorize_text should call all of the helper colorize methods."""
-    with patch(
-        'eg.color.EgColorizer.colorize_heading',
-        return_value='text-heading'
-    ) as heading:
-        with patch(
-            'eg.color.EgColorizer.colorize_block_indent',
-            return_value='text-heading-indent'
-        ) as indent:
-            with patch(
-                'eg.color.EgColorizer.colorize_backticks',
-                return_value='text-heading-indent-backticks'
-            ) as backticks:
-                colorizer = color.EgColorizer(None)
-                text = 'text'
-                actual = colorizer.colorize_text(text)
-                heading.assert_called_once_with(text)
-                indent.assert_called_once_with('text-heading')
-                backticks.assert_called_once_with('text-heading-indent')
-                assert_equal('text-heading-indent-backticks', actual)
+    colorizer = color.EgColorizer(None)
+    text = 'text'
+    actual = colorizer.colorize_text(text)
+    heading.assert_called_once_with(text)
+    indent.assert_called_once_with('text-heading')
+    backticks.assert_called_once_with('text-heading-indent')
+    assert_equal('text-heading-indent-backticks', actual)
