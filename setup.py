@@ -40,14 +40,13 @@ config = {
     'author_email': 'sudar.sam@gmail.com',
     'version': VERSION,
     'install_requires': [],
-    'test_requires': ['nose', 'mock'],
+    'test_requires': ['mock', 'pytest'],
     'packages': ['eg'],
     'scripts': ['bin/eg'],
     'package_data': {
         'eg': ['examples/*']
     },
     'zip_safe': False,
-    'test_suite': 'nose.collector'
 }
 
 setup(**config)
