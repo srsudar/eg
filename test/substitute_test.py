@@ -2,22 +2,20 @@ import re
 
 from eg import substitute
 from mock import patch
-from nose.tools import assert_equal
-from nose.tools import assert_true
 
 
 def test_equality():
     """== should work on Substitution objects."""
     alpha = substitute.Substitution('foo', 'bar', False)
     beta = substitute.Substitution('foo', 'bar', False)
-    assert_true(alpha == beta)
+    assert alpha == beta
 
 
 def test_not_equal():
     """!= should work on Substitution objects."""
     alpha = substitute.Substitution('foo', 'bar', True)
     beta = substitute.Substitution('foo', 'bar', False)
-    assert_true(alpha != beta)
+    assert alpha != beta
 
 
 def test_applies_multiline_substitution():
@@ -29,7 +27,7 @@ def test_applies_multiline_substitution():
     sub = substitute.Substitution(pattern, replacement, True)
 
     actual = sub.apply_and_get_result(raw)
-    assert_equal(actual, subbed)
+    assert actual == subbed
 
 
 def test_applies_normal_mode_substitution():
@@ -41,7 +39,7 @@ def test_applies_normal_mode_substitution():
     sub = substitute.Substitution(pattern, replacement, False)
 
     actual = sub.apply_and_get_result(raw)
-    assert_equal(actual, subbed)
+    assert actual == subbed
 
 
 def test_calls_correct_re_methods_for_multiline():
@@ -96,4 +94,4 @@ def _helper_assert_about_apply_and_get_result(
         repl,
         starting_string
     )
-    assert_equal(actual, subbed_result)
+    assert actual == subbed_result
