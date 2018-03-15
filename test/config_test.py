@@ -1,9 +1,9 @@
 import os
+import pytest
 
 from eg import config
 from eg import substitute
 from mock import patch
-from nose.tools import assert_raises
 
 # Support python 2 and 3
 try:
@@ -648,29 +648,25 @@ def test_parse_substitution_error_if_not_list():
     """
     Raise a SyntaxError if the value is not a list.
     """
-    assert_raises(SyntaxError, config.parse_substitution_from_list, 'foo_str')
+    with pytest.raises(SyntaxError):
+        config.parse_substitution_from_list('foo_str')
 
 
 def test_parse_substitution_error_if_wrong_length():
     """
     Raise a SyntaxError if the list is less than two long.
     """
-    assert_raises(
-        SyntaxError,
-        config.parse_substitution_from_list,
-        ['foo']
-    )
+    with pytest.raises(SyntaxError):
+        config.parse_substitution_from_list(['foo'])
 
 
 def test_parse_substitution_error_if_third_element_not_bool():
     """
     Raise a SyntaxError if the third element in the list is not a boolean.
     """
-    assert_raises(
-        SyntaxError,
-        config.parse_substitution_from_list,
-        ['foo', 'bar', 'intentionally_not_a_bool']
-    )
+    with pytest.raises(SyntaxError):
+        bad_args = ['foo', 'bar', 'intentionally_not_a_bool']
+        config.parse_substitution_from_list(bad_args)
 
 
 def test_get_substitution_from_config_finds_single_substitution():
