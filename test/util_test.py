@@ -6,7 +6,6 @@ from eg import substitute
 from eg import util
 from mock import Mock
 from mock import patch
-from nose.tools import assert_equal
 
 PATH_UNSQUEEZED_FILE = os.path.join(
     'test',
@@ -53,8 +52,7 @@ def test_get_file_path_for_program_correct():
     target = os.path.join(examples_dir, program_file)
 
     actual = util.get_file_path_for_program(program, examples_dir)
-
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def test_has_default_entry_for_program_no_examples_dir():
@@ -66,8 +64,7 @@ def test_has_default_entry_for_program_no_examples_dir():
     program = 'cp'
 
     has_entry = util.has_default_entry_for_program(program, test_config)
-
-    assert_equal(False, has_entry)
+    assert has_entry == False
 
 
 def test_has_custom_entry_for_program_no_custom_dir():
@@ -79,8 +76,7 @@ def test_has_custom_entry_for_program_no_custom_dir():
     program = 'find'
 
     has_entry = util.has_custom_entry_for_program(program, test_config)
-
-    assert_equal(False, has_entry)
+    assert has_entry == False
 
 
 def test_has_default_entry_when_present():
@@ -205,7 +201,7 @@ def _helper_assert_path_isfile_not_present(
     mock_get_path.assert_called_once_with(program, correct_dir)
     mock_isfile.assert_called_once_with(file_path_for_program)
 
-    assert_equal(actual, has_entry)
+    assert actual == has_entry
 
 
 @patch('eg.util.page_string')
@@ -251,9 +247,9 @@ def test_handle_program_no_entries(
 
     # We should have aborted and not called any of the
     # other methods.
-    assert_equal(mock_get_contents.call_count, 0)
-    assert_equal(mock_format.call_count, 0)
-    assert_equal(mock_page_string.call_count, 0)
+    assert mock_get_contents.call_count == 0
+    assert mock_format.call_count == 0
+    assert mock_page_string.call_count == 0
 
 
 @patch('eg.util.get_resolved_program')
@@ -526,7 +522,7 @@ def _helper_assert_list_supported_programs(
     listdir_mock.side_effect = give_list
 
     actual = util.get_list_of_all_supported_commands(config_obj)
-    assert_equal(actual, target_list)
+    assert actual == target_list
 
 
 def test_list_supported_programs_only_default():
@@ -658,7 +654,7 @@ def test_list_supported_programs_fails_gracefully_if_no_dirs():
     actual = util.get_list_of_all_supported_commands(test_config)
     target = []
 
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def test_calls_pipepager_if_not_less():
@@ -717,9 +713,9 @@ def _helper_assert_about_pager(
 
     if use_fallback:
         default_pager.assert_called_once_with(str_to_page)
-        assert_equal(pipepager.call_count, 0)
+        assert pipepager.call_count == 0
     else:
-        assert_equal(default_pager.call_count, 0)
+        assert default_pager.call_count == 0
         pipepager.assert_called_once_with(
             str_to_page,
             cmd=pager_cmd
@@ -766,7 +762,7 @@ def _helper_assert_file_contents(
     get_contents_mock.side_effect = return_file_contents
 
     actual = util.get_contents_from_files(default_path, custom_path)
-    assert_equal(actual, target_contents)
+    assert actual == target_contents
 
 
 @patch('eg.util.pydoc.pipepager', side_effect=KeyboardInterrupt)
@@ -893,13 +889,13 @@ def _helper_assert_formatted_contents(
         )
         contents_thus_far = colorized_contents
     else:
-        assert_equal(color_method.call_count, 0)
+        assert color_method.call_count == 0
 
     if squeeze:
         squeeze_method.assert_called_once_with(contents_thus_far)
         contents_thus_far = squeezed_contents
     else:
-        assert_equal(squeeze_method.call_count, 0)
+        assert squeeze_method.call_count == 0
 
     if subs:
         sub_method.assert_called_once_with(
@@ -908,9 +904,9 @@ def _helper_assert_formatted_contents(
         )
         contents_thus_far = subbed_contents
     else:
-        assert_equal(sub_method.call_count, 0)
+        assert sub_method.call_count == 0
 
-    assert_equal(actual, formatted_result)
+    assert actual == formatted_result
 
 
 def test_get_formatted_contents_does_not_format_methods_if_all_falsey():
@@ -1024,14 +1020,14 @@ def test_get_squeezed_contents_correctly_squeezes():
     target = _get_file_as_string(PATH_SQUEEZED_FILE)
     actual = util.get_squeezed_contents(unsqueezed)
 
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def test_get_substituted_contents_handles_empty_subs():
     """Nothing should be formatted if there are no substitutions."""
     raw_contents = 'this should not be subbed'
     actual = util.get_substituted_contents(raw_contents, [])
-    assert_equal(actual, raw_contents)
+    assert actual == raw_contents
 
 
 def test_get_substituted_contents_substitutes_calls_correct_methods():
@@ -1055,7 +1051,7 @@ def test_get_substituted_contents_substitutes_calls_correct_methods():
     sub_one.apply_and_get_result.assert_called_once_with(starting_contents)
     sub_two.apply_and_get_result.assert_called_once_with(sub_one_result)
 
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def test_get_substituted_contents_substitutes_correctly():
@@ -1071,7 +1067,7 @@ def test_get_substituted_contents_substitutes_correctly():
     subs = [sub_one, sub_two]
     actual = util.get_substituted_contents(start, subs)
 
-    assert_equal(actual, target)
+    assert actual == target
 
 
 @patch('eg.color.EgColorizer')
@@ -1090,7 +1086,7 @@ def test_get_colorized_contents_calls_methods(patched_colorizer_class):
 
     actual = util.get_colorized_contents(raw_contents, color_config)
 
-    assert_equal(actual, colored_contents)
+    assert actual == colored_contents
     colorizer_instance.colorize_text.assert_called_once_with(raw_contents)
 
 
@@ -1111,7 +1107,7 @@ def _helper_assert_get_resolved_program(
     mock_dict.return_value = alias_dict
 
     actual = util.get_resolved_program(program, config_obj)
-    assert_equal(actual, resolved_program)
+    assert actual == resolved_program
     mock_dict.assert_called_once_with(config_obj)
 
 
@@ -1208,7 +1204,7 @@ def _helper_assert_get_alias_dict(
 
     actual = util.get_alias_dict(config_obj)
 
-    assert_equal(actual, target_alias_dict)
+    assert actual == target_alias_dict
 
     mock_get_alias_file_path.assert_called_once_with(config_obj)
     mock_is_file.assert_called_once_with(alias_file_path)
@@ -1216,7 +1212,7 @@ def _helper_assert_get_alias_dict(
     if alias_file_path_is_file:
         mock_get_contents.assert_called_once_with(alias_file_path)
     else:
-        assert_equal(mock_get_contents.call_count, 0)
+        assert mock_get_contents.call_count == 0
 
 
 @patch('os.path.join')
@@ -1233,7 +1229,7 @@ def test_get_alias_file_path(mock_join):
     mock_join.return_value = join_result
 
     actual = util._get_alias_file_path(config_obj)
-    assert_equal(actual, join_result)
+    assert actual == join_result
     mock_join.assert_called_once_with(
         config_obj.examples_dir,
         util.ALIAS_FILE_NAME
@@ -1246,7 +1242,7 @@ def test_is_example_file_true_if_has_suffix():
     """
     file_name = 'find.md'
     actual = util._is_example_file(file_name)
-    assert_equal(actual, True)
+    assert actual == True
 
 
 def test_is_example_file_true_if_not_suffix():
@@ -1255,7 +1251,7 @@ def test_is_example_file_true_if_not_suffix():
     """
     file_name = 'aliases.json'
     actual = util._is_example_file(file_name)
-    assert_equal(actual, False)
+    assert actual == False
 
 
 def test_can_parse_alias_file():
@@ -1272,7 +1268,7 @@ def test_can_parse_alias_file():
     alias_file_contents = util._get_contents_of_file(alias_file_path)
     alias_dict = json.loads(alias_file_contents)
     # We'll check that link goes to ln, as we know that one will be present.
-    assert_equal(alias_dict['link'], 'ln')
+    assert alias_dict['link'] == 'ln'
 
 
 @patch('os.path.exists')
@@ -1304,7 +1300,7 @@ def test_edit_custom_examples_correct_with_custom_dir(
     mock_get_program.assert_called_once_with(program, config)
     mock_get_path.assert_called_once_with(resolved_program, config.custom_dir)
     mock_call.assert_called_once_with([config.editor_cmd, path])
-    assert_equal(mock_inform.call_count, 0)
+    assert mock_inform.call_count == 0
 
 
 @patch('os.path.exists')
@@ -1330,14 +1326,14 @@ def test_edit_custom_examples_informs_if_no_custom_dir(
     config = _create_config(editor_cmd='vi -e')
     mock_exists.return_value = True
     util.edit_custom_examples(program, config)
-    assert_equal(mock_inform.call_count, 1)
+    assert mock_inform.call_count == 1
 
     # And now with it set but a nonexistent path.
     config = _create_config(custom_dir='/path/to/custom', editor_cmd='vi -e')
     mock_exists.return_value = False
     util.edit_custom_examples(program, config)
-    assert_equal(mock_inform.call_count, 2)
+    assert mock_inform.call_count == 2
 
-    assert_equal(mock_call.call_count, 0)
-    assert_equal(mock_get_path.call_count, 0)
-    assert_equal(mock_get_program.call_count, 0)
+    assert mock_call.call_count == 0
+    assert mock_get_path.call_count == 0
+    assert mock_get_program.call_count == 0
