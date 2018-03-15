@@ -3,10 +3,7 @@ import os
 from eg import config
 from eg import substitute
 from mock import patch
-from nose.tools import assert_equal
-from nose.tools import assert_false
 from nose.tools import assert_raises
-from nose.tools import assert_true
 
 # Support python 2 and 3
 try:
@@ -96,14 +93,14 @@ def test_config_returns_egrc_values_if_present(mock_get_config, mock_isfile):
         None,
     )
 
-    assert_equal(resolved_config.examples_dir, examples_dir)
-    assert_equal(resolved_config.custom_dir, custom_dir)
-    assert_equal(resolved_config.color_config, test_color_config)
-    assert_equal(resolved_config.use_color, test_use_color)
-    assert_equal(resolved_config.pager_cmd, test_pager_cmd)
-    assert_equal(resolved_config.editor_cmd, test_editor_cmd)
-    assert_equal(resolved_config.squeeze, test_squeeze)
-    assert_equal(resolved_config.subs, test_subs)
+    assert resolved_config.examples_dir == examples_dir
+    assert resolved_config.custom_dir == custom_dir
+    assert resolved_config.color_config == test_color_config
+    assert resolved_config.use_color == test_use_color
+    assert resolved_config.pager_cmd == test_pager_cmd
+    assert resolved_config.editor_cmd == test_editor_cmd
+    assert resolved_config.squeeze == test_squeeze
+    assert resolved_config.subs == test_subs
 
 
 def _call_get_resolved_config_with_defaults(
@@ -137,7 +134,7 @@ def test_inform_if_paths_invalid_selectively_informs(mock_inform):
     """
     config.inform_if_paths_invalid(None, None, None)
 
-    assert_equal(mock_inform.call_count, 0)
+    assert mock_inform.call_count == 0
 
     egrc_path = 'egrc'
     ex_dir = 'ex dir'
@@ -145,7 +142,7 @@ def test_inform_if_paths_invalid_selectively_informs(mock_inform):
 
     config.inform_if_paths_invalid(egrc_path, ex_dir, cu_dir)
 
-    assert_equal(mock_inform.call_count, 3)
+    assert mock_inform.call_count == 3
     mock_inform.assert_any_call(egrc_path)
     mock_inform.assert_any_call(ex_dir)
     mock_inform.assert_any_call(cu_dir)
@@ -229,7 +226,7 @@ def _assert_about_get_egrc_config(
 
     actual = config.get_egrc_config(cli_path)
 
-    assert_equal(actual, expected_config)
+    assert actual == expected_config
 
     mock_expand.assert_called_once_with(path_to_expand)
     mock_isfile.assert_called_once_with(expanded_path)
@@ -263,8 +260,8 @@ def test_get_resolved_config_calls_expand_paths(
 
     actual = _call_get_resolved_config_with_defaults()
 
-    assert_equal(actual.examples_dir, expected_examples_dir)
-    assert_equal(actual.custom_dir, expected_custom_dir)
+    assert actual.examples_dir == expected_examples_dir
+    assert actual.custom_dir == expected_custom_dir
 
 
 @patch('eg.config.get_editor_cmd_from_environment')
@@ -300,14 +297,14 @@ def _assert_about_get_resolved_config(
         debug=False
     )
 
-    assert_equal(actual.examples_dir, expected_config.examples_dir)
-    assert_equal(actual.custom_dir, expected_config.custom_dir)
-    assert_equal(actual.use_color, expected_config.use_color)
-    assert_equal(actual.color_config, expected_config.color_config)
-    assert_equal(actual.pager_cmd, expected_config.pager_cmd)
-    assert_equal(actual.squeeze, expected_config.squeeze)
-    assert_equal(actual.subs, expected_config.subs)
-    assert_equal(actual.editor_cmd, expected_config.editor_cmd)
+    assert actual.examples_dir == expected_config.examples_dir
+    assert actual.custom_dir == expected_config.custom_dir
+    assert actual.use_color == expected_config.use_color
+    assert actual.color_config == expected_config.color_config
+    assert actual.pager_cmd == expected_config.pager_cmd
+    assert actual.squeeze == expected_config.squeeze
+    assert actual.subs == expected_config.subs
+    assert actual.editor_cmd == expected_config.editor_cmd
 
     mock_get_egrc_config.assert_called_once_with(cli_egrc_path)
     mock_get_editor.assert_called_once_with()
@@ -413,7 +410,7 @@ def test_get_config_tuple_from_egrc_all_none_when_not_present():
         subs=None,
         editor_cmd=None,
     )
-    assert_equal(actual, target)
+    assert actual == target
 
 
 @patch('eg.config.get_expanded_path')
@@ -464,7 +461,7 @@ def test_get_config_tuple_from_egrc_when_present(mock_expand):
         editor_cmd=egrc_editor_cmd,
     )
 
-    assert_equal(actual, expected)
+    assert actual == expected
 
     mock_expand.assert_any_call(egrc_examples_dir)
     mock_expand.assert_any_call(egrc_custom_dir)
@@ -505,7 +502,7 @@ def test_merge_color_configs_first_all_none():
 
     merged = config.merge_color_configs(first, second)
 
-    assert_equal(merged, second)
+    assert merged == second
 
 
 def test_merge_color_configs_take_all_first():
@@ -526,7 +523,7 @@ def test_merge_color_configs_take_all_first():
 
     merged = config.merge_color_configs(first, second)
 
-    assert_equal(merged, first)
+    assert merged == first
 
 
 def test_merge_color_configs_mixed():
@@ -560,62 +557,59 @@ def test_merge_color_configs_mixed():
         prompt_reset=second.prompt_reset
     )
 
-    assert_equal(merged, target)
+    assert merged == target
 
 
 def test_default_color_config():
     """Make sure the default color config is set to the right values."""
     actual = config.get_default_color_config()
 
-    assert_equal(actual.pound, config.DEFAULT_COLOR_POUND)
-    assert_equal(actual.heading, config.DEFAULT_COLOR_HEADING)
-    assert_equal(actual.code, config.DEFAULT_COLOR_CODE)
-    assert_equal(actual.backticks, config.DEFAULT_COLOR_BACKTICKS)
-    assert_equal(actual.prompt, config.DEFAULT_COLOR_PROMPT)
+    assert actual.pound == config.DEFAULT_COLOR_POUND
+    assert actual.heading == config.DEFAULT_COLOR_HEADING
+    assert actual.code == config.DEFAULT_COLOR_CODE
+    assert actual.backticks == config.DEFAULT_COLOR_BACKTICKS
+    assert actual.prompt == config.DEFAULT_COLOR_PROMPT
 
-    assert_equal(actual.pound_reset, config.DEFAULT_COLOR_POUND_RESET)
-    assert_equal(actual.heading_reset, config.DEFAULT_COLOR_HEADING_RESET)
-    assert_equal(actual.code_reset, config.DEFAULT_COLOR_CODE_RESET)
-    assert_equal(
-        actual.backticks_reset,
-        config.DEFAULT_COLOR_BACKTICKS_RESET
-    )
-    assert_equal(actual.prompt_reset, config.DEFAULT_COLOR_PROMPT_RESET)
+    assert actual.pound_reset == config.DEFAULT_COLOR_POUND_RESET
+    assert actual.heading_reset == config.DEFAULT_COLOR_HEADING_RESET
+    assert actual.code_reset == config.DEFAULT_COLOR_CODE_RESET
+    assert actual.backticks_reset == config.DEFAULT_COLOR_BACKTICKS_RESET
+    assert actual.prompt_reset == config.DEFAULT_COLOR_PROMPT_RESET
 
 
 def test_parse_bool_true_for_truthy_values():
     """We should parse both 'True' and 'true' to True."""
-    assert_true(config._parse_bool_from_raw_egrc_value('True'))
-    assert_true(config._parse_bool_from_raw_egrc_value('true'))
+    assert config._parse_bool_from_raw_egrc_value('True') == True
+    assert config._parse_bool_from_raw_egrc_value('true') == True
 
 
 def test_parse_bool_false_for_non_truthy_values():
     """Make sure we parse the likely non-truthy things as false."""
-    assert_false(config._parse_bool_from_raw_egrc_value(''))
-    assert_false(config._parse_bool_from_raw_egrc_value(None))
-    assert_false(config._parse_bool_from_raw_egrc_value('false'))
-    assert_false(config._parse_bool_from_raw_egrc_value('False'))
+    assert config._parse_bool_from_raw_egrc_value('') == False
+    assert config._parse_bool_from_raw_egrc_value(None) == False
+    assert config._parse_bool_from_raw_egrc_value('false') == False
+    assert config._parse_bool_from_raw_egrc_value('False') == False
 
 
 def test_get_priority_first():
     """The first non-None value should always be returned."""
     target = 'alpha'
     actual = config.get_priority(target, 'second', 'third')
-    assert_equal(target, actual)
+    assert target == actual
 
 
 def test_get_priority_second():
     """The second non-None should be returned if the first is None."""
     target = 'beta'
     actual = config.get_priority(None, target, 'third')
-    assert_equal(target, actual)
+    assert target == actual
 
 
 def test_get_priority_third():
     """The last should be taken if the first two are None."""
     target = 'gamma'
     actual = config.get_priority(None, None, target)
-    assert_equal(target, actual)
+    assert target == actual
 
 
 def test_get_priority_respect_false():
@@ -626,7 +620,7 @@ def test_get_priority_respect_false():
     """
     target = False
     actual = config.get_priority(False, 'second', 'third')
-    assert_equal(target, actual)
+    assert target == actual
 
 
 def test_parse_substitution_from_list_without_is_multiline():
@@ -637,7 +631,7 @@ def test_parse_substitution_from_list_without_is_multiline():
     target = substitute.Substitution('foo', 'bar', False)
     list_rep = ['foo', 'bar']
     actual = config.parse_substitution_from_list(list_rep)
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def test_parse_substitution_from_list_with_is_multiline():
@@ -647,7 +641,7 @@ def test_parse_substitution_from_list_with_is_multiline():
     target = substitute.Substitution('patt', 'repl', True)
     list_rep = ['patt', 'repl', True]
     actual = config.parse_substitution_from_list(list_rep)
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def test_parse_substitution_error_if_not_list():
@@ -691,7 +685,7 @@ def test_get_substitution_from_config_finds_single_substitution():
     config_obj = _get_egrc_config(PATH_EGRC_SINGLE_SUB)
 
     actual = config.get_substitutions_from_config(config_obj)
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def test_get_substitution_from_config_finds_multiple_substitutions():
@@ -708,7 +702,7 @@ def test_get_substitution_from_config_finds_multiple_substitutions():
     config_obj = _get_egrc_config(PATH_EGRC_WITH_DATA)
 
     actual = config.get_substitutions_from_config(config_obj)
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def _get_egrc_config(egrc_path):
