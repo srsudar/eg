@@ -4,7 +4,6 @@ from collections import namedtuple
 from eg import color
 from eg import config
 from mock import patch
-from nose.tools import assert_equal
 
 # Some hardcoded real colors.
 _YELLOW = '\x1b[33m'
@@ -138,8 +137,7 @@ def test_colorize_heading():
     colorizer = color.EgColorizer(color_config)
 
     actual = colorizer.colorize_heading(clean)
-
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def test_colorize_block_indents():
@@ -171,8 +169,7 @@ def test_colorize_block_indents():
     colorizer = color.EgColorizer(color_config)
 
     actual = colorizer.colorize_block_indent(clean)
-
-    assert_equal(actual, target)
+    assert actual == target
 
 
 def test_colorize_backticks():
@@ -202,8 +199,7 @@ def test_colorize_backticks():
     colorizer = color.EgColorizer(color_config)
 
     actual = colorizer.colorize_backticks(clean)
-
-    assert_equal(actual, target)
+    assert actual == target
 
 @patch('eg.color.EgColorizer.colorize_backticks',
        return_value='text-heading-indent-backticks')
@@ -218,4 +214,4 @@ def test_colorize_text_calls_all_sub_methods(heading, indent, backticks):
     heading.assert_called_once_with(text)
     indent.assert_called_once_with('text-heading')
     backticks.assert_called_once_with('text-heading-indent')
-    assert_equal('text-heading-indent-backticks', actual)
+    assert 'text-heading-indent-backticks' == actual
