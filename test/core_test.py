@@ -1,6 +1,5 @@
 from collections import namedtuple
 from mock import patch
-from nose.tools import assert_equal
 
 from eg import core
 from test.util_test import _create_config
@@ -109,22 +108,22 @@ def _helper_parses_correctly(
 
     with patch('sys.argv', new=argv):
         actual_args = core._parse_arguments()
-        assert_equal(actual_args.config_file, expected_args.config_file)
-        assert_equal(actual_args.custom_dir, expected_args.custom_dir)
-        assert_equal(actual_args.examples_dir, expected_args.examples_dir)
-        assert_equal(actual_args.list, expected_args.list)
-        assert_equal(actual_args.pager_cmd, expected_args.pager_cmd)
-        assert_equal(actual_args.use_color, expected_args.use_color)
-        assert_equal(actual_args.squeeze, expected_args.squeeze)
-        assert_equal(actual_args.version, expected_args.version)
-        assert_equal(actual_args.edit, expected_args.edit)
+        assert actual_args.config_file == expected_args.config_file
+        assert actual_args.custom_dir == expected_args.custom_dir
+        assert actual_args.examples_dir == expected_args.examples_dir
+        assert actual_args.list == expected_args.list
+        assert actual_args.pager_cmd == expected_args.pager_cmd
+        assert actual_args.use_color == expected_args.use_color
+        assert actual_args.squeeze == expected_args.squeeze
+        assert actual_args.version == expected_args.version
+        assert actual_args.edit == expected_args.edit
         # Note that here we use the default, as described above.
-        assert_equal(actual_args.program, default_program)
+        assert actual_args.program == default_program
 
         # Now make sure we didn't call any other parser methods
-        assert_equal(mock_exit.call_args_list, [])
-        assert_equal(mock_help.call_args_list, [])
-        assert_equal(mock_error.call_args_list, [])
+        assert mock_exit.call_args_list == []
+        assert mock_help.call_args_list == []
+        assert mock_error.call_args_list == []
 
 
 def test_parses_correctly_if_just_program():
@@ -304,29 +303,29 @@ def _helper_run_eg_responds_to_args_correctly(
     if (call_show_list):
         mock_show_list.assert_called_once_with(resolved_config)
     else:
-        assert_equal(mock_show_list.call_args_list, [])
+        assert mock_show_list.call_args_list == []
 
     if (call_show_version):
         mock_show_version.assert_called_once_with()
     else:
-        assert_equal(mock_show_version.call_args_list, [])
+        assert mock_show_version.call_args_list == []
 
     if (call_no_editor):
         mock_no_editor.assert_called_once_with()
     else:
-        assert_equal(mock_no_editor.call_args_list, [])
+        assert mock_no_editor.call_args_list == []
 
     if (call_edit_custom):
         mock_edit_custom.assert_called_once_with(args.program, resolved_config)
     else:
-        assert_equal(mock_edit_custom.call_args_list, [])
+        assert mock_edit_custom.call_args_list == []
 
     if (call_handle_program):
         mock_handle_program.assert_called_once_with(
             args.program, resolved_config
         )
     else:
-        assert_equal(mock_handle_program.call_args_list, [])
+        assert mock_handle_program.call_args_list == []
 
 
 def test_shows_version():
