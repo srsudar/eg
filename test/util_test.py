@@ -1,5 +1,6 @@
 import json
 import os
+import pytest
 
 from eg import config
 from eg import substitute
@@ -45,14 +46,87 @@ def _create_config(
     )
 
 
-def test_get_file_path_for_program_correct():
-    program = 'cp'
-    examples_dir = '/Users/tyrion/test/eg_dir'
-    program_file = program + util.EXAMPLE_FILE_SUFFIX
-    target = os.path.join(examples_dir, program_file)
+# def test_get_file_path_for_program_correct():
+#     program = 'cp'
+#     examples_dir = '/Users/tyrion/test/eg_dir'
+#     program_file = program + util.EXAMPLE_FILE_SUFFIX
+#     target = os.path.join(examples_dir, program_file)
+#
+#     actual = util.get_file_path_for_program(program, examples_dir)
+#     assert actual == target
 
-    actual = util.get_file_path_for_program(program, examples_dir)
-    assert actual == target
+
+@patch('os.walk')
+def test_get_file_paths_for_program_with_single(mock_walk):
+    program = 'cp'
+    examples_dir = '/Users/tyrion'
+    program_file = program + util.EXAMPLE_FILE_SUFFIX
+    expected = ['/Users/tyrion/cp.md']
+
+    mock_walk.return_value = [
+        [examples_dir, [], [program_file, 'cp.txt', 'other_file.md']],
+    ]
+
+    actual = util.get_file_paths_for_program(program, examples_dir)
+    assert actual == expected
+    assert mock_walk.assert_called_once_with(examples_dir) == True
+
+
+@patch('os.walk')
+def test_get_file_paths_for_program_with_nested(mock_walk):
+    program = 'cp'
+    examples_dir = '/Users/tyrion'
+    program_file = 'cp.md'
+
+    mock_walk.return_value = [
+        [
+            examples_dir,
+            ['dirA', 'dirB'],
+            [program_file, 'cp.txt', 'other_file.md'],
+        ],
+        [
+            examples_dir + '/dirA',
+            ['dirA-child'],
+            [program_file, 'bad.md'],
+        ],
+        [
+            examples_dir + '/dirA/dirA-child',
+            [],
+            ['bad.md', program_file, 'wtf.md'],
+        ]
+        [
+            examples_dir + '/dirB',
+            [],
+            ['foo.md', program_file],
+        ],
+    ]
+
+    expected = [
+        'Users/tyrion/cp.md',
+        'Users/tyrion/dirA/cp.md',
+        'Users/tyrion/dirA/dirA-child/cp.md',
+        'Users/tyrion/dirB/cp.md',
+    ]
+
+    actual = util.get_file_paths_for_program(program, examples_dir)
+    assert actual == expected
+    assert mock_walk.assert_called_once_with(examples_dir) == True
+
+
+@patch('os.walk')
+def test_get_file_paths_for_program_with_none(mock_walk):
+    expected = []
+    mock_walk.return_value = []
+
+    actual = util.get_file_paths_for_program('cp', '/Users/tyrion')
+    assert actual == expected
+    assert mock_walk.assert_called_once_with('/Users/tyrion') == True
+
+
+@patch('os.walk')
+def test_get_file_paths_for_program_throws_if_missing_dir(mock_walk):
+    with pytest.raises(TypeError):
+        util.get_file_paths_for_program('cp')
 
 
 def test_has_default_entry_for_program_no_examples_dir():
@@ -164,7 +238,7 @@ def test_has_custom_entry_when_not_present():
 
 
 @patch('os.path.isfile')
-@patch('eg.util.get_file_path_for_program')
+@patch('eg.util.get_file_paths_for_program')
 def _helper_assert_path_isfile_not_present(
     config,
     program,
@@ -172,7 +246,7 @@ def _helper_assert_path_isfile_not_present(
     defaultOrCustom,
     isfile,
     has_entry,
-    mock_get_path,
+    mock_get_paths,
     mock_isfile,
 ):
     """
@@ -185,7 +259,7 @@ def _helper_assert_path_isfile_not_present(
             'defaultOrCustom must be default or custom, not ' + defaultOrCustom
         )
 
-    mock_get_path.return_value = file_path_for_program
+    mock_get_path.return_value = [file_path_for_program]
     mock_isfile.return_value = isfile
 
     actual = None
@@ -256,13 +330,13 @@ def test_handle_program_no_entries(
 @patch('eg.util.has_default_entry_for_program', return_value=True)
 @patch('eg.util.has_custom_entry_for_program', return_value=True)
 @patch('eg.util.get_contents_from_files')
-@patch('eg.util.get_file_path_for_program')
+@patch('eg.util.get_file_paths_for_program')
 @patch('eg.util.get_formatted_contents')
 @patch('eg.util.page_string')
 def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
     mock_page,
     mock_format,
-    mock_get_file,
+    mock_get_paths,
     mock_get_contents,
     mock_has_custom,
     mock_has_default,
@@ -296,8 +370,8 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
         subs=subs
     )
 
-    default_path = 'test-eg-dir/mv.md'
-    custom_path = 'test-custom-dir/mv.md'
+    default_paths = ['test-eg-dir/mv.md']
+    custom_paths = ['test-custom-dir/mv.md']
 
     def return_correct_path(*args, **kwargs):
         program_param = args[0]
@@ -318,7 +392,7 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
                 custom_dir)
 
     mock_format.return_value = formatted_contents
-    mock_get_file.side_effect=return_correct_path
+    mock_get_paths.side_effect=return_correct_path
     mock_get_contents.return_value = file_contents
     mock_resolve.return_value = program
 
@@ -338,18 +412,18 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
         test_config
     )
 
-    mock_get_file.assert_any_call(
+    mock_get_paths.assert_any_call(
         program,
         examples_dir
     )
-    mock_get_file.assert_any_call(
+    mock_get_paths.assert_any_call(
         program,
         custom_dir,
     )
 
     mock_get_contents.assert_called_once_with(
-        default_path,
-        custom_path
+        default_paths,
+        custom_paths
     )
 
     mock_format.assert_called_once_with(
@@ -370,13 +444,13 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
 @patch('eg.util.has_default_entry_for_program', return_value=True)
 @patch('eg.util.has_custom_entry_for_program', return_value=True)
 @patch('eg.util.get_contents_from_files')
-@patch('eg.util.get_file_path_for_program')
+@patch('eg.util.get_file_paths_for_program')
 @patch('eg.util.get_formatted_contents')
 @patch('eg.util.page_string')
 def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
     mock_page,
     mock_format,
-    mock_get_file,
+    mock_get_paths,
     mock_get_contents,
     mock_has_custom,
     mock_has_default,
@@ -411,8 +485,8 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
         subs=subs
     )
 
-    default_path = 'test-eg-dir/ln.md'
-    custom_path = 'test-custom-dir/ln.md'
+    default_paths = ['test-eg-dir/ln.md']
+    custom_paths = ['test-custom-dir/ln.md']
 
     def return_correct_path(*args, **kwargs):
         program_param = args[0]
@@ -425,9 +499,9 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
                 program_param
             )
         if dir_param == examples_dir:
-            return default_path
+            return default_paths
         elif dir_param == custom_dir:
-            return custom_path
+            return custom_paths
         else:
             raise NameError(
                 'got ' +
@@ -438,7 +512,7 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
                 custom_dir)
 
     mock_format.return_value = formatted_contents
-    mock_get_file.side_effect = return_correct_path
+    mock_get_paths.side_effect = return_correct_path
     mock_get_contents.return_value = file_contents
     mock_resolve.return_value = resolved_program
 
@@ -461,18 +535,18 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
         test_config
     )
 
-    mock_get_file.assert_any_call(
+    mock_get_paths.assert_any_call(
         resolved_program,
         examples_dir
     )
-    mock_get_file.assert_any_call(
+    mock_get_paths.assert_any_call(
         resolved_program,
         custom_dir,
     )
 
     mock_get_contents.assert_called_once_with(
-        default_path,
-        custom_path
+        default_paths,
+        custom_paths
     )
 
     mock_format.assert_called_once_with(
@@ -1274,11 +1348,11 @@ def test_can_parse_alias_file():
 @patch('os.path.exists')
 @patch('eg.util._inform_cannot_edit_no_custom_dir')
 @patch('eg.util.get_resolved_program')
-@patch('eg.util.get_file_path_for_program')
+@patch('eg.util.get_file_paths_for_program')
 @patch('subprocess.call')
 def test_edit_custom_examples_correct_with_custom_dir(
     mock_call,
-    mock_get_path,
+    mock_get_paths,
     mock_get_program,
     mock_inform,
     mock_exists,
@@ -1289,28 +1363,28 @@ def test_edit_custom_examples_correct_with_custom_dir(
     program = 'du'
     resolved_program = 'alias for du'
     config = _create_config(custom_dir='path/to/custom', editor_cmd='nano')
-    path = 'path/to/custom/du.md'
+    paths = ['path/to/custom/du.md']
 
     mock_get_program.return_value = resolved_program
-    mock_get_path.return_value = path
+    mock_get_paths.return_value = paths
     mock_exists.return_value = True
 
     util.edit_custom_examples(program, config)
 
     mock_get_program.assert_called_once_with(program, config)
-    mock_get_path.assert_called_once_with(resolved_program, config.custom_dir)
-    mock_call.assert_called_once_with([config.editor_cmd, path])
+    mock_get_paths.assert_called_once_with(resolved_program, config.custom_dir)
+    mock_call.assert_called_once_with([config.editor_cmd, paths])
     assert mock_inform.call_count == 0
 
 
 @patch('os.path.exists')
 @patch('eg.util._inform_cannot_edit_no_custom_dir')
 @patch('eg.util.get_resolved_program')
-@patch('eg.util.get_file_path_for_program')
+@patch('eg.util.get_file_paths_for_program')
 @patch('subprocess.call')
 def test_edit_custom_examples_informs_if_no_custom_dir(
     mock_call,
-    mock_get_path,
+    mock_get_paths,
     mock_get_program,
     mock_inform,
     mock_exists,
@@ -1335,5 +1409,5 @@ def test_edit_custom_examples_informs_if_no_custom_dir(
     assert mock_inform.call_count == 2
 
     assert mock_call.call_count == 0
-    assert mock_get_path.call_count == 0
+    assert mock_get_paths.call_count == 0
     assert mock_get_program.call_count == 0
