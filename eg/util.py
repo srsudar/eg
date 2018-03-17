@@ -57,7 +57,7 @@ def edit_custom_examples(program, config):
 
     # resolve aliases
     resolved_program = get_resolved_program(program, config)
-    custom_file_path = get_file_path_for_program(
+    custom_file_path = get_file_paths_for_program(
         resolved_program,
         config.custom_dir
     )
@@ -72,13 +72,13 @@ def handle_program(program, config):
     resolved_program = get_resolved_program(program, config)
 
     if has_default_entry_for_program(resolved_program, config):
-        default_file_path = get_file_path_for_program(
+        default_file_path = get_file_paths_for_program(
             resolved_program,
             config.examples_dir
         )
 
     if has_custom_entry_for_program(resolved_program, config):
-        custom_file_path = get_file_path_for_program(
+        custom_file_path = get_file_paths_for_program(
             resolved_program,
             config.custom_dir
         )
@@ -108,7 +108,7 @@ def handle_program(program, config):
     page_string(formatted_contents, config.pager_cmd)
 
 
-def get_file_path_for_program(program, dir_to_search):
+def get_file_paths_for_program(program, dir_to_search):
     """
     Return the file name and path for the program.
 
@@ -121,18 +121,24 @@ def get_file_path_for_program(program, dir_to_search):
     if dir_to_search is None:
         raise TypeError('examples_dir cannot be None')
     else:
-        result = os.path.join(dir_to_search, program + EXAMPLE_FILE_SUFFIX)
+        wanted_file_name = program + EXAMPLE_FILE_SUFFIX
+        result = []
+        for basedir, dirs, file_names in os.walk(dir_to_search):
+            for file_name in file_names:
+                if file_name == wanted_file_name:
+                    result.append(os.path.join(basedir, file_name))
+
         return result
 
 
 def has_default_entry_for_program(program, config):
     """Return True if has standard examples for program, else False."""
     if config.examples_dir:
-        file_path = get_file_path_for_program(
+        file_paths = get_file_paths_for_program(
             program,
             config.examples_dir
         )
-        return os.path.isfile(file_path)
+        return len(file_paths) > 0
     else:
         return False
 
@@ -140,11 +146,11 @@ def has_default_entry_for_program(program, config):
 def has_custom_entry_for_program(program, config):
     """Return True if has custom examples for a program, else false."""
     if config.custom_dir:
-        custom_path = get_file_path_for_program(
+        custom_paths = get_file_paths_for_program(
             program,
             config.custom_dir
         )
-        return os.path.isfile(custom_path)
+        return len(custom_paths) > 0
     else:
         return False
 

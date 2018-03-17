@@ -46,16 +46,6 @@ def _create_config(
     )
 
 
-# def test_get_file_path_for_program_correct():
-#     program = 'cp'
-#     examples_dir = '/Users/tyrion/test/eg_dir'
-#     program_file = program + util.EXAMPLE_FILE_SUFFIX
-#     target = os.path.join(examples_dir, program_file)
-#
-#     actual = util.get_file_path_for_program(program, examples_dir)
-#     assert actual == target
-
-
 @patch('os.walk')
 def test_get_file_paths_for_program_with_single(mock_walk):
     program = 'cp'
@@ -69,7 +59,7 @@ def test_get_file_paths_for_program_with_single(mock_walk):
 
     actual = util.get_file_paths_for_program(program, examples_dir)
     assert actual == expected
-    assert mock_walk.assert_called_once_with(examples_dir) == True
+    mock_walk.assert_called_once_with(examples_dir)
 
 
 @patch('os.walk')
@@ -93,7 +83,7 @@ def test_get_file_paths_for_program_with_nested(mock_walk):
             examples_dir + '/dirA/dirA-child',
             [],
             ['bad.md', program_file, 'wtf.md'],
-        ]
+        ],
         [
             examples_dir + '/dirB',
             [],
@@ -102,15 +92,15 @@ def test_get_file_paths_for_program_with_nested(mock_walk):
     ]
 
     expected = [
-        'Users/tyrion/cp.md',
-        'Users/tyrion/dirA/cp.md',
-        'Users/tyrion/dirA/dirA-child/cp.md',
-        'Users/tyrion/dirB/cp.md',
+        '/Users/tyrion/cp.md',
+        '/Users/tyrion/dirA/cp.md',
+        '/Users/tyrion/dirA/dirA-child/cp.md',
+        '/Users/tyrion/dirB/cp.md',
     ]
 
     actual = util.get_file_paths_for_program(program, examples_dir)
     assert actual == expected
-    assert mock_walk.assert_called_once_with(examples_dir) == True
+    mock_walk.assert_called_once_with(examples_dir)
 
 
 @patch('os.walk')
@@ -120,7 +110,7 @@ def test_get_file_paths_for_program_with_none(mock_walk):
 
     actual = util.get_file_paths_for_program('cp', '/Users/tyrion')
     assert actual == expected
-    assert mock_walk.assert_called_once_with('/Users/tyrion') == True
+    mock_walk.assert_called_once_with('/Users/tyrion')
 
 
 @patch('os.walk')
@@ -237,17 +227,15 @@ def test_has_custom_entry_when_not_present():
     )
 
 
-@patch('os.path.isfile')
 @patch('eg.util.get_file_paths_for_program')
 def _helper_assert_path_isfile_not_present(
     config,
     program,
     file_path_for_program,
     defaultOrCustom,
-    isfile,
+    is_file,
     has_entry,
     mock_get_paths,
-    mock_isfile,
 ):
     """
     Helper for asserting whether or not a default file is present. Pass in the
@@ -259,8 +247,10 @@ def _helper_assert_path_isfile_not_present(
             'defaultOrCustom must be default or custom, not ' + defaultOrCustom
         )
 
-    mock_get_path.return_value = [file_path_for_program]
-    mock_isfile.return_value = isfile
+    if is_file:
+        mock_get_paths.return_value = [file_path_for_program]
+    else:
+        mock_get_paths.return_value = []
 
     actual = None
     correct_dir = None
@@ -272,8 +262,7 @@ def _helper_assert_path_isfile_not_present(
         correct_dir = config.custom_dir
         actual = util.has_custom_entry_for_program(program, config)
 
-    mock_get_path.assert_called_once_with(program, correct_dir)
-    mock_isfile.assert_called_once_with(file_path_for_program)
+    mock_get_paths.assert_called_once_with(program, correct_dir)
 
     assert actual == has_entry
 
@@ -379,9 +368,9 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
         if program_param != program:
             raise NameError('expected ' + program + ', got ' + program_param)
         if dir_param == examples_dir:
-            return default_path
+            return default_paths
         elif dir_param == custom_dir:
-            return custom_path
+            return custom_paths
         else:
             raise NameError(
                 'got ' +
