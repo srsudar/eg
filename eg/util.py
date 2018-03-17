@@ -61,7 +61,8 @@ def edit_custom_examples(program, config):
         resolved_program,
         config.custom_dir
     )
-    subprocess.call([config.editor_cmd, custom_file_path])
+    # Edit the first. Handles the basic case.
+    subprocess.call([config.editor_cmd, custom_file_path[0]])
 
 
 def handle_program(program, config):

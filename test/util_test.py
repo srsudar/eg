@@ -1362,7 +1362,7 @@ def test_edit_custom_examples_correct_with_custom_dir(
 
     mock_get_program.assert_called_once_with(program, config)
     mock_get_paths.assert_called_once_with(resolved_program, config.custom_dir)
-    mock_call.assert_called_once_with([config.editor_cmd, paths])
+    mock_call.assert_called_once_with([config.editor_cmd, paths[0]])
     assert mock_inform.call_count == 0
 
 
