@@ -88,10 +88,12 @@ def handle_program(program, config):
         )
         return
 
-    raw_contents = get_contents_from_files(
-        *custom_file_paths,
-        *default_file_paths
-    )
+    print(custom_file_paths)
+    print(default_file_paths)
+
+    paths = [path for path in custom_file_paths]
+    paths.extend(default_file_paths)
+    raw_contents = get_contents_from_files(*paths)
 
     formatted_contents = get_formatted_contents(
         raw_contents,
