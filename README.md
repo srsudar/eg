@@ -49,9 +49,8 @@ change, but you'll have to update your links to point at the new location. Or
 you can install with `pip`.
 
 `eg` doesn't ship with a binary. Dependencies are very modest and should not
-require you to install anything (other than
-[Nose](https://github.com/nose-devs/nose/) if you want to run the tests).
-If you find otherwise, open an issue.
+require you to install anything (other than [pytest](https://docs.pytest.org) if
+you want to run the tests).  If you find otherwise, open an issue.
 
 
 ## Usage
@@ -353,8 +352,9 @@ available.
 `eg` depends only on standard libraries and Python 2.x, so building should be a
 simple matter of cloning the repo and running the executable `eg/eg.py`.
 
-`eg` uses Nose for testing, so you'll have to have Nose installed to run tests.
-Once you have Nose, run `nosetests` from **the root directory of the repo**.
+`eg` uses pytest for testing, so you'll have to have Nose installed to run
+tests.  Once you have Nose, run `py.test` from **the root directory of the
+repo**.
 
 Tests should always be expected to pass. If they fail, please open an issue,
 even if only so that we can better elucidate `eg`'s dependencies.
