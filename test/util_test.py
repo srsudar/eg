@@ -114,169 +114,16 @@ def test_get_file_paths_for_program_with_none(mock_walk):
 
 
 @patch('os.walk')
-def test_get_file_paths_for_program_throws_if_missing_dir(mock_walk):
-    with pytest.raises(TypeError):
-        util.get_file_paths_for_program('cp')
-
-
-def test_has_default_entry_for_program_no_examples_dir():
-    test_config = _create_config(
-        examples_dir=None,
-        custom_dir='customdir',
-    )
-
-    program = 'cp'
-
-    has_entry = util.has_default_entry_for_program(program, test_config)
-    assert has_entry == False
-
-
-def test_has_custom_entry_for_program_no_custom_dir():
-    test_config = _create_config(
-        examples_dir='examplesdir',
-        custom_dir=None,
-    )
-
-    program = 'find'
-
-    has_entry = util.has_custom_entry_for_program(program, test_config)
-    assert has_entry == False
-
-
-def test_has_default_entry_when_present():
-    test_config = _create_config(
-        examples_dir='examplesdir',
-    )
-    program = 'mv'
-
-    path = '/Users/tyrion/examplesdir/mv.md'
-
-    _helper_assert_path_isfile_not_present(
-        test_config,
-        program,
-        path,
-        'default',
-        True,
-        True
-    )
-
-
-def test_has_default_entry_when_not_present():
-    test_config = _create_config(
-        examples_dir='examplesdir',
-    )
-    program = 'cp'
-
-    path = '/Users/tyrion/examplesdir/cp.md'
-
-    _helper_assert_path_isfile_not_present(
-        test_config,
-        program,
-        path,
-        'default',
-        False,
-        False,
-    )
-
-
-def test_has_custom_entry_when_present():
-    test_config = _create_config(
-        examples_dir=None,
-        custom_dir='customdir',
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
-    )
-    program = 'find'
-
-    path = '/Users/tyrion/customdir/find.md'
-
-    _helper_assert_path_isfile_not_present(
-        test_config,
-        program,
-        path,
-        'custom',
-        True,
-        True
-    )
-
-
-def test_has_custom_entry_when_not_present():
-    test_config = _create_config(
-        custom_dir='customdir',
-        color_config=None,
-        use_color=False,
-        pager_cmd=None,
-        squeeze=False,
-        subs=None
-    )
-
-    program = 'locate'
-
-    path = '/Users/tyrion/customdir/locate.md'
-
-    _helper_assert_path_isfile_not_present(
-        test_config,
-        program,
-        path,
-        'custom',
-        False,
-        False,
-    )
-
-
-@patch('eg.util.get_file_paths_for_program')
-def _helper_assert_path_isfile_not_present(
-    config,
-    program,
-    file_path_for_program,
-    defaultOrCustom,
-    is_file,
-    has_entry,
-    mock_get_paths,
-):
-    """
-    Helper for asserting whether or not a default file is present. Pass in the
-    parameters defining the program and directories and say whether or not that
-    file should be found.
-    """
-    if defaultOrCustom != 'default' and defaultOrCustom != 'custom':
-        raise TypeError(
-            'defaultOrCustom must be default or custom, not ' + defaultOrCustom
-        )
-
-    if is_file:
-        mock_get_paths.return_value = [file_path_for_program]
-    else:
-        mock_get_paths.return_value = []
-
-    actual = None
-    correct_dir = None
-
-    if (defaultOrCustom == 'default'):
-        correct_dir = config.examples_dir
-        actual = util.has_default_entry_for_program(program, config)
-    else:
-        correct_dir = config.custom_dir
-        actual = util.has_custom_entry_for_program(program, config)
-
-    mock_get_paths.assert_called_once_with(program, correct_dir)
-
-    assert actual == has_entry
+def test_get_file_paths_for_program_with_no_dir(mock_walk):
+    assert util.get_file_paths_for_program('cp', None) == []
 
 
 @patch('eg.util.page_string')
 @patch('eg.util.get_formatted_contents')
 @patch('eg.util.get_contents_from_files')
-@patch('eg.util.has_custom_entry_for_program')
-@patch('eg.util.has_default_entry_for_program')
 @patch('eg.util.get_resolved_program')
 def test_handle_program_no_entries(
     mock_resolve_program,
-    mock_has_default,
-    mock_has_custom,
     mock_get_contents,
     mock_format,
     mock_page_string,
@@ -288,22 +135,10 @@ def test_handle_program_no_entries(
     test_config = _create_config()
 
     mock_resolve_program.return_value = program
-    mock_has_default.return_value = False
-    mock_has_custom.return_value = False
 
     util.handle_program(program, test_config)
 
     mock_resolve_program.assert_called_once_with(
-        program,
-        test_config
-    )
-
-    mock_has_default.assert_called_once_with(
-        program,
-        test_config
-    )
-
-    mock_has_custom.assert_called_once_with(
         program,
         test_config
     )
@@ -316,8 +151,6 @@ def test_handle_program_no_entries(
 
 
 @patch('eg.util.get_resolved_program')
-@patch('eg.util.has_default_entry_for_program', return_value=True)
-@patch('eg.util.has_custom_entry_for_program', return_value=True)
 @patch('eg.util.get_contents_from_files')
 @patch('eg.util.get_file_paths_for_program')
 @patch('eg.util.get_formatted_contents')
@@ -327,8 +160,6 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
     mock_format,
     mock_get_paths,
     mock_get_contents,
-    mock_has_custom,
-    mock_has_default,
     mock_resolve,
 ):
     """
@@ -359,8 +190,8 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
         subs=subs
     )
 
-    default_paths = ['test-eg-dir/mv.md']
-    custom_paths = ['test-custom-dir/mv.md']
+    default_paths = ['test-eg-dir/mv.md', 'test-eg-dir/foo/mv.md']
+    custom_paths = ['test-custom-dir/mv.md', 'test-custom-dir/bar.md']
 
     def return_correct_path(*args, **kwargs):
         program_param = args[0]
@@ -392,15 +223,6 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
         test_config
     )
 
-    mock_has_default.assert_called_once_with(
-        program,
-        test_config
-    )
-    mock_has_custom.assert_called_once_with(
-        program,
-        test_config
-    )
-
     mock_get_paths.assert_any_call(
         program,
         examples_dir
@@ -411,8 +233,10 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
     )
 
     mock_get_contents.assert_called_once_with(
-        default_paths,
-        custom_paths
+        custom_paths[0],
+        custom_paths[1],
+        default_paths[0],
+        default_paths[1],
     )
 
     mock_format.assert_called_once_with(
@@ -430,8 +254,6 @@ def test_handle_program_finds_paths_and_calls_open_pager_no_alias(
 
 
 @patch('eg.util.get_resolved_program')
-@patch('eg.util.has_default_entry_for_program', return_value=True)
-@patch('eg.util.has_custom_entry_for_program', return_value=True)
 @patch('eg.util.get_contents_from_files')
 @patch('eg.util.get_file_paths_for_program')
 @patch('eg.util.get_formatted_contents')
@@ -441,8 +263,6 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
     mock_format,
     mock_get_paths,
     mock_get_contents,
-    mock_has_custom,
-    mock_has_default,
     mock_resolve,
 ):
     """
@@ -515,15 +335,6 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
         test_config
     )
 
-    mock_has_default.assert_called_once_with(
-        resolved_program,
-        test_config
-    )
-    mock_has_custom.assert_called_once_with(
-        resolved_program,
-        test_config
-    )
-
     mock_get_paths.assert_any_call(
         resolved_program,
         examples_dir
@@ -534,8 +345,8 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
     )
 
     mock_get_contents.assert_called_once_with(
-        default_paths,
-        custom_paths
+        custom_paths[0],
+        default_paths[0]
     )
 
     mock_format.assert_called_once_with(
@@ -785,49 +596,6 @@ def _helper_assert_about_pager(
         )
 
 
-@patch('eg.util._get_contents_of_file')
-def _helper_assert_file_contents(
-    default_path,
-    default_contents,
-    custom_path,
-    custom_contents,
-    target_contents,
-    get_contents_mock,
-):
-    """
-    Helper method to assert things about the get_contents_from_files method.
-    Does not actually hit the disk.
-
-    default_path: the path of a default file
-    default_contents: the contents of the default file
-    custom_path: the path to a custom file
-    custom_contents: the contents of the custom file
-    target_contents: the final combined contents that should be returned by the
-        get_contents_from_files method.
-    """
-
-    # This method will be used by the mock framework to return the right file
-    # contents based on the file name.
-    def return_file_contents(*args, **kwargs):
-        if args[0] == default_path:
-            return default_contents
-        elif args[0] == custom_path:
-            return custom_contents
-        else:
-            raise TypeError(
-                args[0] +
-                ' was an unexpected path--should be ' +
-                default_path +
-                ' or ' +
-                custom_path
-            )
-
-    get_contents_mock.side_effect = return_file_contents
-
-    actual = util.get_contents_from_files(default_path, custom_path)
-    assert actual == target_contents
-
-
 @patch('eg.util.pydoc.pipepager', side_effect=KeyboardInterrupt)
 def test_page_string_excepts_keyboard_interrupt_if_not_less(pipepager_mock):
     """
@@ -852,50 +620,83 @@ def test_page_string_excepts_keyboard_interrupt_if_none(pager_mock):
     pager_mock.assert_called_once_with('page me plz')
 
 
-def test_get_contents_from_files_only_default():
+def test_get_contents_from_files_handles_none():
     """
-    Retrieve the correct file contents when only a default file is present.
+    Empty string if no files.
     """
-    default_path = 'test/default/path'
-    default_contents = 'contents of the default file'
     _helper_assert_file_contents(
-        default_path,
-        default_contents,
-        None,
-        None,
-        default_contents
+        [],
+        ''
     )
 
 
-def test_get_contents_from_files_only_custom():
-    """
-    Retrieve only the custom file contents when we only have a custom file
-    path.
-    """
-    custom_path = 'test/custom/path'
-    custom_contents = 'contents of the custom file'
+def test_get_contents_from_files_handles_one():
+    file_infos = [
+        {
+            'path': 'test/path',
+            'contents': 'contents of file'
+        }
+    ]
+    combined_contents = 'contents of file'
     _helper_assert_file_contents(
-        None,
-        None,
-        custom_path,
-        custom_contents,
-        custom_contents
-    )
-
-
-def test_get_contents_from_file_both_default_and_custom():
-    default_path = 'test/default/path'
-    default_contents = 'contents of the default file'
-    custom_path = 'test/custom/path'
-    custom_contents = 'contents of the custom file'
-    combined_contents = custom_contents + default_contents
-    _helper_assert_file_contents(
-        default_path,
-        default_contents,
-        custom_path,
-        custom_contents,
+        file_infos,
         combined_contents
     )
+
+
+def test_get_contents_from_files_handles_multiple():
+    file_infos = [
+        {
+            'path': 'path/1',
+            'contents': 'foo\n'
+        },
+        {
+            'path': 'path/2/foo',
+            'contents': 'bar\n'
+        },
+        {
+            'path': 'another/path',
+            'contents': 'baz'
+        }
+    ]
+
+    combined_contents = 'foo\nbar\nbaz'
+
+    _helper_assert_file_contents(
+        file_infos,
+        combined_contents
+    )
+
+
+@patch('eg.util._get_contents_of_file')
+def _helper_assert_file_contents(
+    file_infos,
+    target_contents,
+    get_contents_mock,
+):
+    """
+    Helper method to assert things about the get_contents_from_files method.
+    Does not actually hit the disk.
+
+    file_infos: array of { path, contents } dicts representing files. Array so
+        that we can assert proper order calling
+    target_contents: the final combined contents that should be returned by the
+        get_contents_from_files method.
+    """
+
+    # This method will be used by the mock framework to return the right file
+    # contents based on the file name.
+    def return_file_contents(*args, **kwargs):
+        for file_info in file_infos:
+            if file_info['path'] == args[0]:
+                return file_info['contents']
+        raise TypeError('did not find path in test obj')
+
+    get_contents_mock.side_effect = return_file_contents
+
+    paths = [el['path'] for el in file_infos]
+    actual = util.get_contents_from_files(*paths)
+    assert actual == target_contents
 
 @patch('eg.util.get_colorized_contents')
 @patch('eg.util.get_squeezed_contents')

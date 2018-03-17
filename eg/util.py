@@ -61,31 +61,26 @@ def edit_custom_examples(program, config):
         resolved_program,
         config.custom_dir
     )
-    # Edit the first. Handles the basic case.
+    # Edit the first. Handles the base case.
     subprocess.call([config.editor_cmd, custom_file_path[0]])
 
 
 def handle_program(program, config):
-    default_file_path = None
-    custom_file_path = None
-
     # try to resolve any aliases
     resolved_program = get_resolved_program(program, config)
 
-    if has_default_entry_for_program(resolved_program, config):
-        default_file_path = get_file_paths_for_program(
-            resolved_program,
-            config.examples_dir
-        )
+    default_file_paths = get_file_paths_for_program(
+        resolved_program,
+        config.examples_dir
+    )
 
-    if has_custom_entry_for_program(resolved_program, config):
-        custom_file_path = get_file_paths_for_program(
-            resolved_program,
-            config.custom_dir
-        )
+    custom_file_paths = get_file_paths_for_program(
+        resolved_program,
+        config.custom_dir
+    )
 
     # Handle the case where we have nothing for them.
-    if default_file_path is None and custom_file_path is None:
+    if len(default_file_paths) == 0 and len(custom_file_paths) == 0:
         print(
             'No entry found for ' +
             program +
@@ -94,8 +89,8 @@ def handle_program(program, config):
         return
 
     raw_contents = get_contents_from_files(
-        default_file_path,
-        custom_file_path
+        *custom_file_paths,
+        *default_file_paths
     )
 
     formatted_contents = get_formatted_contents(
@@ -111,16 +106,15 @@ def handle_program(program, config):
 
 def get_file_paths_for_program(program, dir_to_search):
     """
-    Return the file name and path for the program.
-
-    examples_dir cannot be None
+    Return an array of full paths matching the given program. If no directory is
+    present, returns an empty list.
 
     Path is not guaranteed to exist. Just says where it should be if it
     existed. Paths must be fully expanded before being passed in (i.e. no ~ or
     variables).
     """
     if dir_to_search is None:
-        raise TypeError('examples_dir cannot be None')
+        return []
     else:
         wanted_file_name = program + EXAMPLE_FILE_SUFFIX
         result = []
@@ -132,31 +126,7 @@ def get_file_paths_for_program(program, dir_to_search):
         return result
 
 
-def has_default_entry_for_program(program, config):
-    """Return True if has standard examples for program, else False."""
-    if config.examples_dir:
-        file_paths = get_file_paths_for_program(
-            program,
-            config.examples_dir
-        )
-        return len(file_paths) > 0
-    else:
-        return False
-
-
-def has_custom_entry_for_program(program, config):
-    """Return True if has custom examples for a program, else false."""
-    if config.custom_dir:
-        custom_paths = get_file_paths_for_program(
-            program,
-            config.custom_dir
-        )
-        return len(custom_paths) > 0
-    else:
-        return False
-
-
-def get_contents_from_files(default_file_path, custom_file_path):
+def get_contents_from_files(*paths):
     """
     Take the paths to two files and return the contents as a string. If
     custom_file_path is valid, it will be shown before the contents of the
@@ -164,11 +134,8 @@ def get_contents_from_files(default_file_path, custom_file_path):
     """
     file_data = ''
 
-    if custom_file_path:
-        file_data += _get_contents_of_file(custom_file_path)
-
-    if default_file_path:
-        file_data += _get_contents_of_file(default_file_path)
+    for path in paths:
+        file_data += _get_contents_of_file(path)
 
     return file_data
 
