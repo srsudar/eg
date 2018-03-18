@@ -367,8 +367,8 @@ def test_get_list_of_all_supported_commands(tmpdir):
     dir_custom = tmpdir.mkdir('custom')
 
     config = _create_config(
-        examples_dir=dir_example,
-        custom_dir=dir_custom,
+        examples_dir=str(dir_example),
+        custom_dir=str(dir_custom),
     )
 
     expected = [
