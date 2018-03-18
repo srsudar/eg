@@ -46,6 +46,24 @@ def _inform_cannot_edit_no_custom_dir():
     print(msg)
 
 
+def _recursive_get_all_file_names(dir):
+    """
+    Get all the file names in the directory. Gets all the top level file names
+    only, not the full path.
+
+    dir: a directory or string, as to hand to os.walk(). If None, returns empty
+        list.
+    """
+    if not dir:
+        return []
+
+    result = []
+    for basedir, dirs, files in os.walk(dir):
+        result.extend(files)
+
+    return result
+
+
 def edit_custom_examples(program, config):
     """
     Edit custom examples for the given program, creating the file if it does
@@ -87,9 +105,6 @@ def handle_program(program, config):
             '. Run `eg --list` to see all available entries.'
         )
         return
-
-    print(custom_file_paths)
-    print(default_file_paths)
 
     paths = [path for path in custom_file_paths]
     paths.extend(default_file_paths)
@@ -200,17 +215,13 @@ def get_list_of_all_supported_commands(config):
     custom file names. This is intentional, as that is the behavior for file
     resolution--an alias will hide a custom file.
     """
-    default_files = []
-    custom_files = []
-
-    if config.examples_dir and os.path.isdir(config.examples_dir):
-        default_files = os.listdir(config.examples_dir)
-    if config.custom_dir and os.path.isdir(config.custom_dir):
-        custom_files = os.listdir(config.custom_dir)
+    default_files = _recursive_get_all_file_names(config.examples_dir)
+    custom_files = _recursive_get_all_file_names(config.custom_dir)
 
     # Now filter so we only have example files, not things like aliases.json.
     default_files = [path for path in default_files if _is_example_file(path)]
     custom_files = [path for path in custom_files if _is_example_file(path)]
+
 
     def get_without_suffix(file_name):
         """

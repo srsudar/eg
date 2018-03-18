@@ -1,6 +1,5 @@
 import json
 import os
-import pytest
 
 from eg import config
 from eg import substitute
@@ -363,163 +362,61 @@ def test_handle_program_finds_paths_and_calls_open_pager_with_alias(
     )
 
 
-@patch('os.path.isdir', return_value=True)
-@patch('os.listdir')
-@patch('eg.util.get_alias_dict')
-def _helper_assert_list_supported_programs(
-    config_obj,
-    default_list,
-    custom_list,
-    alias_dict,
-    target_list,
-    get_dict_mock,
-    listdir_mock,
-    isdir_mock,
-):
-    """
-    config_obj: Config object to be passed to get_list function
-    default_list: the list of default programs
-    custom_list: the list of programs with custom programs
-    alias_dict: dict of aliases
-    target_list: list of string that should be returned
-    """
-    def give_list(*args, **kwargs):
-        dir_name = args[0]
-        if dir_name == config_obj.custom_dir:
-            return custom_list
-        elif dir_name == config_obj.examples_dir:
-            return default_list
-        else:
-            raise NameError('Not the default or custom dir: ' + dir_name)
+def test_get_list_of_all_supported_commands(tmpdir):
+    dir_example = tmpdir.mkdir('examples')
+    dir_custom = tmpdir.mkdir('custom')
 
-    get_dict_mock.return_value = alias_dict
-    listdir_mock.side_effect = give_list
-
-    actual = util.get_list_of_all_supported_commands(config_obj)
-    assert actual == target_list
-
-
-def test_list_supported_programs_only_default():
-    example_dir = 'example/dir'
-    custom_dir = 'custom/dir'
-
-    test_config = _create_config(
-        examples_dir=example_dir,
-        custom_dir=custom_dir,
+    config = _create_config(
+        examples_dir=dir_example,
+        custom_dir=dir_custom,
     )
 
-    examples_list = ['aliases', 'cp.md', 'find.md', 'xargs.md']
-    custom_list = []
-    target = ['cp', 'find', 'xargs']
-    _helper_assert_list_supported_programs(
-        test_config,
-        examples_list,
-        custom_list,
-        {},
-        target
-    )
-
-
-def test_list_supported_programs_only_custom():
-    example_dir = 'example/dir'
-    custom_dir = 'custom/dir'
-
-    test_config = _create_config(
-        examples_dir=example_dir,
-        custom_dir=custom_dir,
-    )
-    target = ['awk +', 'bar +', 'xor +']
-    _helper_assert_list_supported_programs(
-        test_config,
-        [],
-        ['awk.md', 'bar.md', 'xor.md'],
-        {},
-        target
-    )
-
-
-def test_list_supported_programs_both():
-    examples_dir = 'example/dir'
-    custom_dir = 'custom/dir'
-
-    test_config = _create_config(
-        examples_dir=examples_dir,
-        custom_dir=custom_dir,
-    )
-    examples_list = ['alpha.md', 'bar.md', 'both.md', 'examples.md']
-    custom_list = ['azy.md', 'both.md', 'examples.md', 'zeta.md']
-    target = [
-        'alpha',
-        'azy +',
-        'bar',
-        'both *',
-        'examples *',
-        'zeta +'
+    expected = [
+        'a-only-default',
+        'b-both *',
+        'c-only-custom +',
+        'd-only-custom-nested +',
+        'e-only-default-nested',
+        'f-default-custom-nested',
+        'g-both-different-levels *',
+        't-a-only-default-alias -> a-only-default',
+        'u-b-both-alias -> b-both *',
+        'v-c-only-custom-alias -> c-only-custom +'
     ]
-    _helper_assert_list_supported_programs(
-        test_config,
-        examples_list,
-        custom_list,
-        {},
-        target
-    )
 
-
-def test_list_supported_commands_includes_aliases():
-    examples_dir = 'examples/dir/for/aliases'
-    custom_dir = 'custom/dir/for/aliases'
-
-    test_config = _create_config(
-        examples_dir=examples_dir,
-        custom_dir=custom_dir,
-    )
-    # Things we want to cover:
-    #   normal alias
-    #   alias that shadows a custom-only declaration
-    #   alias that points to a * or + program
-
-    examples_list = [
-        'alpha.md',
-        'bar.md',
-        'both.md',
-        'default-only.md',
-        'examples.md',
-        'z-hidden-by-alias.md'
-    ]
-    custom_list = [
-        'aaa.md',
-        'azy.md',
-        'both.md',
-        'examples.md',
-        'zeta.md'
-    ]
-    alias_dict = {
-        'aaa': 'alpha',
-        'y-alias-for-both': 'both',
-        'alias-for-azy': 'azy',
-        'z-hidden-by-alias': 'azy'
+    aliases = {
+        't-a-only-default-alias': 'a-only-default',
+        'u-b-both-alias': 'b-both',
+        'v-c-only-custom-alias': 'c-only-custom'
     }
 
-    target = [
-        'aaa -> alpha',  # shadow the custom file
-        'alias-for-azy -> azy +',
-        'alpha',
-        'azy +',
-        'bar',
-        'both *',
-        'default-only',
-        'examples *',
-        'y-alias-for-both -> both *',
-        'z-hidden-by-alias -> azy +',
-        'zeta +'
-    ]
-    _helper_assert_list_supported_programs(
-        test_config,
-        examples_list,
-        custom_list,
-        alias_dict,
-        target
-    )
+    # Make the directory structure we expect.
+    dir_example_nested = dir_example.mkdir('default-nested')
+    dir_custom_nested = dir_custom.mkdir('custom-nested')
+
+    dir_example.join('a-only-default.md').write('foo')
+
+    dir_example.join('b-both.md').write('foo')
+    dir_custom.join('b-both.md').write('foo')
+
+    dir_custom.join('c-only-custom.md').write('foo')
+
+    dir_custom_nested.join('d-only-custom-nested.md').write('foo')
+
+    dir_example_nested.join('e-only-default-nested.md').write('foo')
+
+    dir_example_nested.join('f-default-custom-nested.md').write('foo')
+
+    dir_example.join('g-both-different-levels.md').write('foo')
+    dir_custom_nested.join('g-both-different-levels.md').write('foo')
+
+    # Use the 'with' context manager rather than the @decorator, because the
+    # tmpdir fixture doesn't play nice with the decorator.
+    with patch('eg.util.get_alias_dict') as mock_get_alias:
+        mock_get_alias.return_value = aliases
+        actual = util.get_list_of_all_supported_commands(config)
+        assert actual == expected
+        mock_get_alias.assert_called_once_with(config)
 
 
 def test_list_supported_programs_fails_gracefully_if_no_dirs():
