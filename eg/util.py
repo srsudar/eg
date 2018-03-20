@@ -75,12 +75,19 @@ def edit_custom_examples(program, config):
 
     # resolve aliases
     resolved_program = get_resolved_program(program, config)
-    custom_file_path = get_file_paths_for_program(
+    custom_file_paths = get_file_paths_for_program(
         resolved_program,
         config.custom_dir
     )
+
+    if (len(custom_file_paths) > 0):
+        path_to_edit = custom_file_paths[0]
+    else:
+        # A new file.
+        path_to_edit = os.path.join(config.custom_dir, resolved_program + '.md')
+
     # Edit the first. Handles the base case.
-    subprocess.call([config.editor_cmd, custom_file_path[0]])
+    subprocess.call([config.editor_cmd, path_to_edit])
 
 
 def handle_program(program, config):

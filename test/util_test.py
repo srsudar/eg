@@ -1050,7 +1050,7 @@ def test_edit_custom_examples_correct_with_custom_dir(
     program = 'du'
     resolved_program = 'alias for du'
     config = _create_config(custom_dir='path/to/custom', editor_cmd='nano')
-    paths = ['path/to/custom/du.md']
+    paths = ['path/to/custom/du.md', 'foo.md']
 
     mock_get_program.return_value = resolved_program
     mock_get_paths.return_value = paths
@@ -1062,6 +1062,37 @@ def test_edit_custom_examples_correct_with_custom_dir(
     mock_get_paths.assert_called_once_with(resolved_program, config.custom_dir)
     mock_call.assert_called_once_with([config.editor_cmd, paths[0]])
     assert mock_inform.call_count == 0
+
+
+@patch('os.path.exists')
+@patch('eg.util._inform_cannot_edit_no_custom_dir')
+@patch('eg.util.get_resolved_program')
+@patch('eg.util.get_file_paths_for_program')
+@patch('subprocess.call')
+def test_edit_custom_examples_creates_file_if_none_exist(
+    mock_call,
+    mock_get_paths,
+    mock_get_program,
+    mock_inform,
+    mock_exists,
+):
+    program = 'du'
+    resolved_program = 'alias-for-du'
+    config = _create_config(custom_dir='path/to/custom', editor_cmd='nano')
+    paths = []
+
+    mock_get_program.return_value = resolved_program
+    mock_get_paths.return_value = paths
+    mock_exists.return_value = True
+
+    util.edit_custom_examples(program, config)
+
+    mock_get_program.assert_called_once_with(program, config)
+    mock_get_paths.assert_called_once_with(resolved_program, config.custom_dir)
+    mock_call.assert_called_once_with(
+        [config.editor_cmd, 'path/to/custom/alias-for-du.md'])
+    assert mock_inform.call_count == 0
+
 
 
 @patch('os.path.exists')
