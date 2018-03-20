@@ -352,9 +352,8 @@ available.
 `eg` depends only on standard libraries and Python 2.x, so building should be a
 simple matter of cloning the repo and running the executable `eg/eg.py`.
 
-`eg` uses pytest for testing, so you'll have to have Nose installed to run
-tests.  Once you have Nose, run `py.test` from **the root directory of the
-repo**.
+`eg` uses pytest for testing, so you'll have to have it installed to run tests.
+Once you have it, run `py.test` from **the root directory of the repo**.
 
 Tests should always be expected to pass. If they fail, please open an issue,
 even if only so that we can better elucidate `eg`'s dependencies.
