@@ -94,10 +94,10 @@ like everybody else? You can create an example for untarring and unzipping
 bzipped tarballs, stick it in a file called `tar.md`, and tell `eg` where to
 find it.
 
-The way to think about what `eg` does is just that it takes a program name, for
-example `find`, and looks for two files named `find.md` in the default
-directory and a custom directory. If it finds them, it pipes them through
-`less`, with the custom file at the top. Easy.
+The way to think about what `eg` does is that it takes a program name, for
+example `find`, and looks for files named `find.md` in the default and custom
+directories (including subdirectories). If it finds them, it pipes them through
+`less`, with the custom files at the top. Easy.
 
 The default and custom directories can be specified at the command line like
 so:
