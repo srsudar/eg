@@ -4,6 +4,9 @@ execute ls as the super user
 
     sudo ls
 
+execute ls as another user
+
+    sudo -u <user> ls
 
 
 # Basic Usage
