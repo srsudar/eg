@@ -4,9 +4,10 @@ execute ls as the super user
 
     sudo ls
 
-execute ls as another user
+execute ls as the user tyrion
 
-    sudo -u <user> ls
+    sudo -u tyrion ls
+
 
 
 # Basic Usage
@@ -14,5 +15,9 @@ execute ls as another user
 Execute a command as the super-user:
 
     sudo <command>
+
+Execute a command as another user:
+
+    sudo -u <user> <command>
 
 
