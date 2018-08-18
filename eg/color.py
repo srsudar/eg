@@ -86,7 +86,7 @@ class EgColorizer():
 
     def _color_helper(self, text, pattern, repl):
         # < 2.7 didn't have the flags named argument.
-        if sys.version_info[1] < 7:
+        if sys.version_info < (2, 7):
             compiled_pattern = re.compile(pattern, re.MULTILINE)
             return re.sub(
                 compiled_pattern,
