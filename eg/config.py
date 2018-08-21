@@ -48,6 +48,16 @@ PAGER_CMD = 'pager-cmd'
 SQUEEZE = 'squeeze'
 EDITOR_CMD = 'editor-cmd'
 
+# Config location based on XDG speciification
+if 'XDG_CONFIG_HOME' in os.environ:
+    configdir = os.environ['XDG_CONFIG_HOME']
+else:
+    configdir = os.path.join('~', '.config')
+XDG_CONFIG_EGCONF_PATH = os.path.join(configdir, 'eg.conf')
+# if config file not exist at XDG_CONFIG_EGRC_PATH then reassign None
+if ~os.path.isfile(XDG_CONFIG_EGCONF_PATH):
+    XDG_CONFIG_EGCONF_PATH = None
+
 # A basic struct containing configuration values.
 #    examples_dir: path to the directory of examples that ship with eg
 #    custom_dir: path to the directory where custom examples are found
@@ -159,7 +169,7 @@ def get_egrc_config(cli_egrc_path):
     cli_egrc_path: the path to the egrc as given on the command line via
         --config-file
     """
-    resolved_path = get_priority(cli_egrc_path, DEFAULT_EGRC_PATH, None)
+    resolved_path = get_priority(cli_egrc_path, XDG_CONFIG_EGCONF_PATH, DEFAULT_EGRC_PATH)
     expanded_path = get_expanded_path(resolved_path)
 
     # Start as if nothing was defined in the egrc.
