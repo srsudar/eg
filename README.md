@@ -107,7 +107,8 @@ eg --examples-dir='the/default/dir' --custom-dir='my/fancy/dir' find
 ```
 
 Instead of doing this every time, you can define a configuration file. By
-default it is expected to live in `~/.egrc`. It must begin with a section
+default it is expected to live in `$XDG_CONFIG_HOME/eg.conf` 
+(usually `~/.config/eg.conf`) or `~/.egrc`. It must begin with a section
 called `eg-config` and can contain two keys: `custom-dir` and `examples-dir`.
 Here is an example of a valid config file:
 
