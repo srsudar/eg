@@ -219,8 +219,11 @@ name before being applied.
 
 ## Paging
 
-By default, `eg` pages using `less -R`. The `-R` switch tells `less` to
-interpret ANSI escape sequences like color rather than showing them raw.
+By default, `eg` pages using `less -RMFXK`. The `-R` switch tells `less` to
+interpret ANSI escape sequences like color rather than showing them raw. `-M`
+tells it to show line number information in the bottom of the screen. `-F` to
+automatically quit if the entire example fits on the screen. `-X` tells it not
+to clear the screen. Finally, `-K` makes `less` exit in response to `Ctrl-C`.
 
 You can specify a different pager using the `--pager-cmd` option at the command
 line or the `pager-cmd` option in the egrc. If specified in the egrc, the value
