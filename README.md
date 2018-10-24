@@ -32,7 +32,13 @@ gee".
 pip install eg
 ```
 
-### Without `pip`
+### With `brew`
+
+```shell
+brew install eg-examples
+```
+
+### Run from source
 
 Clone the repo and create a symlink to `eg_exec.py`. Make sure the location you
 choose for the symlink is on your path:
@@ -46,7 +52,7 @@ ln -s /absolute/path/to/eg-repo/eg_exec.py /usr/local/bin/eg
 > Note that the location of `eg_exec.py` changed in version 0.1.x in order to
 support Python 3 as well as 2. Old symlinks will print a message explaining the
 change, but you'll have to update your links to point at the new location. Or
-you can install with `pip`.
+you can install with `pip` or `brew`.
 
 `eg` doesn't ship with a binary. Dependencies are very modest and should not
 require you to install anything (other than [pytest](https://docs.pytest.org) if
