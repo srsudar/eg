@@ -32,7 +32,13 @@ gee".
 pip install eg
 ```
 
-### Without `pip`
+### With `brew`
+
+```shell
+brew install eg-examples
+```
+
+### Run from source
 
 Clone the repo and create a symlink to `eg_exec.py`. Make sure the location you
 choose for the symlink is on your path:
@@ -46,7 +52,7 @@ ln -s /absolute/path/to/eg-repo/eg_exec.py /usr/local/bin/eg
 > Note that the location of `eg_exec.py` changed in version 0.1.x in order to
 support Python 3 as well as 2. Old symlinks will print a message explaining the
 change, but you'll have to update your links to point at the new location. Or
-you can install with `pip`.
+you can install with `pip` or `brew`.
 
 `eg` doesn't ship with a binary. Dependencies are very modest and should not
 require you to install anything (other than [pytest](https://docs.pytest.org) if
@@ -219,8 +225,11 @@ name before being applied.
 
 ## Paging
 
-By default, `eg` pages using `less -R`. The `-R` switch tells `less` to
-interpret ANSI escape sequences like color rather than showing them raw.
+By default, `eg` pages using `less -RMFXK`. The `-R` switch tells `less` to
+interpret ANSI escape sequences like color rather than showing them raw. `-M`
+tells it to show line number information in the bottom of the screen. `-F` to
+automatically quit if the entire example fits on the screen. `-X` tells it not
+to clear the screen. Finally, `-K` makes `less` exit in response to `Ctrl-C`.
 
 You can specify a different pager using the `--pager-cmd` option at the command
 line or the `pager-cmd` option in the egrc. If specified in the egrc, the value
@@ -349,8 +358,8 @@ available.
 
 ### Building and Running Tests
 
-`eg` depends only on standard libraries and Python 2.x, so building should be a
-simple matter of cloning the repo and running the executable `eg/eg.py`.
+`eg` depends only on standard libraries and Python 2.x/3.x, so building should
+be a simple matter of cloning the repo and running the executable `eg/eg.py`.
 
 `eg` uses pytest for testing, so you'll have to have it installed to run tests.
 Once you have it, run `py.test` from **the root directory of the repo**.
