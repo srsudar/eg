@@ -128,6 +128,19 @@ different location at the command line like so:
 eg --config-file=myfile find
 ```
 
+## Editing Your Custom Examples
+
+If you want to edit one of your custom examples, you can edit the file directly
+or you can just use the `-e` or `--edit` flag.
+
+To edit your `find` examples, for example, you could say:
+
+```shell
+eg -e find
+```
+
+This will dump you into an editor. The contents will be piped before the default
+examples the next time you run `eg find`.
 
 ## Formatting Output
 
