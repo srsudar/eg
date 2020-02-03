@@ -220,11 +220,11 @@ syntax: `[pattern, replacement, compile_as_multiline]`. If
 as multiline, which affects the syntax expected by `re`. The `re.sub` method is
 called with the compiled pattern and `replacement`.
 
-Substitutions must be named and must be in the `[substitution]` section of the
+Substitutions must be named and must be in the `[substitutions]` section of the
 egrc. For example, this would remove all the four-space indents beginning
 lines:
 
-    [substitution]
+    [substitutions]
     remove-indents = ['^    ', '', True]
 
 This powerful feature can be used to perform complex transformations, including
