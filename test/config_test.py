@@ -168,27 +168,70 @@ def test_get_resolved_config_uses_custom_egrc_path(
 
 def test_get_egrc_config_reads_from_command_line():
     """
-    get_egrc_config should use the command line path if it is provided.
+    Favor the CLI config file.
     """
-    cli_path = 'path/from/command/line'
     expected = 'mock config from egrc'
 
     _assert_about_get_egrc_config(
-        cli_path=cli_path, path_to_expand=cli_path, expected_config=expected
+        cli_path='path/from/command/line',
+        cli_config_exists=True,
+        winning_config_path='path/from/command/line_expanded',
+        expected_config=expected,
+        home_config_exists=True,
+        xdg_dir_variable='path/to/xdg',
+        xdg_config_exists=True,
     )
 
 
-def test_get_egrc_config_uses_default():
+def test_get_egrc_config_uses_home_dir_default_no_xdg_dir():
     """
-    get_egrc_config should use the default path if not provided on the command
-    line.
+    Fallback to the home directory config if there is no XDG directory.
     """
     expected = 'mock config from default position'
 
     _assert_about_get_egrc_config(
         cli_path=None,
-        path_to_expand=config.DEFAULT_EGRC_PATH,
+        cli_config_exists=False,
+        winning_config_path=os.path.join('~', '.egrc_expanded'),
+        home_config_exists=True,
         expected_config=expected,
+        xdg_dir_variable=None,
+        xdg_config_exists=False,
+    )
+
+
+def test_get_egrc_config_uses_home_dir_default_xdg_dir_file_not_present():
+    """
+    Fallback to the home directory config if XDG directory is set but the XDG
+    config file doesn't exist.
+    """
+    expected = 'mock config from default position'
+
+    _assert_about_get_egrc_config(
+        cli_path=None,
+        cli_config_exists=False,
+        winning_config_path=os.path.join('~', '.egrc_expanded'),
+        home_config_exists=True,
+        expected_config=expected,
+        xdg_dir_variable='path/to/xdg_home',
+        xdg_config_exists=False,
+    )
+
+def test_get_egrc_config_uses_xdg_dir_default_if_present():
+    """
+    The XDG config should win over the home directory.
+    """
+    expected = 'mock config from default position'
+
+    _assert_about_get_egrc_config(
+        cli_path=None,
+        cli_config_exists=False,
+        winning_config_path=os.path.join('path/to/xdg_home',
+                                         'eg.conf_expanded'),
+        home_config_exists=True,
+        expected_config=expected,
+        xdg_dir_variable='path/to/xdg_home',
+        xdg_config_exists=True,
     )
 
 
@@ -200,39 +243,62 @@ def test_get_egrc_returns_empty_if_no_egrc():
 
     _assert_about_get_egrc_config(
         cli_path=None,
-        path_to_expand=config.DEFAULT_EGRC_PATH,
+        cli_config_exists=False,
+        winning_config_path=None,
+        home_config_exists=False,
         expected_config=expected,
-        is_file=False,
+        xdg_dir_variable='path/to/xdg_home',
+        xdg_config_exists=False,
     )
 
 
 @patch('eg.config.get_config_tuple_from_egrc')
 @patch('eg.config.get_expanded_path')
 @patch('os.path.isfile')
+@patch('os.getenv')
 def _assert_about_get_egrc_config(
+    mock_getenv,
     mock_isfile,
     mock_expand,
     mock_get_config,
     cli_path=None,
-    path_to_expand=None,
-    is_file=True,
-    expected_config=None
+    winning_config_path=None,
+    cli_config_exists=False,
+    home_config_exists=False,
+    xdg_config_exists=False,
+    xdg_dir_variable=None,
+    expected_config=None,
 ):
-    expanded_path = path_to_expand + 'expanded'
+    def expand_side_effect(file_name):
+      return file_name + '_expanded'
+    mock_expand.side_effect = expand_side_effect
 
-    mock_isfile.return_value = is_file
-    mock_expand.return_value = expanded_path
+    def isfile_side_effect(file_name):
+      if cli_path and file_name == cli_path + '_expanded':
+        return cli_config_exists
+      if file_name == os.path.join('~', '.egrc_expanded'):
+        return home_config_exists
+      if file_name == os.path.join(xdg_dir_variable, 'eg.conf_expanded'):
+        return xdg_config_exists
+      return False
+    mock_isfile.side_effect = isfile_side_effect
+
+    def getenv_side_effect(var):
+      if var == 'XDG_CONFIG_HOME':
+        return xdg_dir_variable
+      return None
+    mock_getenv.side_effect = getenv_side_effect
+
     mock_get_config.return_value = expected_config
 
     actual = config.get_egrc_config(cli_path)
 
     assert actual == expected_config
 
-    mock_expand.assert_called_once_with(path_to_expand)
-    mock_isfile.assert_called_once_with(expanded_path)
-
-    if (is_file):
-        mock_get_config.assert_called_once_with(expanded_path)
+    if (winning_config_path):
+        mock_get_config.assert_called_once_with(winning_config_path)
+    else:
+        mock_get_config.assert_not_called()
 
 
 @patch('eg.config.get_expanded_path')

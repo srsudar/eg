@@ -112,18 +112,17 @@ so:
 eg --examples-dir='the/default/dir' --custom-dir='my/fancy/dir' find
 ```
 
-Instead of doing this every time, you can define a configuration file. By
-default it is expected to live in `$XDG_CONFIG_HOME/eg.conf` 
-(usually `~/.config/eg.conf`) or `~/.egrc`. It must begin with a section
-called `eg-config` and can contain two keys: `custom-dir` and `examples-dir`.
-Here is an example of a valid config file:
+Instead of doing this every time, you can define a configuration file. It must
+begin with a section called `eg-config` and can contain two keys: `custom-dir`
+and `examples-dir`. Here is an example of a valid config file:
 
     [eg-config]
     examples-dir = ~/examples-dir
     custom-dir = ~/my/fancy/custom/dir
 
-Although by default the file is looked for at `~/.egrc`, you can also specify a
-different location at the command line like so:
+The config file is looked for first at `${XDG_CONFIG_HOME}/eg.conf` and then at
+`~/.egrc`. You can also specify a different location at the command line like
+so:
 
 ```shell
 eg --config-file=myfile find

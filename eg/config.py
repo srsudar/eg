@@ -48,16 +48,6 @@ PAGER_CMD = 'pager-cmd'
 SQUEEZE = 'squeeze'
 EDITOR_CMD = 'editor-cmd'
 
-# Config location based on XDG speciification
-if 'XDG_CONFIG_HOME' in os.environ:
-    configdir = os.environ['XDG_CONFIG_HOME']
-else:
-    configdir = os.path.join('~', '.config')
-XDG_CONFIG_EGCONF_PATH = os.path.join(configdir, 'eg.conf')
-# if config file not exist at XDG_CONFIG_EGRC_PATH then reassign None
-if ~os.path.isfile(XDG_CONFIG_EGCONF_PATH):
-    XDG_CONFIG_EGCONF_PATH = None
-
 # A basic struct containing configuration values.
 #    examples_dir: path to the directory of examples that ship with eg
 #    custom_dir: path to the directory where custom examples are found
@@ -164,19 +154,42 @@ def get_egrc_config(cli_egrc_path):
 
     If the egrc is not present, it returns an empty default Config.
 
-    This method tries to use the egrc at cli_egrc_path, then the default path.
+    This method tries to use the egrc at cli_egrc_path, then XDG_CONFIG_HOME,
+    and then the default path.
 
     cli_egrc_path: the path to the egrc as given on the command line via
         --config-file
     """
-    resolved_path = get_priority(cli_egrc_path, XDG_CONFIG_EGCONF_PATH, DEFAULT_EGRC_PATH)
-    expanded_path = get_expanded_path(resolved_path)
+    # We have to be a little crafty here, because we want to support people
+    # having an XDG_CONFIG_HOME dir that doesn't contain the config file. This
+    # will allow a smooth transition for XDG users that started using eg when we
+    # only supported `~/.egrc`. We don't want to suddenly break for them when we
+    # add new support.
+    config_path = ''
+
+    if cli_egrc_path:
+      # cli values always win
+      config_path = get_expanded_path(cli_egrc_path)
+
+    if config_path == '':
+      # Try for the xdg config.
+      xdg_home_dir = os.getenv('XDG_CONFIG_HOME')
+      if xdg_home_dir:
+        xdg_config_path = os.path.join(xdg_home_dir, 'eg.conf')
+        xdg_config_path = get_expanded_path(xdg_config_path)
+        if os.path.isfile(xdg_config_path):
+          config_path = xdg_config_path
+
+    if config_path == '':
+      # Fall back to our home directory.
+      config_path = get_expanded_path(DEFAULT_EGRC_PATH)
+
 
     # Start as if nothing was defined in the egrc.
     egrc_config = get_empty_config()
 
-    if os.path.isfile(expanded_path):
-        egrc_config = get_config_tuple_from_egrc(expanded_path)
+    if os.path.isfile(config_path):
+        egrc_config = get_config_tuple_from_egrc(config_path)
 
     return egrc_config
 
