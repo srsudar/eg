@@ -102,6 +102,13 @@ Match any line containing `z` or `f` (`[zf]`):
     baz omega
 
 
+Match any line containing `hello` or `world`:
+
+    $ grep "hello\|world" input.txt
+    hello alpha
+    omega world
+
+
 Match all lines with lower case or capital letters a through z (`[a-zA-Z]`):
 
     $ grep -e "[a-zA-Z]" input.txt
