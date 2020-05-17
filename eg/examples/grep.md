@@ -102,7 +102,7 @@ Match any line containing `z` or `f` (`[zf]`):
     baz omega
 
 
-Match any line containing `hello` or `world` :
+Match any line containing `hello` or `world`:
 
     $ grep "hello\|world" input.txt
     hello alpha
