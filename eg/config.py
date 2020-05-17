@@ -175,7 +175,7 @@ def get_egrc_config(cli_egrc_path):
       # Try for the xdg config.
       xdg_home_dir = os.getenv('XDG_CONFIG_HOME')
       if xdg_home_dir:
-        xdg_config_path = os.path.join(xdg_home_dir, 'eg.conf')
+        xdg_config_path = os.path.join(xdg_home_dir, 'eg', 'eg.conf')
         xdg_config_path = get_expanded_path(xdg_config_path)
         if os.path.isfile(xdg_config_path):
           config_path = xdg_config_path

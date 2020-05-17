@@ -178,7 +178,7 @@ def test_get_egrc_config_reads_from_command_line():
         winning_config_path='path/from/command/line_expanded',
         expected_config=expected,
         home_config_exists=True,
-        xdg_dir_variable='path/to/xdg',
+        xdg_dir_variable=os.path.join('path', 'to', 'xdg_home'),
         xdg_config_exists=True,
     )
 
@@ -213,7 +213,7 @@ def test_get_egrc_config_uses_home_dir_default_xdg_dir_file_not_present():
         winning_config_path=os.path.join('~', '.egrc_expanded'),
         home_config_exists=True,
         expected_config=expected,
-        xdg_dir_variable='path/to/xdg_home',
+        xdg_dir_variable=os.path.join('path', 'to', 'xdg_home'),
         xdg_config_exists=False,
     )
 
@@ -226,11 +226,11 @@ def test_get_egrc_config_uses_xdg_dir_default_if_present():
     _assert_about_get_egrc_config(
         cli_path=None,
         cli_config_exists=False,
-        winning_config_path=os.path.join('path/to/xdg_home',
+        winning_config_path=os.path.join('path', 'to', 'xdg_home', 'eg',
                                          'eg.conf_expanded'),
         home_config_exists=True,
         expected_config=expected,
-        xdg_dir_variable='path/to/xdg_home',
+        xdg_dir_variable=os.path.join('path', 'to', 'xdg_home'),
         xdg_config_exists=True,
     )
 
@@ -247,7 +247,7 @@ def test_get_egrc_returns_empty_if_no_egrc():
         winning_config_path=None,
         home_config_exists=False,
         expected_config=expected,
-        xdg_dir_variable='path/to/xdg_home',
+        xdg_dir_variable=os.path.join('path', 'to', 'xdg_home'),
         xdg_config_exists=False,
     )
 
@@ -278,7 +278,8 @@ def _assert_about_get_egrc_config(
         return cli_config_exists
       if file_name == os.path.join('~', '.egrc_expanded'):
         return home_config_exists
-      if file_name == os.path.join(xdg_dir_variable, 'eg.conf_expanded'):
+      if file_name == os.path.join(xdg_dir_variable, 'eg', 'eg.conf_expanded'):
+        # ${XDG_DIR_HOME}/eg/egrc
         return xdg_config_exists
       return False
     mock_isfile.side_effect = isfile_side_effect

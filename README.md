@@ -120,8 +120,8 @@ and `examples-dir`. Here is an example of a valid config file:
     examples-dir = ~/examples-dir
     custom-dir = ~/my/fancy/custom/dir
 
-The config file is looked for first at `${XDG_CONFIG_HOME}/eg.conf` and then at
-`~/.egrc`. You can also specify a different location at the command line like
+The config file is looked for first at `${XDG_CONFIG_HOME}/eg/eg.conf` and then
+at `~/.egrc`. You can also specify a different location at the command line like
 so:
 
 ```shell
