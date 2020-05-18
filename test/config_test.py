@@ -227,7 +227,7 @@ def test_get_egrc_config_uses_xdg_dir_default_if_present():
         cli_path=None,
         cli_config_exists=False,
         winning_config_path=os.path.join('path', 'to', 'xdg_home', 'eg',
-                                         'eg.conf_expanded'),
+                                         'egrc_expanded'),
         home_config_exists=True,
         expected_config=expected,
         xdg_dir_variable=os.path.join('path', 'to', 'xdg_home'),
@@ -278,7 +278,7 @@ def _assert_about_get_egrc_config(
         return cli_config_exists
       if file_name == os.path.join('~', '.egrc_expanded'):
         return home_config_exists
-      if file_name == os.path.join(xdg_dir_variable, 'eg', 'eg.conf_expanded'):
+      if file_name == os.path.join(xdg_dir_variable, 'eg', 'egrc_expanded'):
         # ${XDG_DIR_HOME}/eg/egrc
         return xdg_config_exists
       return False
