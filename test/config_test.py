@@ -200,6 +200,50 @@ def test_get_egrc_config_uses_home_dir_default_no_xdg_dir():
     )
 
 
+def test_get_egrc_config_uses_default_xdg_dir_if_env_var_not_set():
+    """
+    If the XDG environment variable isn't set, but the file exists at the
+    default XDG location, it should be used. Note that here we don't have
+    'egrc', not as a hidden file by default.
+
+    See: https://github.com/srsudar/eg/issues/87
+    """
+    expected = 'mock config from default position'
+
+    _assert_about_get_egrc_config(
+        cli_path=None,
+        cli_config_exists=False,
+        winning_config_path=os.path.join(
+          '~', '.config', 'eg', 'egrc_expanded'),
+        home_config_exists=True,
+        expected_config=expected,
+        xdg_dir_variable=None,
+        xdg_config_exists=True,
+    )
+
+
+def test_get_egrc_config_uses_default_xdg_dir_if_env_var_empty():
+    """
+    If the XDG environment variable is empty, but the file exists at the default
+    XDG location, it should be used. Note that here we don't have 'egrc', not as
+    a hidden file by default.
+
+    See: https://github.com/srsudar/eg/issues/87
+    """
+    expected = 'mock config from default position'
+
+    _assert_about_get_egrc_config(
+        cli_path=None,
+        cli_config_exists=False,
+        winning_config_path=os.path.join(
+          '~', '.config', 'eg', 'egrc_expanded'),
+        home_config_exists=True,
+        expected_config=expected,
+        xdg_dir_variable='',
+        xdg_config_exists=True,
+    )
+
+
 def test_get_egrc_config_uses_home_dir_default_xdg_dir_file_not_present():
     """
     Fallback to the home directory config if XDG directory is set but the XDG
@@ -217,7 +261,7 @@ def test_get_egrc_config_uses_home_dir_default_xdg_dir_file_not_present():
         xdg_config_exists=False,
     )
 
-def test_get_egrc_config_uses_xdg_dir_default_if_present():
+def test_get_egrc_config_uses_xdg_dir_default_if_both_present():
     """
     The XDG config should win over the home directory.
     """
@@ -278,8 +322,13 @@ def _assert_about_get_egrc_config(
         return cli_config_exists
       if file_name == os.path.join('~', '.egrc_expanded'):
         return home_config_exists
-      if file_name == os.path.join(xdg_dir_variable, 'eg', 'egrc_expanded'):
-        # ${XDG_DIR_HOME}/eg/egrc
+      if (xdg_dir_variable and
+          file_name == os.path.join(xdg_dir_variable, 'eg', 'egrc_expanded')):
+        # ${XDG_CONFIG_HOME}/eg/egrc
+        return xdg_config_exists
+      if file_name == os.path.join('~', '.config', 'eg', 'egrc_expanded'):
+        # This is the default location of XDG_CONFIG_HOME, which we may fall
+        # back to under some test cases.
         return xdg_config_exists
       return False
     mock_isfile.side_effect = isfile_side_effect
