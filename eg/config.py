@@ -173,12 +173,16 @@ def get_egrc_config(cli_egrc_path):
 
     if config_path == '':
       # Try for the xdg config.
-      xdg_home_dir = os.getenv('XDG_CONFIG_HOME')
-      if xdg_home_dir:
-        xdg_config_path = os.path.join(xdg_home_dir, 'eg', 'egrc')
-        xdg_config_path = get_expanded_path(xdg_config_path)
-        if os.path.isfile(xdg_config_path):
-          config_path = xdg_config_path
+      # The freedesktop.org spec says '$HOME/.config' should be used if the
+      # environment variable is not set or is empty. os.getenv() will be falsey
+      # if it is either not set (None) or an empty string.
+      default_xdg_dir = os.path.join('~', '.config')
+      xdg_home_dir = os.getenv('XDG_CONFIG_HOME') or default_xdg_dir
+
+      xdg_config_path = os.path.join(xdg_home_dir, 'eg', 'egrc')
+      xdg_config_path = get_expanded_path(xdg_config_path)
+      if os.path.isfile(xdg_config_path):
+        config_path = xdg_config_path
 
     if config_path == '':
       # Fall back to our home directory.
