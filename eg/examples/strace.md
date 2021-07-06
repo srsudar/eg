@@ -42,7 +42,9 @@ Only show a summary of syscalls
 
 # Attach to a running process to see time spent in calls
 
-    strace -f -s 256 -p <pid> -T
+    $ strace -f -s 256 -p <pid> -T
+
+    This attached to a process (-p) with the pid of <pid>, following child processes (-f) and printing 256 string characters (-s), showing time spent in calls (-T).  Example:
 
     $ strace -f -s 256 -T echo "hi"
     execve("/usr/bin/echo", ["echo", "hi"], 0x7fff519c2db8 /* 57 vars */) = 0 <0.003416>
