@@ -44,7 +44,7 @@ Only show a summary of syscalls
 
     strace -f -s 256 -p <pid> -T
 
-    ~$ strace -f -s 256 -T echo "hi"
+    $ strace -f -s 256 -T echo "hi"
     execve("/usr/bin/echo", ["echo", "hi"], 0x7fff519c2db8 /* 57 vars */) = 0 <0.003416>
     brk(NULL)                               = 0x561667bc7000 <0.000013>
     arch_prctl(0x3001 /* ARCH_??? */, 0x7ffd1ca4cec0) = -1 EINVAL (Invalid argument) <0.000012>
