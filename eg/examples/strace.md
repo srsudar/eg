@@ -4,6 +4,8 @@ trace syscalls of a command and follow child pids
 
     strace -f ls
 
+
+
 # Basic Usage
 
 Trace syscalls of a command:
