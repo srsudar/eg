@@ -12,39 +12,52 @@ Trace syscalls of a command:
 
     strace <command>
 
+
 See the syscalls of an already-running process:
 
     strace -p <pid>
 
-See only `network` type syscalls (and/or `file`,`stat`, `process`, or any specific syscall, comma separated)
+
+See only `network` type syscalls (and/or `file`,`stat`, `process`, or any
+specific syscall, comma separated):
 
     strace -e trace=%network <command>
 
-See only system calls accessing <path>
+
+See only system calls accessing a specific path:
 
     strace -P <path> <command>
 
-Increase default preview string size to 256
+
+Increase default preview string size to 256:
 
     strace -s 256 <command>
 
-Show timestamps
+
+Show timestamps:
 
     strace -t <command>
 
-Show time spent in syscalls
+
+Show time spent in syscalls:
 
     strace -T <command>
 
-Only show a summary of syscalls
 
-    strace --summary-only/-c
+Only show a summary of syscalls (equivalent to `-c`):
 
-# Attach to a running process to see time spent in calls
+    strace --summary-only <command>
+
+
+Attach to a running process with the id of 1234 (`-p 1234`), follow child
+processes (`-f`), print 256 string characters (`-s 256`), and show the time
+spent in calls (`-T`):
 
     $ strace -f -s 256 -p <pid> -T
 
-    This attached to a process (-p) with the pid of <pid>, following child processes (-f) and printing 256 string characters (-s), showing time spent in calls (-T).  Example:
+
+Run the command `echo "hi"`, follow child processes (`-f`), print 256 string
+characters (`-s 256`), and show the time spent in calls (`-T`):
 
     $ strace -f -s 256 -T echo "hi"
     execve("/usr/bin/echo", ["echo", "hi"], 0x7fff519c2db8 /* 57 vars */) = 0 <0.003416>
