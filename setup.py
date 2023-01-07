@@ -4,7 +4,7 @@ except ImportError:
     from distutils.core import setup
 
 # Also bump at eg.eg_util.VERSION
-VERSION = '1.2.1'
+VERSION = '1.2.2'
 
 LONG_DESCRIPTION = """
 eg provides examples at the command line.
