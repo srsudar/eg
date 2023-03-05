@@ -391,3 +391,10 @@ $ alias woman=eg
 $ man find
 $ woman find
 ```
+
+## Similar projects
+
+- [Command Line Interface Pages](https://github.com/command-line-interface-pages)
+- [TlDr](https://github.com/tldr-pages/tldr)
+- [Cheat](https://github.com/cheat/cheat)
+- [Cheatsheets](https://github.com/rstacruz/cheatsheets)
