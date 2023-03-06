@@ -6,9 +6,11 @@ render a specific local page
 
     clip-view cat
 
+
 render a specific local page
 
     clip-view path/to/cat.clip
+
 
 # Advanced usage
 
