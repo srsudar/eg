@@ -1,28 +1,46 @@
 # clip-view
 
-render specific local pages
+# Basic usage
 
-    clip-view path/to/page1.clip path/to/page2.clip ...
+render a specific local page
 
-render specific remote pages
+    clip-view cat
 
-    clip-view page_name1 page_name2 ...
+render a specific local page
 
-render pages by a specific render
+    clip-view path/to/cat.clip
 
-    clip-view --render tldr|tldr-colorful|docopt|docopt-colorful page_name1 page_name2 ...
+# Advanced usage
 
-render pages with a specific color theme
+render a page by a specific render
 
-    clip-view --theme path/to/local_theme.yaml|remote_theme_name page_name1 page_name2 ...
+    clip-view --render tldr cat
 
-clear a page or theme cache
 
-    clip-view --clear-page|--clear-theme-cache
+render a page with a specific color theme
+
+    clip-view --theme awesome cat
+
+
+render a page in a specific platform
+
+    clip-view --operating-system windows dir
+
+
+clear a page cache
+
+    clip-view --clear-page-cache
+
+
+clear a theme cache
+
+    clip-view --clear-theme-cache
+
 
 display help
 
     clip-view --help
+
 
 display version
 
