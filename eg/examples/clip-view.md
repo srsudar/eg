@@ -1,7 +1,5 @@
 # clip-view
 
-# Basic usage
-
 render a specific local page
 
     clip-view cat
@@ -11,8 +9,6 @@ render a specific local page
 
     clip-view path/to/cat.clip
 
-
-# Advanced usage
 
 render a page by a specific render
 
