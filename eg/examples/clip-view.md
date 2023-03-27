@@ -43,3 +43,5 @@ display help
 display version
 
     clip-view --version
+
+
