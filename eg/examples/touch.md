@@ -12,7 +12,7 @@ update the modified and access time of a file to the current instant
 
 update the modified and access time of the file to August 5 at 13:00
 
-    touch -t 08051200 file.txt
+    touch -t 08051300 file.txt
 
 
 update only the modified time to the current instant
