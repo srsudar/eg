@@ -266,6 +266,11 @@ Print the complete `pm` help by passing no arguments:
 
     adb shell pm
 
+Clear the caches of all apps. This command requires a size of cache to be
+cleared. So instead of calculating it manually, simply pass it a max value,
+like the overall storage size:
+
+    adb shell pm trim-caches 256 GB
 
 
 ## Pull an apk Off a Device
