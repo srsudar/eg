@@ -826,5 +826,9 @@ def _get_egrc_config(egrc_path):
             config = ConfigParser.RawConfigParser()
         except AttributeError:
             config = ConfigParser()
-        config.readfp(egrc)
+        # as in config.py, try and support Python 3.12 and above as well
+        try:
+            config.readfp(egrc)
+        except AttributeError:
+            config.read_file(egrc)
     return config
