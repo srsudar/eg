@@ -320,7 +320,7 @@ def get_config_tuple_from_egrc(egrc_path):
         # Support Python 3.12 and above.
         try:
             config.readfp(egrc)
-        except:
+        except AttributeError:
             config.read_file(egrc)
 
         # default to None
